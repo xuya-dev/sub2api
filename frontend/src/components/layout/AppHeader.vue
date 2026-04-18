@@ -278,7 +278,6 @@ const checkinLoading = computed(() => checkinStore.loading)
 const canCheckin = computed(() => checkinStore.canCheckin)
 const checkedInToday = computed(() => checkinStore.checkedInToday)
 const todayReward = computed(() => checkinStore.todayReward)
-const streakDays = computed(() => checkinStore.streakDays)
 
 async function handleCheckin() {
   const result = await checkinStore.doCheckin()
