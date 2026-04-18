@@ -146,8 +146,8 @@ func (s *MonitoringService) queryGroupModelStats(ctx context.Context, overview *
 			COUNT(*) FILTER (WHERE u.output_tokens > 0) as success_cnt,
 			COUNT(*) FILTER (WHERE u.output_tokens = 0) as error_cnt,
 			COALESCE(AVG(u.duration_ms) FILTER (WHERE u.duration_ms IS NOT NULL AND u.duration_ms > 0), 0)::float8,
-			COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY u.duration_ms) FILTER (WHERE u.duration_ms IS NOT NULL AND u.duration_ms > 0), 0)::float8,
-			COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY u.duration_ms) FILTER (WHERE u.duration_ms IS NOT NULL AND u.duration_ms > 0), 0)::float8,
+			COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY CASE WHEN u.duration_ms IS NOT NULL AND u.duration_ms > 0 THEN u.duration_ms END), 0)::float8,
+			COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY CASE WHEN u.duration_ms IS NOT NULL AND u.duration_ms > 0 THEN u.duration_ms END), 0)::float8,
 			COALESCE(AVG(u.first_token_ms) FILTER (WHERE u.first_token_ms IS NOT NULL AND u.first_token_ms > 0), 0)::float8
 		FROM usage_logs u
 		JOIN groups g ON u.group_id = g.id
@@ -182,9 +182,9 @@ func (s *MonitoringService) queryModelLatency(ctx context.Context, overview *Mon
 			COUNT(*) FILTER (WHERE output_tokens > 0) as success_cnt,
 			COUNT(*) FILTER (WHERE output_tokens = 0) as error_cnt,
 			COALESCE(AVG(duration_ms) FILTER (WHERE duration_ms IS NOT NULL AND duration_ms > 0), 0)::float8,
-			COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE duration_ms IS NOT NULL AND duration_ms > 0), 0)::float8,
-			COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE duration_ms IS NOT NULL AND duration_ms > 0), 0)::float8,
-			COALESCE(percentile_cont(0.99) WITHIN GROUP (ORDER BY duration_ms) FILTER (WHERE duration_ms IS NOT NULL AND duration_ms > 0), 0)::float8,
+			COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY CASE WHEN duration_ms IS NOT NULL AND duration_ms > 0 THEN duration_ms END), 0)::float8,
+			COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY CASE WHEN duration_ms IS NOT NULL AND duration_ms > 0 THEN duration_ms END), 0)::float8,
+			COALESCE(percentile_cont(0.99) WITHIN GROUP (ORDER BY CASE WHEN duration_ms IS NOT NULL AND duration_ms > 0 THEN duration_ms END), 0)::float8,
 			COALESCE(AVG(first_token_ms) FILTER (WHERE first_token_ms IS NOT NULL AND first_token_ms > 0), 0)::float8
 		FROM usage_logs
 		WHERE created_at >= $1
