@@ -109,15 +109,10 @@
         <p class="mb-8 text-center text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">
           {{ t('home.providers.title') }}
         </p>
-        <div class="flex flex-wrap items-center justify-center gap-8">
-          <div v-for="p in providers" :key="p.name" class="flex items-center gap-3">
-            <div :class="p.bg" class="flex h-10 w-10 items-center justify-center rounded-lg">
-              <span class="text-sm font-bold text-white">{{ p.icon }}</span>
-            </div>
-            <div>
-              <span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ p.name }}</span>
-              <span class="block text-xs text-primary-600 dark:text-primary-400">{{ t('home.providers.supported') }}</span>
-            </div>
+        <div class="flex flex-wrap items-center justify-center gap-10">
+          <div v-for="p in providers" :key="p.name" class="flex flex-col items-center gap-2">
+            <img :src="p.icon" :alt="p.name" class="h-8 w-8 dark:invert" />
+            <span class="text-sm font-semibold text-gray-700 dark:text-dark-200">{{ p.name }}</span>
           </div>
         </div>
       </div>
@@ -243,6 +238,9 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore, useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
+import claudeIcon from '@/assets/icons/claude.svg'
+import openaiIcon from '@/assets/icons/openai.svg'
+import geminiIcon from '@/assets/icons/gemini.svg'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -265,10 +263,9 @@ const dashboardPath = computed(() => isAdmin.value ? '/admin/dashboard' : '/dash
 const currentYear = computed(() => new Date().getFullYear())
 
 const providers = [
-  { name: 'Claude', icon: 'C', bg: 'bg-gradient-to-br from-orange-400 to-orange-500' },
-  { name: 'GPT', icon: 'G', bg: 'bg-gradient-to-br from-green-500 to-green-600' },
-  { name: 'Gemini', icon: 'G', bg: 'bg-gradient-to-br from-blue-500 to-blue-600' },
-  { name: 'Antigravity', icon: 'A', bg: 'bg-gradient-to-br from-rose-500 to-pink-600' },
+  { name: 'Claude', icon: claudeIcon },
+  { name: 'OpenAI', icon: openaiIcon },
+  { name: 'Gemini', icon: geminiIcon },
 ]
 
 const featureItems = computed(() => [
