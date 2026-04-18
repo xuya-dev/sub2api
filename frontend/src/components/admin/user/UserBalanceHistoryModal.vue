@@ -200,6 +200,7 @@ const typeOptions = computed(() => [
   { value: 'checkin', label: t('admin.users.typeCheckin') },
   { value: 'concurrency', label: t('admin.users.typeConcurrency') },
   { value: 'admin_concurrency', label: t('admin.users.typeAdminConcurrency') },
+  { value: 'invitation', label: t('admin.users.typeInvitation') },
   { value: 'subscription', label: t('admin.users.typeSubscription') }
 ])
 
@@ -235,7 +236,7 @@ const loadHistory = async (page: number) => {
 // Helper: check if admin type
 const isAdminType = (type: string) => type === 'admin_balance' || type === 'admin_concurrency'
 
-const isBalanceType = (type: string) => type === 'balance' || type === 'admin_balance' || type === 'checkin'
+const isBalanceType = (type: string) => type === 'balance' || type === 'admin_balance' || type === 'checkin' || type === 'invitation'
 
 // Helper: check if subscription type
 const isSubscriptionType = (type: string) => type === 'subscription'
@@ -243,6 +244,7 @@ const isSubscriptionType = (type: string) => type === 'subscription'
 // Icon name based on type
 const getIconName = (item: BalanceHistoryItem) => {
   if (item.type === 'checkin') return 'calendar'
+  if (item.type === 'invitation') return 'gift'
   if (isBalanceType(item.type)) return 'dollar'
   if (isSubscriptionType(item.type)) return 'badge'
   return 'bolt'
@@ -251,6 +253,7 @@ const getIconName = (item: BalanceHistoryItem) => {
 // Icon background color
 const getIconBg = (item: BalanceHistoryItem) => {
   if (item.type === 'checkin') return 'bg-amber-100 dark:bg-amber-900/30'
+  if (item.type === 'invitation') return 'bg-rose-100 dark:bg-rose-900/30'
   if (isBalanceType(item.type)) {
     return item.value >= 0
       ? 'bg-emerald-100 dark:bg-emerald-900/30'
@@ -265,6 +268,7 @@ const getIconBg = (item: BalanceHistoryItem) => {
 // Icon text color
 const getIconColor = (item: BalanceHistoryItem) => {
   if (item.type === 'checkin') return 'text-amber-600 dark:text-amber-400'
+  if (item.type === 'invitation') return 'text-rose-600 dark:text-rose-400'
   if (isBalanceType(item.type)) {
     return item.value >= 0
       ? 'text-emerald-600 dark:text-emerald-400'
@@ -279,6 +283,7 @@ const getIconColor = (item: BalanceHistoryItem) => {
 // Value text color
 const getValueColor = (item: BalanceHistoryItem) => {
   if (item.type === 'checkin') return 'text-amber-600 dark:text-amber-400'
+  if (item.type === 'invitation') return 'text-rose-600 dark:text-rose-400'
   if (isBalanceType(item.type)) {
     return item.value >= 0
       ? 'text-emerald-600 dark:text-emerald-400'
@@ -299,6 +304,8 @@ const getItemTitle = (item: BalanceHistoryItem) => {
       return item.value >= 0 ? t('redeem.balanceAddedAdmin') : t('redeem.balanceDeductedAdmin')
     case 'checkin':
       return t('admin.users.typeCheckin')
+    case 'invitation':
+      return t('admin.users.typeInvitation')
     case 'concurrency':
       return t('redeem.concurrencyAddedRedeem')
     case 'admin_concurrency':

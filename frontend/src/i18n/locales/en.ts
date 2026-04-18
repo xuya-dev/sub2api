@@ -1508,6 +1508,7 @@ export default {
       typeBalance: 'Balance (Redeem)',
       typeAdminBalance: 'Balance (Admin)',
       typeCheckin: 'Daily Check-in Reward',
+      typeInvitation: 'Registration Bonus (Invitation)',
       typeConcurrency: 'Concurrency (Redeem)',
       typeAdminConcurrency: 'Concurrency (Admin)',
       typeSubscription: 'Subscription',
