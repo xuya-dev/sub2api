@@ -7,7 +7,7 @@
     ]"
   >
     <!-- Logo/Brand -->
-    <router-link to="/home" class="sidebar-header block" :class="{ 'sidebar-header-collapsed': sidebarCollapsed }">
+    <router-link to="/home" class="sidebar-header" :class="{ 'sidebar-header-collapsed': sidebarCollapsed }">
       <div class="sidebar-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-glow">
         <img v-if="settingsLoaded" :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
       </div>
