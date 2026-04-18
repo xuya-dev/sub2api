@@ -842,6 +842,17 @@ export default {
     pleaseEnterCode: 'Please enter a redeem code'
   },
 
+  checkin: {
+    title: 'Daily Check-in',
+    button: 'Check in',
+    checked: 'Checked in',
+    todayReward: 'Today\'s reward: ${amount}',
+    streakDays: '{days} day streak',
+    rangeHint: 'Reward: ${min} ~ ${max}',
+    success: 'Check-in successful! Earned ${amount}',
+    alreadyChecked: 'Already checked in today'
+  },
+
   // Profile
   profile: {
     title: 'Profile Settings',
@@ -4396,6 +4407,15 @@ export default {
           'Duplicate subscription group: {groupId}. Each group can only appear once.',
         subscriptionGroup: 'Subscription Group',
         subscriptionValidityDays: 'Validity (days)'
+      },
+      checkin: {
+        title: 'Check-in Settings',
+        enabled: 'Enable Check-in',
+        enabledHint: 'Allow users to check in once daily for a random balance reward',
+        minBalance: 'Min Reward Amount',
+        minBalanceHint: 'Minimum random reward per check-in (USD)',
+        maxBalance: 'Max Reward Amount',
+        maxBalanceHint: 'Maximum random reward per check-in (USD)'
       },
       claudeCode: {
         title: 'Claude Code Settings',

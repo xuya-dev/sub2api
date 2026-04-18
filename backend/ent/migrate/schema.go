@@ -338,6 +338,41 @@ var (
 			},
 		},
 	}
+	// CheckinsColumns holds the columns for the "checkins" table.
+	CheckinsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "checkin_date", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "date"}},
+		{Name: "reward_amount", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "streak_days", Type: field.TypeInt, Default: 1},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "user_id", Type: field.TypeInt64},
+	}
+	// CheckinsTable holds the schema information for the "checkins" table.
+	CheckinsTable = &schema.Table{
+		Name:       "checkins",
+		Columns:    CheckinsColumns,
+		PrimaryKey: []*schema.Column{CheckinsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "checkins_users_checkins",
+				Columns:    []*schema.Column{CheckinsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "checkin_user_id_checkin_date",
+				Unique:  true,
+				Columns: []*schema.Column{CheckinsColumns[5], CheckinsColumns[1]},
+			},
+			{
+				Name:    "checkin_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{CheckinsColumns[5]},
+			},
+		},
+	}
 	// ErrorPassthroughRulesColumns holds the columns for the "error_passthrough_rules" table.
 	ErrorPassthroughRulesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -1318,6 +1353,7 @@ var (
 		AccountGroupsTable,
 		AnnouncementsTable,
 		AnnouncementReadsTable,
+		CheckinsTable,
 		ErrorPassthroughRulesTable,
 		GroupsTable,
 		IdempotencyRecordsTable,
@@ -1364,6 +1400,10 @@ func init() {
 	AnnouncementReadsTable.ForeignKeys[1].RefTable = UsersTable
 	AnnouncementReadsTable.Annotation = &entsql.Annotation{
 		Table: "announcement_reads",
+	}
+	CheckinsTable.ForeignKeys[0].RefTable = UsersTable
+	CheckinsTable.Annotation = &entsql.Annotation{
+		Table: "checkins",
 	}
 	ErrorPassthroughRulesTable.Annotation = &entsql.Annotation{
 		Table: "error_passthrough_rules",

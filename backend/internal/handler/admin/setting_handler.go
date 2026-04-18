@@ -180,6 +180,9 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		BalanceLowNotifyRechargeURL:          settings.BalanceLowNotifyRechargeURL,
 		AccountQuotaNotifyEnabled:            settings.AccountQuotaNotifyEnabled,
 		AccountQuotaNotifyEmails:             dto.NotifyEmailEntriesFromService(settings.AccountQuotaNotifyEmails),
+		CheckinEnabled:                       settings.CheckinEnabled,
+		CheckinMinBalance:                    settings.CheckinMinBalance,
+		CheckinMaxBalance:                    settings.CheckinMaxBalance,
 		PaymentEnabled:                       paymentCfg.Enabled,
 		PaymentMinAmount:                     paymentCfg.MinAmount,
 		PaymentMaxAmount:                     paymentCfg.MaxAmount,
@@ -341,6 +344,11 @@ type UpdateSettingsRequest struct {
 	PaymentCancelRateLimitWindow  *int    `json:"payment_cancel_rate_limit_window"`
 	PaymentCancelRateLimitUnit    *string `json:"payment_cancel_rate_limit_unit"`
 	PaymentCancelRateLimitMode    *string `json:"payment_cancel_rate_limit_window_mode"`
+
+	// Checkin 签到设置
+	CheckinEnabled    *bool    `json:"checkin_enabled"`
+	CheckinMinBalance *float64 `json:"checkin_min_balance"`
+	CheckinMaxBalance *float64 `json:"checkin_max_balance"`
 }
 
 // UpdateSettings 更新系统设置
@@ -927,6 +935,24 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 			}
 			return previousSettings.AccountQuotaNotifyEmails
 		}(),
+		CheckinEnabled: func() bool {
+			if req.CheckinEnabled != nil {
+				return *req.CheckinEnabled
+			}
+			return previousSettings.CheckinEnabled
+		}(),
+		CheckinMinBalance: func() float64 {
+			if req.CheckinMinBalance != nil {
+				return *req.CheckinMinBalance
+			}
+			return previousSettings.CheckinMinBalance
+		}(),
+		CheckinMaxBalance: func() float64 {
+			if req.CheckinMaxBalance != nil {
+				return *req.CheckinMaxBalance
+			}
+			return previousSettings.CheckinMaxBalance
+		}(),
 	}
 
 	if err := h.settingService.UpdateSettings(c.Request.Context(), settings); err != nil {
@@ -1080,6 +1106,9 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		BalanceLowNotifyRechargeURL:          updatedSettings.BalanceLowNotifyRechargeURL,
 		AccountQuotaNotifyEnabled:            updatedSettings.AccountQuotaNotifyEnabled,
 		AccountQuotaNotifyEmails:             dto.NotifyEmailEntriesFromService(updatedSettings.AccountQuotaNotifyEmails),
+		CheckinEnabled:                       updatedSettings.CheckinEnabled,
+		CheckinMinBalance:                    updatedSettings.CheckinMinBalance,
+		CheckinMaxBalance:                    updatedSettings.CheckinMaxBalance,
 		PaymentEnabled:                       updatedPaymentCfg.Enabled,
 		PaymentMinAmount:                     updatedPaymentCfg.MinAmount,
 		PaymentMaxAmount:                     updatedPaymentCfg.MaxAmount,

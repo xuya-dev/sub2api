@@ -634,6 +634,11 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	updates[SettingKeyAccountQuotaNotifyEnabled] = strconv.FormatBool(settings.AccountQuotaNotifyEnabled)
 	updates[SettingKeyAccountQuotaNotifyEmails] = MarshalNotifyEmails(settings.AccountQuotaNotifyEmails)
 
+	// Checkin 签到设置
+	updates[SettingKeyCheckinEnabled] = strconv.FormatBool(settings.CheckinEnabled)
+	updates[SettingKeyCheckinMinBalance] = strconv.FormatFloat(settings.CheckinMinBalance, 'f', 8, 64)
+	updates[SettingKeyCheckinMaxBalance] = strconv.FormatFloat(settings.CheckinMaxBalance, 'f', 8, 64)
+
 	err = s.settingRepo.SetMultiple(ctx, updates)
 	if err == nil {
 		// 先使 inflight singleflight 失效，再刷新缓存，缩小旧值覆盖新值的竞态窗口
@@ -919,6 +924,38 @@ func (s *SettingService) GetDefaultSubscriptions(ctx context.Context) []DefaultS
 	return parseDefaultSubscriptions(value)
 }
 
+// IsCheckinEnabled 获取签到功能是否启用
+func (s *SettingService) IsCheckinEnabled(ctx context.Context) bool {
+	value, err := s.settingRepo.GetValue(ctx, SettingKeyCheckinEnabled)
+	if err != nil {
+		return false
+	}
+	return value == "true"
+}
+
+// GetCheckinBalanceRange 获取签到奖励金额范围 (min, max)
+func (s *SettingService) GetCheckinBalanceRange(ctx context.Context) (float64, float64) {
+	minVal, maxVal := 0.1, 1.0
+	if v, err := strconv.ParseFloat(s.getStringWithDefault(ctx, SettingKeyCheckinMinBalance, "0.1"), 64); err == nil && v >= 0 {
+		minVal = v
+	}
+	if v, err := strconv.ParseFloat(s.getStringWithDefault(ctx, SettingKeyCheckinMaxBalance, "1.0"), 64); err == nil && v >= 0 {
+		maxVal = v
+	}
+	if minVal > maxVal {
+		minVal, maxVal = maxVal, minVal
+	}
+	return minVal, maxVal
+}
+
+func (s *SettingService) getStringWithDefault(ctx context.Context, key, fallback string) string {
+	value, err := s.settingRepo.GetValue(ctx, key)
+	if err != nil || value == "" {
+		return fallback
+	}
+	return value
+}
+
 // InitializeDefaultSettings 初始化默认设置
 func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 	// 检查是否已有设置
@@ -974,6 +1011,11 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 
 		// 分组隔离（默认不允许未分组 Key 调度）
 		SettingKeyAllowUngroupedKeyScheduling: "false",
+
+		// Checkin 签到设置（默认关闭）
+		SettingKeyCheckinEnabled:    "false",
+		SettingKeyCheckinMinBalance: "0.10",
+		SettingKeyCheckinMaxBalance: "1.00",
 	}
 
 	return s.settingRepo.SetMultiple(ctx, defaults)
@@ -1278,6 +1320,19 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 	}
 	if result.AccountQuotaNotifyEmails == nil {
 		result.AccountQuotaNotifyEmails = []NotifyEmailEntry{}
+	}
+
+	// Checkin 签到设置
+	result.CheckinEnabled = settings[SettingKeyCheckinEnabled] == "true"
+	if v, err := strconv.ParseFloat(settings[SettingKeyCheckinMinBalance], 64); err == nil && v >= 0 {
+		result.CheckinMinBalance = v
+	} else {
+		result.CheckinMinBalance = 0.1
+	}
+	if v, err := strconv.ParseFloat(settings[SettingKeyCheckinMaxBalance], 64); err == nil && v >= 0 {
+		result.CheckinMaxBalance = v
+	} else {
+		result.CheckinMaxBalance = 1.0
 	}
 
 	return result

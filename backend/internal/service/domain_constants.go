@@ -261,6 +261,11 @@ const (
 
 	// Web Search Emulation
 	SettingKeyWebSearchEmulationConfig = "web_search_emulation_config" // JSON 配置
+
+	// Checkin 签到设置
+	SettingKeyCheckinEnabled    = "checkin_enabled"     // 是否启用签到功能
+	SettingKeyCheckinMinBalance = "checkin_min_balance"  // 签到最小奖励额度
+	SettingKeyCheckinMaxBalance = "checkin_max_balance"  // 签到最大奖励额度
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

@@ -67,6 +67,34 @@
           </span>
         </div>
 
+        <!-- Checkin Button (desktop) -->
+        <div
+          v-if="user"
+          class="hidden items-center sm:flex"
+        >
+          <button
+            v-if="canCheckin"
+            type="button"
+            :disabled="checkinLoading"
+            class="flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-100 disabled:opacity-50 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30"
+            @click="handleCheckin"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+            </svg>
+            <span>{{ checkinLoading ? '...' : t('checkin.button') }}</span>
+          </button>
+          <div
+            v-else-if="checkedInToday"
+            class="flex items-center gap-1.5 rounded-xl bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 dark:bg-green-900/20 dark:text-green-300"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>+${{ todayReward?.toFixed(2) }}</span>
+          </div>
+        </div>
+
         <!-- User Dropdown -->
         <div v-if="user" class="relative" ref="dropdownRef">
           <button
@@ -109,6 +137,22 @@
                 <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">
                   ${{ user.balance?.toFixed(2) || '0.00' }}
                 </div>
+              </div>
+
+              <!-- Checkin (mobile) -->
+              <div v-if="canCheckin" class="border-b border-gray-100 px-4 py-2 dark:border-dark-700">
+                <button
+                  type="button"
+                  :disabled="checkinLoading"
+                  class="w-full rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition-all hover:bg-amber-100 disabled:opacity-50 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/30"
+                  @click="handleCheckin"
+                >
+                  {{ checkinLoading ? '...' : t('checkin.button') }}
+                </button>
+              </div>
+              <div v-else-if="checkedInToday && todayReward" class="border-b border-gray-100 px-4 py-2 dark:border-dark-700">
+                <div class="text-xs text-gray-500 dark:text-dark-400">{{ t('checkin.checked') }}</div>
+                <div class="text-sm font-semibold text-green-600 dark:text-green-400">+${{ todayReward.toFixed(2) }}</div>
               </div>
 
               <div class="py-1">
@@ -209,11 +253,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppStore, useAuthStore, useOnboardingStore } from '@/stores'
 import { useAdminSettingsStore } from '@/stores/adminSettings'
+import { useCheckinStore } from '@/stores/checkin'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMini.vue'
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
@@ -226,8 +271,21 @@ const appStore = useAppStore()
 const authStore = useAuthStore()
 const adminSettingsStore = useAdminSettingsStore()
 const onboardingStore = useOnboardingStore()
+const checkinStore = useCheckinStore()
 
 const user = computed(() => authStore.user)
+const checkinLoading = computed(() => checkinStore.loading)
+const canCheckin = computed(() => checkinStore.canCheckin)
+const checkedInToday = computed(() => checkinStore.checkedInToday)
+const todayReward = computed(() => checkinStore.todayReward)
+const streakDays = computed(() => checkinStore.streakDays)
+
+async function handleCheckin() {
+  const result = await checkinStore.doCheckin()
+  if (result) {
+    // success feedback is handled by the UI state change
+  }
+}
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 const contactInfo = computed(() => appStore.contactInfo)
@@ -318,6 +376,12 @@ function handleClickOutside(event: MouseEvent) {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
+
+watch(() => authStore.user, (user) => {
+  if (user) {
+    checkinStore.fetchStatus()
+  }
+}, { immediate: true })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)

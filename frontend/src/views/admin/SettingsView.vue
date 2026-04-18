@@ -1584,6 +1584,54 @@
                 </div>
               </div>
             </div>
+
+            <!-- Checkin 签到设置 -->
+            <div class="mt-4 border-t pt-4 dark:border-dark-700">
+              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-dark-300">
+                {{ t('admin.settings.checkin.title') }}
+              </h4>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-dark-300">
+                      {{ t('admin.settings.checkin.enabled') }}
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-dark-400">
+                      {{ t('admin.settings.checkin.enabledHint') }}
+                    </p>
+                  </div>
+                  <button type="button"
+                    :class="form.checkin_enabled ? 'bg-primary-600' : 'bg-gray-300 dark:bg-dark-600'"
+                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    @click="form.checkin_enabled = !form.checkin_enabled">
+                    <span :class="form.checkin_enabled ? 'translate-x-5' : 'translate-x-0'"
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
+                  </button>
+                </div>
+                <template v-if="form.checkin_enabled">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-300">
+                      {{ t('admin.settings.checkin.minBalance') }}
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-dark-400">
+                      {{ t('admin.settings.checkin.minBalanceHint') }}
+                    </p>
+                    <input v-model.number="form.checkin_min_balance" type="number" step="0.01" min="0"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-dark-600 dark:bg-dark-800 dark:text-dark-200 sm:text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-300">
+                      {{ t('admin.settings.checkin.maxBalance') }}
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-dark-400">
+                      {{ t('admin.settings.checkin.maxBalanceHint') }}
+                    </p>
+                    <input v-model.number="form.checkin_max_balance" type="number" step="0.01" min="0"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-dark-600 dark:bg-dark-800 dark:text-dark-200 sm:text-sm" />
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
         </div>
         </div><!-- /Tab: Users -->
@@ -2974,6 +3022,9 @@ const form = reactive<SettingsForm>({
   default_balance: 0,
   default_concurrency: 1,
   default_subscriptions: [],
+  checkin_enabled: false,
+  checkin_min_balance: 0.1,
+  checkin_max_balance: 1.0,
   site_name: 'Sub2API',
   site_logo: '',
   site_subtitle: 'Subscription to API Conversion Platform',
@@ -3437,6 +3488,9 @@ async function loadSettings() {
             validity_days: item.validity_days
           }))
       : []
+    form.checkin_enabled = settings.checkin_enabled ?? false
+    form.checkin_min_balance = settings.checkin_min_balance ?? 0.1
+    form.checkin_max_balance = settings.checkin_max_balance ?? 1.0
     registrationEmailSuffixWhitelistTags.value = normalizeRegistrationEmailSuffixDomains(
       settings.registration_email_suffix_whitelist
     )
@@ -3571,6 +3625,9 @@ async function saveSettings() {
       default_balance: form.default_balance,
       default_concurrency: form.default_concurrency,
       default_subscriptions: normalizedDefaultSubscriptions,
+      checkin_enabled: form.checkin_enabled,
+      checkin_min_balance: form.checkin_min_balance,
+      checkin_max_balance: form.checkin_max_balance,
       site_name: form.site_name,
       site_logo: form.site_logo,
       site_subtitle: form.site_subtitle,

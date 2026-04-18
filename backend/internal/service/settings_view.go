@@ -118,6 +118,11 @@ type SystemSettings struct {
 	// Account quota notification
 	AccountQuotaNotifyEnabled bool
 	AccountQuotaNotifyEmails  []NotifyEmailEntry
+
+	// Checkin 签到设置
+	CheckinEnabled    bool
+	CheckinMinBalance float64
+	CheckinMaxBalance float64
 }
 
 type DefaultSubscriptionSetting struct {

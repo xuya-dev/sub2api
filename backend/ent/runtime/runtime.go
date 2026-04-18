@@ -10,6 +10,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/announcement"
 	"github.com/Wei-Shaw/sub2api/ent/announcementread"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
+	"github.com/Wei-Shaw/sub2api/ent/checkin"
 	"github.com/Wei-Shaw/sub2api/ent/errorpassthroughrule"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
@@ -309,6 +310,16 @@ func init() {
 	announcementreadDescCreatedAt := announcementreadFields[3].Descriptor()
 	// announcementread.DefaultCreatedAt holds the default value on creation for the created_at field.
 	announcementread.DefaultCreatedAt = announcementreadDescCreatedAt.Default.(func() time.Time)
+	checkinFields := schema.Checkin{}.Fields()
+	_ = checkinFields
+	// checkinDescStreakDays is the schema descriptor for streak_days field.
+	checkinDescStreakDays := checkinFields[3].Descriptor()
+	// checkin.DefaultStreakDays holds the default value on creation for the streak_days field.
+	checkin.DefaultStreakDays = checkinDescStreakDays.Default.(int)
+	// checkinDescCreatedAt is the schema descriptor for created_at field.
+	checkinDescCreatedAt := checkinFields[4].Descriptor()
+	// checkin.DefaultCreatedAt holds the default value on creation for the created_at field.
+	checkin.DefaultCreatedAt = checkinDescCreatedAt.Default.(func() time.Time)
 	errorpassthroughruleMixin := schema.ErrorPassthroughRule{}.Mixin()
 	errorpassthroughruleMixinFields0 := errorpassthroughruleMixin[0].Fields()
 	_ = errorpassthroughruleMixinFields0

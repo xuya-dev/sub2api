@@ -18,6 +18,7 @@ export { paymentAPI } from './payment'
 export { userGroupsAPI } from './groups'
 export { totpAPI } from './totp'
 export { default as announcementsAPI } from './announcements'
+export { checkinAPI } from './checkin'
 
 // Admin APIs
 export { adminAPI } from './admin'

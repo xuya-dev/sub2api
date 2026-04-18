@@ -333,20 +333,20 @@ export default {
   // Navigation
   nav: {
     dashboard: '仪表盘',
-    announcements: '公告',
+    announcements: '通知公告',
     apiKeys: 'API 密钥',
     usage: '使用记录',
-    redeem: '兑换',
+    redeem: '兑换充值',
     profile: '个人资料',
     users: '用户管理',
     groups: '分组管理',
     channels: '渠道管理',
     subscriptions: '订阅管理',
     accounts: '账号管理',
-    proxies: 'IP管理',
-    redeemCodes: '兑换码',
+    proxies: '代理管理',
+    redeemCodes: '兑换管理',
     ops: '运维监控',
-    promoCodes: '优惠码',
+    promoCodes: '优惠管理',
     settings: '系统设置',
     myAccount: '我的账户',
     lightMode: '浅色模式',
@@ -844,6 +844,17 @@ export default {
     failedToRedeem: '兑换失败，请检查兑换码后重试。',
     subscriptionRefreshFailed: '兑换成功，但订阅状态刷新失败。',
     pleaseEnterCode: '请输入兑换码'
+  },
+
+  checkin: {
+    title: '每日签到',
+    button: '签到',
+    checked: '已签到',
+    todayReward: '今日获得 ${amount}',
+    streakDays: '连续 {days} 天',
+    rangeHint: '奖励范围 ${min} ~ ${max}',
+    success: '签到成功！获得 ${amount}',
+    alreadyChecked: '今日已签到'
   },
 
   // Profile
@@ -4560,6 +4571,15 @@ export default {
         defaultSubscriptionsDuplicate: '默认订阅存在重复分组：{groupId}。每个分组只能出现一次。',
         subscriptionGroup: '订阅分组',
         subscriptionValidityDays: '有效期（天）'
+      },
+      checkin: {
+        title: '签到设置',
+        enabled: '启用签到功能',
+        enabledHint: '允许用户每天签到一次，随机获得余额奖励',
+        minBalance: '签到最小额度',
+        minBalanceHint: '每日签到随机奖励下限（USD）',
+        maxBalance: '签到最大额度',
+        maxBalanceHint: '每日签到随机奖励上限（USD）'
       },
       claudeCode: {
         title: 'Claude Code 设置',

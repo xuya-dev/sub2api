@@ -157,6 +157,11 @@ type SystemSettings struct {
 	BalanceLowNotifyRechargeURL string             `json:"balance_low_notify_recharge_url"`
 	AccountQuotaNotifyEnabled   bool               `json:"account_quota_notify_enabled"`
 	AccountQuotaNotifyEmails    []NotifyEmailEntry `json:"account_quota_notify_emails"`
+
+	// Checkin 签到设置
+	CheckinEnabled    bool    `json:"checkin_enabled"`
+	CheckinMinBalance float64 `json:"checkin_min_balance"`
+	CheckinMaxBalance float64 `json:"checkin_max_balance"`
 }
 
 type DefaultSubscriptionSetting struct {

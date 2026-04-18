@@ -144,6 +144,11 @@ export interface SystemSettings {
   balance_low_notify_recharge_url: string
   account_quota_notify_enabled: boolean
   account_quota_notify_emails: NotifyEmailEntry[]
+
+  // Checkin 签到设置
+  checkin_enabled: boolean
+  checkin_min_balance: number
+  checkin_max_balance: number
 }
 
 export interface UpdateSettingsRequest {
@@ -251,6 +256,10 @@ export interface UpdateSettingsRequest {
   balance_low_notify_recharge_url?: string
   account_quota_notify_enabled?: boolean
   account_quota_notify_emails?: NotifyEmailEntry[]
+  // Checkin 签到设置
+  checkin_enabled?: boolean
+  checkin_min_balance?: number
+  checkin_max_balance?: number
 }
 
 /**
