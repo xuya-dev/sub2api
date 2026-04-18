@@ -25,6 +25,7 @@ type CheckinResult struct {
 }
 
 type CheckinStatus struct {
+	Enabled     bool     `json:"enabled"`
 	CanCheckin  bool     `json:"can_checkin"`
 	StreakDays  int      `json:"streak_days"`
 	TodayReward *float64 `json:"today_reward,omitempty"`
@@ -139,6 +140,7 @@ func (s *CheckinService) GetStatus(ctx context.Context, userID int64) (*CheckinS
 
 	if !enabled {
 		return &CheckinStatus{
+			Enabled:    false,
 			CanCheckin: false,
 			StreakDays: 0,
 			MinReward:  minReward,
@@ -160,6 +162,7 @@ func (s *CheckinService) GetStatus(ctx context.Context, userID int64) (*CheckinS
 	}
 
 	status := &CheckinStatus{
+		Enabled:    true,
 		CanCheckin: true,
 		MinReward:  minReward,
 		MaxReward:  maxReward,

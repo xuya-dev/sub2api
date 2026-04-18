@@ -9,7 +9,8 @@ export const useCheckinStore = defineStore('checkin', () => {
   const checkinResult = ref<CheckinResult | null>(null)
 
   const canCheckin = computed(() => status.value?.can_checkin ?? false)
-  const checkedInToday = computed(() => !canCheckin.value && status.value !== null)
+  const enabled = computed(() => status.value?.enabled ?? false)
+  const checkedInToday = computed(() => enabled.value && !canCheckin.value && status.value !== null)
   const streakDays = computed(() => status.value?.streak_days ?? 0)
   const todayReward = computed(() => status.value?.today_reward ?? null)
 
@@ -56,6 +57,7 @@ export const useCheckinStore = defineStore('checkin', () => {
     loading,
     checkinResult,
     canCheckin,
+    enabled,
     checkedInToday,
     streakDays,
     todayReward,

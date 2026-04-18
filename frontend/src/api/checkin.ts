@@ -7,6 +7,7 @@ export interface CheckinResult {
 }
 
 export interface CheckinStatus {
+  enabled: boolean
   can_checkin: boolean
   streak_days: number
   today_reward: number | null

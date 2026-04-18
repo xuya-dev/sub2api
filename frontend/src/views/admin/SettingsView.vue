@@ -1587,16 +1587,16 @@
 
             <!-- Checkin 签到设置 -->
             <div class="mt-4 border-t pt-4 dark:border-dark-700">
-              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-dark-300">
+              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('admin.settings.checkin.title') }}
               </h4>
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-dark-300">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {{ t('admin.settings.checkin.enabled') }}
                     </label>
-                    <p class="text-xs text-gray-500 dark:text-dark-400">
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
                       {{ t('admin.settings.checkin.enabledHint') }}
                     </p>
                   </div>
@@ -1609,25 +1609,27 @@
                   </button>
                 </div>
                 <template v-if="form.checkin_enabled">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-300">
-                      {{ t('admin.settings.checkin.minBalance') }}
-                    </label>
-                    <p class="text-xs text-gray-500 dark:text-dark-400">
-                      {{ t('admin.settings.checkin.minBalanceHint') }}
-                    </p>
-                    <input v-model.number="form.checkin_min_balance" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-dark-600 dark:bg-dark-800 dark:text-dark-200 sm:text-sm" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-300">
-                      {{ t('admin.settings.checkin.maxBalance') }}
-                    </label>
-                    <p class="text-xs text-gray-500 dark:text-dark-400">
-                      {{ t('admin.settings.checkin.maxBalanceHint') }}
-                    </p>
-                    <input v-model.number="form.checkin_max_balance" type="number" step="0.01" min="0"
-                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-dark-600 dark:bg-dark-800 dark:text-dark-200 sm:text-sm" />
+                  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ t('admin.settings.checkin.minBalance') }}
+                      </label>
+                      <input v-model.number="form.checkin_min_balance" type="number" step="0.01" min="0"
+                        class="input" placeholder="0.10" />
+                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ t('admin.settings.checkin.minBalanceHint') }}
+                      </p>
+                    </div>
+                    <div>
+                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ t('admin.settings.checkin.maxBalance') }}
+                      </label>
+                      <input v-model.number="form.checkin_max_balance" type="number" step="0.01" min="0"
+                        class="input" placeholder="1.00" />
+                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ t('admin.settings.checkin.maxBalanceHint') }}
+                      </p>
+                    </div>
                   </div>
                 </template>
               </div>

@@ -7,7 +7,7 @@
         <StatCard :title="t('profile.memberSince')" :value="formatDate(user?.created_at || '', { year: 'numeric', month: 'long' })" :icon="CalendarIcon" icon-variant="primary" />
       </div>
       <ProfileInfoCard :user="user" />
-      <div v-if="checkinStore.status && checkinStore.status.can_checkin !== undefined" class="card p-6">
+      <div v-if="checkinStore.enabled" class="card p-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="rounded-xl bg-amber-100 p-3 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
