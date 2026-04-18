@@ -226,6 +226,10 @@
             class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">
             {{ t('home.keyUsage') }}
           </router-link>
+          <router-link to="/monitoring"
+            class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">
+            {{ t('admin.monitoring.title') }}
+          </router-link>
         </div>
       </div>
     </footer>
@@ -241,6 +245,14 @@ import Icon from '@/components/icons/Icon.vue'
 import claudeIcon from '@/assets/icons/claude.svg'
 import openaiIcon from '@/assets/icons/openai.svg'
 import geminiIcon from '@/assets/icons/gemini.svg'
+import deepseekIcon from '@/assets/icons/deepseek.svg'
+import glmIcon from '@/assets/icons/glm.svg'
+import qwenIcon from '@/assets/icons/qwen.svg'
+import kimiIcon from '@/assets/icons/kimi.svg'
+import minimaxIcon from '@/assets/icons/minimax.svg'
+import yiIcon from '@/assets/icons/yi.svg'
+import mistralIcon from '@/assets/icons/mistral.svg'
+import llamaIcon from '@/assets/icons/llama.svg'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -266,6 +278,14 @@ const providers = [
   { name: 'Claude', icon: claudeIcon },
   { name: 'OpenAI', icon: openaiIcon },
   { name: 'Gemini', icon: geminiIcon },
+  { name: 'DeepSeek', icon: deepseekIcon },
+  { name: 'GLM', icon: glmIcon },
+  { name: 'Qwen', icon: qwenIcon },
+  { name: 'Kimi', icon: kimiIcon },
+  { name: 'MiniMax', icon: minimaxIcon },
+  { name: 'Yi', icon: yiIcon },
+  { name: 'Mistral', icon: mistralIcon },
+  { name: 'Llama', icon: llamaIcon },
 ]
 
 const featureItems = computed(() => [

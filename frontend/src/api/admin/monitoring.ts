@@ -40,7 +40,7 @@ export interface MonitoringOverview {
 }
 
 export async function getMonitoringOverview(): Promise<MonitoringOverview> {
-  const { data } = await apiClient.get<MonitoringOverview>('/admin/monitoring/overview')
+  const { data } = await apiClient.get<MonitoringOverview>('/monitoring/overview')
   return data
 }
 

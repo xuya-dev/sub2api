@@ -120,6 +120,16 @@ const routes: RouteRecordRaw[] = [
       title: 'Key Usage',
     }
   },
+  {
+    path: '/monitoring',
+    name: 'Monitoring',
+    component: () => import('@/views/MonitoringView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Monitoring',
+      titleKey: 'admin.monitoring.title',
+    }
+  },
 
   // ==================== User Routes ====================
   {
@@ -443,18 +453,6 @@ const routes: RouteRecordRaw[] = [
       descriptionKey: 'admin.usage.description'
     }
   },
-  {
-    path: '/admin/monitoring',
-    name: 'AdminMonitoring',
-    component: () => import('@/views/admin/MonitoringView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Monitoring',
-      titleKey: 'admin.monitoring.title',
-      descriptionKey: 'admin.monitoring.description'
-    }
-  },
 
 
   // ==================== Payment Admin Routes ====================
@@ -531,7 +529,7 @@ let authInitialized = false
 const navigationLoading = useNavigationLoadingState()
 // 延迟初始化预加载，传入 router 实例
 let routePrefetch: ReturnType<typeof useRoutePrefetch> | null = null
-const BACKEND_MODE_ALLOWED_PATHS = ['/login', '/key-usage', '/setup']
+const BACKEND_MODE_ALLOWED_PATHS = ['/login', '/key-usage', '/monitoring', '/setup']
 
 router.beforeEach((to, _from, next) => {
   // 开始导航加载状态
