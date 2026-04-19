@@ -1,7 +1,7 @@
 <template>
   <div class="relative flex min-h-screen flex-col bg-gray-50 dark:bg-dark-950">
     <header class="relative z-20 border-b border-gray-100 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80">
-      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <router-link to="/home" class="flex items-center gap-3">
           <div class="h-8 w-8 overflow-hidden rounded-lg">
             <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
@@ -44,11 +44,11 @@
       </nav>
     </header>
 
-    <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
+    <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
       <div class="space-y-6">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('pricing.title') }}</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">{{ t('pricing.title') }}</h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">{{ t('pricing.description') }}</p>
           </div>
           <button @click="refresh" :disabled="loading"
@@ -69,34 +69,47 @@
               {{ group.models.length }} {{ group.models.length === 1 ? t('pricing.model') : t('pricing.models') }}
             </span>
           </div>
-          <div v-if="group.models.length > 0" class="overflow-x-auto">
-            <table class="w-full" style="table-layout: fixed;">
-              <colgroup>
-                <col style="width: 36%;">
-                <col style="width: 16%;">
-                <col style="width: 16%;">
-                <col style="width: 16%;">
-                <col style="width: 16%;">
-              </colgroup>
-              <thead>
-                <tr class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('pricing.modelName') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('pricing.inputPrice') }} ($)</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('pricing.outputPrice') }} ($)</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400">{{ t('pricing.effectiveInput') }} ($)</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400">{{ t('pricing.effectiveOutput') }} ($)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="m in group.models" :key="m.model_name" class="border-b border-gray-50 last:border-b-0 dark:border-dark-800">
-                  <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white font-mono truncate" :title="m.model_name">{{ m.model_name }}</td>
-                  <td class="px-4 py-3 text-right text-sm text-gray-600 dark:text-dark-300 tabular-nums">{{ formatPrice(m.input_cost_per_million) }}</td>
-                  <td class="px-4 py-3 text-right text-sm text-gray-600 dark:text-dark-300 tabular-nums">{{ formatPrice(m.output_cost_per_million) }}</td>
-                  <td class="px-4 py-3 text-right text-sm font-medium tabular-nums" :class="group.rate_multiplier !== 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-dark-200'">{{ formatPrice(m.effective_input) }}</td>
-                  <td class="px-4 py-3 text-right text-sm font-medium tabular-nums" :class="group.rate_multiplier !== 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-dark-200'">{{ formatPrice(m.effective_output) }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="group.models.length > 0">
+            <div class="hidden sm:block overflow-x-auto">
+              <table class="w-full" style="table-layout: fixed;">
+                <colgroup>
+                  <col style="width: 36%;">
+                  <col style="width: 16%;">
+                  <col style="width: 16%;">
+                  <col style="width: 16%;">
+                  <col style="width: 16%;">
+                </colgroup>
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('pricing.modelName') }}</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('pricing.inputPrice') }} ($)</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('pricing.outputPrice') }} ($)</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400">{{ t('pricing.effectiveInput') }} ($)</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400">{{ t('pricing.effectiveOutput') }} ($)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="m in group.models" :key="m.model_name" class="border-b border-gray-50 last:border-b-0 dark:border-dark-800">
+                    <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white font-mono truncate" :title="m.model_name">{{ m.model_name }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-gray-600 dark:text-dark-300 tabular-nums">{{ formatPrice(m.input_cost_per_million) }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-gray-600 dark:text-dark-300 tabular-nums">{{ formatPrice(m.output_cost_per_million) }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-medium tabular-nums" :class="group.rate_multiplier !== 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-dark-200'">{{ formatPrice(m.effective_input) }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-medium tabular-nums" :class="group.rate_multiplier !== 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-dark-200'">{{ formatPrice(m.effective_output) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sm:hidden divide-y divide-gray-100 dark:divide-dark-700">
+              <div v-for="m in group.models" :key="m.model_name" class="px-4 py-3 space-y-2">
+                <p class="text-sm font-medium text-gray-900 dark:text-white font-mono break-all">{{ m.model_name }}</p>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                  <div class="flex justify-between"><span class="text-gray-500 dark:text-dark-400">{{ t('pricing.inputPrice') }}</span><span class="tabular-nums text-gray-700 dark:text-dark-200">{{ formatPrice(m.input_cost_per_million) }}</span></div>
+                  <div class="flex justify-between"><span class="text-gray-500 dark:text-dark-400">{{ t('pricing.outputPrice') }}</span><span class="tabular-nums text-gray-700 dark:text-dark-200">{{ formatPrice(m.output_cost_per_million) }}</span></div>
+                  <div class="flex justify-between"><span class="text-blue-600 dark:text-blue-400">{{ t('pricing.effectiveInput') }}</span><span class="tabular-nums font-medium" :class="group.rate_multiplier !== 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-dark-200'">{{ formatPrice(m.effective_input) }}</span></div>
+                  <div class="flex justify-between"><span class="text-blue-600 dark:text-blue-400">{{ t('pricing.effectiveOutput') }}</span><span class="tabular-nums font-medium" :class="group.rate_multiplier !== 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-dark-200'">{{ formatPrice(m.effective_output) }}</span></div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else class="py-12 text-center">
             <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('pricing.noModelsInGroup') }}</p>

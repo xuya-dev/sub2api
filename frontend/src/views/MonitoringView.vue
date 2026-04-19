@@ -1,7 +1,7 @@
 <template>
   <div class="relative flex min-h-screen flex-col bg-gray-50 dark:bg-dark-950">
     <header class="relative z-20 border-b border-gray-100 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80">
-      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <router-link to="/home" class="flex items-center gap-3">
           <div class="h-8 w-8 overflow-hidden rounded-lg">
             <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
@@ -44,11 +44,11 @@
       </nav>
     </header>
 
-    <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
+    <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
       <div class="space-y-6">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('admin.monitoring.title') }}</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">{{ t('admin.monitoring.title') }}</h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.description') }}</p>
           </div>
           <div class="flex items-center gap-3">
@@ -64,7 +64,7 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-5 sm:gap-4">
           <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
             <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.todayRequests') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ data?.total_requests_today?.toLocaleString() ?? '-' }}</p>
@@ -120,74 +120,94 @@
 
         <!-- Group × Model Matrix -->
         <div v-for="group in groupedModels" :key="group.groupId" class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-dark-700 dark:bg-dark-900 overflow-hidden">
-          <div class="flex items-center gap-3 border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ group.groupName }}</span>
+          <div class="flex items-center gap-3 border-b border-gray-100 px-4 py-3 dark:border-dark-700 sm:px-6 sm:py-4">
+            <span class="text-base font-semibold text-gray-900 dark:text-white sm:text-lg">{{ group.groupName }}</span>
             <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-dark-800 dark:text-dark-300">
               {{ group.models.length }} {{ group.models.length === 1 ? 'model' : 'models' }}
             </span>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full" style="table-layout: fixed;">
-              <colgroup>
-                <col style="width: 22%;">
-                <col style="width: 8%;">
-                <col style="width: 7%;">
-                <col style="width: 7%;">
-                <col style="width: 14%;">
-                <col style="width: 22%;">
-                <col style="width: 7%;">
-                <col style="width: 7%;">
-                <col style="width: 6%;">
-              </colgroup>
-              <thead>
-                <tr class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.model') }}</th>
-                  <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.requests') }}</th>
-                  <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-green-600 dark:text-green-400">{{ t('admin.monitoring.success') }}</th>
-                  <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-red-500 dark:text-red-400">{{ t('admin.monitoring.errors') }}</th>
-                  <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.successRate') }}</th>
-                  <th class="px-2 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.hourlySuccessRate') }}</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">AVG</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-amber-500 dark:text-amber-400">P95</th>
-                  <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">TTFT</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="m in group.models" :key="m.model" class="border-b border-gray-50 dark:border-dark-800">
-                  <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white font-mono truncate" :title="m.model">{{ m.model }}</td>
-                  <td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-dark-200 tabular-nums">{{ m.request_count.toLocaleString() }}</td>
-                  <td class="px-3 py-3 text-center">
-                    <span class="text-sm font-semibold tabular-nums" :class="m.success_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400'">{{ m.success_count }}</span>
-                  </td>
-                  <td class="px-3 py-3 text-center">
-                    <span class="text-sm font-semibold tabular-nums" :class="m.error_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-sm text-gray-400'">{{ m.error_count }}</span>
-                  </td>
-                  <td class="px-4 py-3 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <div class="h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 dark:bg-dark-700 flex-shrink-0">
-                        <div class="h-full rounded-full" :class="successRateColor(m.success_count, m.request_count)" :style="{ width: successRateWidth(m.success_count, m.request_count) }"></div>
+          <div>
+            <div class="hidden sm:block overflow-x-auto">
+              <table class="w-full" style="table-layout: fixed;">
+                <colgroup>
+                  <col style="width: 22%;">
+                  <col style="width: 8%;">
+                  <col style="width: 7%;">
+                  <col style="width: 7%;">
+                  <col style="width: 14%;">
+                  <col style="width: 22%;">
+                  <col style="width: 7%;">
+                  <col style="width: 7%;">
+                  <col style="width: 6%;">
+                </colgroup>
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.model') }}</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.requests') }}</th>
+                    <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-green-600 dark:text-green-400">{{ t('admin.monitoring.success') }}</th>
+                    <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-red-500 dark:text-red-400">{{ t('admin.monitoring.errors') }}</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.successRate') }}</th>
+                    <th class="px-2 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.hourlySuccessRate') }}</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">AVG</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-amber-500 dark:text-amber-400">P95</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">TTFT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="m in group.models" :key="m.model" class="border-b border-gray-50 dark:border-dark-800">
+                    <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white font-mono truncate" :title="m.model">{{ m.model }}</td>
+                    <td class="px-4 py-3 text-center text-sm text-gray-700 dark:text-dark-200 tabular-nums">{{ m.request_count.toLocaleString() }}</td>
+                    <td class="px-3 py-3 text-center">
+                      <span class="text-sm font-semibold tabular-nums" :class="m.success_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400'">{{ m.success_count }}</span>
+                    </td>
+                    <td class="px-3 py-3 text-center">
+                      <span class="text-sm font-semibold tabular-nums" :class="m.error_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-sm text-gray-400'">{{ m.error_count }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                      <div class="flex items-center justify-center gap-2">
+                        <div class="h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 dark:bg-dark-700 flex-shrink-0">
+                          <div class="h-full rounded-full" :class="successRateColor(m.success_count, m.request_count)" :style="{ width: successRateWidth(m.success_count, m.request_count) }"></div>
+                        </div>
+                        <span class="text-sm tabular-nums whitespace-nowrap" :class="successRateTextColor(m.success_count, m.request_count)">{{ successRate(m.success_count, m.request_count) }}</span>
                       </div>
-                      <span class="text-sm tabular-nums whitespace-nowrap" :class="successRateTextColor(m.success_count, m.request_count)">{{ successRate(m.success_count, m.request_count) }}</span>
-                    </div>
-                  </td>
-                  <td class="px-2 py-3">
-                    <div class="flex gap-[1px]" style="height: 16px;">
-                      <div v-for="(h, hi) in getModelHourly(m.group_id, m.model)" :key="hi"
-                        class="relative flex-1 rounded-[1px] transition-colors cursor-pointer group/cell"
-                        :class="hourColorMini(h.rate)"
-                        :title="modelHourTooltip(m.model, hi, h)">
-                        <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-[10px] text-white opacity-0 shadow-lg group-hover/cell:opacity-100 dark:bg-dark-600">
-                          {{ modelHourTooltip(m.model, hi, h) }}
+                    </td>
+                    <td class="px-2 py-3">
+                      <div class="flex gap-[1px]" style="height: 16px;">
+                        <div v-for="(h, hi) in getModelHourly(m.group_id, m.model)" :key="hi"
+                          class="relative flex-1 rounded-[1px] transition-colors cursor-pointer group/cell"
+                          :class="hourColorMini(h.rate)"
+                          :title="modelHourTooltip(m.model, hi, h)">
+                          <div class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-[10px] text-white opacity-0 shadow-lg group-hover/cell:opacity-100 dark:bg-dark-600">
+                            {{ modelHourTooltip(m.model, hi, h) }}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-dark-200 tabular-nums">{{ formatMs(m.avg_latency_ms) }}</td>
-                  <td class="px-4 py-3 text-right text-sm tabular-nums" :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-dark-200'">{{ formatMs(m.p95_latency_ms) }}</td>
-                  <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-dark-200 tabular-nums">{{ formatMs(m.avg_ttft) }}</td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-dark-200 tabular-nums">{{ formatMs(m.avg_latency_ms) }}</td>
+                    <td class="px-4 py-3 text-right text-sm tabular-nums" :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-dark-200'">{{ formatMs(m.p95_latency_ms) }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-gray-700 dark:text-dark-200 tabular-nums">{{ formatMs(m.avg_ttft) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sm:hidden divide-y divide-gray-100 dark:divide-dark-700">
+              <div v-for="m in group.models" :key="'m-'+m.model" class="px-4 py-3 space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white font-mono break-all">{{ m.model }}</p>
+                  <span class="ml-2 flex-shrink-0 text-sm tabular-nums font-semibold" :class="successRateTextColor(m.success_count, m.request_count)">{{ successRate(m.success_count, m.request_count) }}</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-400">
+                  <span>{{ m.request_count.toLocaleString() }} {{ t('admin.monitoring.requests') }}</span>
+                  <span class="text-green-600 dark:text-green-400">{{ m.success_count }} {{ t('admin.monitoring.success') }}</span>
+                  <span :class="m.error_count > 0 ? 'text-red-500' : ''">{{ m.error_count }} {{ t('admin.monitoring.errors') }}</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                  <span class="text-gray-500 dark:text-dark-400">AVG {{ formatMs(m.avg_latency_ms) }}</span>
+                  <span :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-500 dark:text-dark-400'">P95 {{ formatMs(m.p95_latency_ms) }}</span>
+                  <span class="text-gray-500 dark:text-dark-400">TTFT {{ formatMs(m.avg_ttft) }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -197,50 +217,71 @@
 
         <!-- Model Latency Overview -->
         <div v-if="data?.model_latencies?.length" class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-dark-700 dark:bg-dark-900 overflow-hidden">
-          <div class="flex items-center gap-3 border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('admin.monitoring.modelLatency') }}</h2>
+          <div class="flex items-center gap-3 border-b border-gray-100 px-4 py-3 dark:border-dark-700 sm:px-6 sm:py-4">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-white sm:text-lg">{{ t('admin.monitoring.modelLatency') }}</h2>
             <span class="text-xs text-gray-400 dark:text-dark-500">{{ t('admin.monitoring.modelLatencyHint') }}</span>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
-                  <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.model') }}</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.requests') }}</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-green-600 dark:text-green-400">{{ t('admin.monitoring.success') }}</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-red-500 dark:text-red-400">{{ t('admin.monitoring.errors') }}</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.successRate') }}</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">AVG</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-amber-500 dark:text-amber-400">P95</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-red-500 dark:text-red-400">P99</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">TTFT</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="m in data.model_latencies" :key="m.model" class="border-b border-gray-50 dark:border-dark-800">
-                  <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white font-mono">{{ m.model }}</td>
-                  <td class="px-6 py-3 text-center text-sm text-gray-700 dark:text-dark-200">{{ m.request_count.toLocaleString() }}</td>
-                  <td class="px-6 py-3 text-center">
-                    <span class="text-sm font-semibold" :class="m.success_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400'">{{ m.success_count }}</span>
-                  </td>
-                  <td class="px-6 py-3 text-center">
-                    <span :class="m.error_count > 0 ? 'text-sm font-semibold text-red-600 dark:text-red-400' : 'text-sm text-gray-400'">{{ m.error_count }}</span>
-                  </td>
-                  <td class="px-6 py-3 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <div class="h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 dark:bg-dark-700">
-                        <div class="h-full rounded-full" :class="successRateColor(m.success_count, m.request_count)" :style="{ width: successRateWidth(m.success_count, m.request_count) }"></div>
+          <div>
+            <div class="hidden sm:block overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.model') }}</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.requests') }}</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-green-600 dark:text-green-400">{{ t('admin.monitoring.success') }}</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-red-500 dark:text-red-400">{{ t('admin.monitoring.errors') }}</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.successRate') }}</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">AVG</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-amber-500 dark:text-amber-400">P95</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-red-500 dark:text-red-400">P99</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">TTFT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="m in data.model_latencies" :key="m.model" class="border-b border-gray-50 dark:border-dark-800">
+                    <td class="px-6 py-3 text-sm font-medium text-gray-900 dark:text-white font-mono">{{ m.model }}</td>
+                    <td class="px-6 py-3 text-center text-sm text-gray-700 dark:text-dark-200">{{ m.request_count.toLocaleString() }}</td>
+                    <td class="px-6 py-3 text-center">
+                      <span class="text-sm font-semibold" :class="m.success_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400'">{{ m.success_count }}</span>
+                    </td>
+                    <td class="px-6 py-3 text-center">
+                      <span :class="m.error_count > 0 ? 'text-sm font-semibold text-red-600 dark:text-red-400' : 'text-sm text-gray-400'">{{ m.error_count }}</span>
+                    </td>
+                    <td class="px-6 py-3 text-center">
+                      <div class="flex items-center justify-center gap-2">
+                        <div class="h-1.5 w-16 overflow-hidden rounded-full bg-gray-200 dark:bg-dark-700">
+                          <div class="h-full rounded-full" :class="successRateColor(m.success_count, m.request_count)" :style="{ width: successRateWidth(m.success_count, m.request_count) }"></div>
+                        </div>
+                        <span class="text-sm" :class="successRateTextColor(m.success_count, m.request_count)">{{ successRate(m.success_count, m.request_count) }}</span>
                       </div>
-                      <span class="text-sm" :class="successRateTextColor(m.success_count, m.request_count)">{{ successRate(m.success_count, m.request_count) }}</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-3 text-right text-sm text-gray-700 dark:text-dark-200">{{ formatMs(m.avg_latency_ms) }}</td>
-                  <td class="px-6 py-3 text-right text-sm" :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-dark-200'">{{ formatMs(m.p95_latency_ms) }}</td>
-                  <td class="px-6 py-3 text-right text-sm" :class="m.p99_latency_ms > 30000 ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-gray-700 dark:text-dark-200'">{{ formatMs(m.p99_latency_ms) }}</td>
-                  <td class="px-6 py-3 text-right text-sm text-gray-700 dark:text-dark-200">{{ formatMs(m.avg_first_token_ms) }}</td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td class="px-6 py-3 text-right text-sm text-gray-700 dark:text-dark-200">{{ formatMs(m.avg_latency_ms) }}</td>
+                    <td class="px-6 py-3 text-right text-sm" :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-dark-200'">{{ formatMs(m.p95_latency_ms) }}</td>
+                    <td class="px-6 py-3 text-right text-sm" :class="m.p99_latency_ms > 30000 ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-gray-700 dark:text-dark-200'">{{ formatMs(m.p99_latency_ms) }}</td>
+                    <td class="px-6 py-3 text-right text-sm text-gray-700 dark:text-dark-200">{{ formatMs(m.avg_first_token_ms) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sm:hidden divide-y divide-gray-100 dark:divide-dark-700">
+              <div v-for="m in data.model_latencies" :key="'ml-'+m.model" class="px-4 py-3 space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white font-mono break-all">{{ m.model }}</p>
+                  <span class="ml-2 flex-shrink-0 text-sm tabular-nums font-semibold" :class="successRateTextColor(m.success_count, m.request_count)">{{ successRate(m.success_count, m.request_count) }}</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-dark-400">
+                  <span>{{ m.request_count.toLocaleString() }} {{ t('admin.monitoring.requests') }}</span>
+                  <span class="text-green-600 dark:text-green-400">{{ m.success_count }} {{ t('admin.monitoring.success') }}</span>
+                  <span :class="m.error_count > 0 ? 'text-red-500' : ''">{{ m.error_count }} {{ t('admin.monitoring.errors') }}</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                  <span class="text-gray-500 dark:text-dark-400">AVG {{ formatMs(m.avg_latency_ms) }}</span>
+                  <span :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-500 dark:text-dark-400'">P95 {{ formatMs(m.p95_latency_ms) }}</span>
+                  <span :class="m.p99_latency_ms > 30000 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-dark-400'">P99 {{ formatMs(m.p99_latency_ms) }}</span>
+                  <span class="text-gray-500 dark:text-dark-400">TTFT {{ formatMs(m.avg_first_token_ms) }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
