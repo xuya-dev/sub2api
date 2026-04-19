@@ -793,7 +793,10 @@ func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Con
 		WITH group_models AS (
 			SELECT DISTINCT
 				ag.group_id,
-				mk.key AS model_name
+				COALESCE(
+					a.credentials->'model_mapping'->>mk.key,
+					mk.key
+				) AS model_name
 			FROM account_groups ag
 			JOIN accounts a ON a.id = ag.account_id
 			CROSS JOIN LATERAL jsonb_object_keys(
