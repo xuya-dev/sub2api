@@ -5727,7 +5727,6 @@ export default {
     outputPrice: 'Output Price',
     effectiveInput: 'Eff. Input',
     effectiveOutput: 'Eff. Output',
-    requests7d: '7d Requests',
     model: 'model',
     models: 'models',
     noModelsInGroup: 'No models available in this group',

@@ -791,13 +791,11 @@ type PublicPricingModel struct {
 func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Context) ([]PublicPricingGroup, error) {
 	query := `
 		WITH group_models AS (
-			SELECT
+			SELECT DISTINCT
 				u.group_id,
-				COALESCE(u.requested_model, u.model) AS model_name,
-				COUNT(*) AS request_count
+				COALESCE(u.requested_model, u.model) AS model_name
 			FROM usage_logs u
-			WHERE u.created_at >= NOW() - INTERVAL '168 hours'
-			GROUP BY u.group_id, COALESCE(u.requested_model, u.model)
+			WHERE u.output_tokens > 0
 		)
 		SELECT
 			g.id,
@@ -812,8 +810,8 @@ func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Con
 						'output_cost_per_million', CASE WHEN mp.output_cost_per_token IS NOT NULL THEN mp.output_cost_per_token * 1000000 ELSE 0 END,
 						'effective_input', CASE WHEN mp.input_cost_per_token IS NOT NULL THEN mp.input_cost_per_token * g.rate_multiplier * 1000000 ELSE 0 END,
 						'effective_output', CASE WHEN mp.output_cost_per_token IS NOT NULL THEN mp.output_cost_per_token * g.rate_multiplier * 1000000 ELSE 0 END,
-						'request_count', COALESCE(gm.request_count, 0)
-					) ORDER BY gm.request_count DESC
+						'request_count', 0
+					) ORDER BY gm.model_name
 				),
 				'[]'::json
 			) AS models

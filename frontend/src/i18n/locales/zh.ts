@@ -5915,7 +5915,6 @@ export default {
     outputPrice: '输出价格',
     effectiveInput: '实际输入',
     effectiveOutput: '实际输出',
-    requests7d: '7日请求',
     model: '个模型',
     models: '个模型',
     noModelsInGroup: '该分组暂无可用模型',
