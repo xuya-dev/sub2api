@@ -201,6 +201,13 @@
                   <span class="text-green-600 dark:text-green-400">{{ m.success_count }} {{ t('admin.monitoring.success') }}</span>
                   <span :class="m.error_count > 0 ? 'text-red-500' : ''">{{ m.error_count }} {{ t('admin.monitoring.errors') }}</span>
                 </div>
+                <div class="flex gap-[1px]" style="height: 16px;">
+                  <div v-for="(h, hi) in getModelHourly(m.group_id, m.model)" :key="hi"
+                    class="relative flex-1 rounded-[1px] transition-colors"
+                    :class="hourColorMini(h.rate)"
+                    :title="modelHourTooltip(m.model, hi, h)">
+                  </div>
+                </div>
                 <div class="flex items-center gap-3 text-xs">
                   <span class="text-gray-500 dark:text-dark-400">AVG {{ formatMs(m.avg_latency_ms) }}</span>
                   <span :class="m.p95_latency_ms > 10000 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-500 dark:text-dark-400'">P95 {{ formatMs(m.p95_latency_ms) }}</span>
