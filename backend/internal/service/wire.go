@@ -30,8 +30,8 @@ func ProvidePricingService(cfg *config.Config, remoteClient PricingRemoteClient)
 }
 
 // ProvideModelPricingAdminService creates and initializes ModelPricingAdminService
-func ProvideModelPricingAdminService(client *dbent.Client, cfg *config.Config, remoteClient PricingRemoteClient) (*ModelPricingAdminService, error) {
-	svc := NewModelPricingAdminService(client, cfg, remoteClient)
+func ProvideModelPricingAdminService(client *dbent.Client, db *sql.DB, cfg *config.Config, remoteClient PricingRemoteClient) (*ModelPricingAdminService, error) {
+	svc := NewModelPricingAdminService(client, db, cfg, remoteClient)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 	if err := svc.Initialize(ctx); err != nil {

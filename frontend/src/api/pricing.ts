@@ -1,25 +1,24 @@
 import { apiClient } from './client'
 
+export interface PublicPricingModel {
+  model_name: string
+  input_cost_per_million: number
+  output_cost_per_million: number
+  effective_input: number
+  effective_output: number
+  request_count: number
+}
+
 export interface PublicPricingGroup {
   id: number
   name: string
   platform: string
   rate_multiplier: number
-}
-
-export interface LiteLLMModelPricing {
-  model_name: string
-  input_cost_per_token: number
-  output_cost_per_token: number
-  cache_creation_input_token_cost?: number | null
-  cache_read_input_token_cost?: number | null
-  litellm_provider?: string
-  mode?: string
+  models: PublicPricingModel[]
 }
 
 export interface PublicPricingResponse {
   groups: PublicPricingGroup[]
-  pricing: Record<string, LiteLLMModelPricing>
 }
 
 export async function getPublicPricing(): Promise<PublicPricingResponse> {

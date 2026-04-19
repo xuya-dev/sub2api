@@ -5718,4 +5718,20 @@ export default {
     },
   },
 
+  pricing: {
+    title: 'Model Pricing',
+    description: 'View billing prices for all groups and their models (per 1M tokens)',
+    perMillionTokens: 'Per 1M Tokens',
+    modelName: 'Model Name',
+    inputPrice: 'Input Price',
+    outputPrice: 'Output Price',
+    effectiveInput: 'Eff. Input',
+    effectiveOutput: 'Eff. Output',
+    requests7d: '7d Requests',
+    model: 'model',
+    models: 'models',
+    noModelsInGroup: 'No models available in this group',
+    noData: 'No pricing data available',
+  },
+
 }

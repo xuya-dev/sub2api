@@ -25,6 +25,10 @@
             class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
             {{ t('admin.monitoring.title') }}
           </router-link>
+          <router-link to="/pricing"
+            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
+            {{ t('pricing.title') }}
+          </router-link>
           <LocaleSwitcher />
           <a v-if="docUrl" :href="docUrl" target="_blank" rel="noopener noreferrer"
             class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
@@ -199,107 +203,6 @@
       </div>
     </section>
 
-    <!-- Model Pricing Query -->
-    <section class="border-y border-gray-100 bg-gray-50/50 py-20 dark:border-dark-800 dark:bg-dark-900/50">
-      <div class="mx-auto max-w-7xl px-6">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">{{ t('home.pricing.title') }}</h2>
-          <p class="mt-4 text-lg text-gray-600 dark:text-dark-300">{{ t('home.pricing.description') }}</p>
-        </div>
-
-        <div v-if="pricingLoading" class="mt-10 flex justify-center py-20">
-          <svg class="h-8 w-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-        </div>
-
-        <div v-else-if="pricingData" class="mt-10 mx-auto max-w-3xl space-y-6">
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            <!-- Group Select -->
-            <div>
-              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.pricing.selectGroup') }}</label>
-              <select v-model.number="selectedGroupId"
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-dark-600 dark:bg-dark-800 dark:text-white">
-                <option :value="null">{{ t('home.pricing.selectGroup') }}</option>
-                <option v-for="g in pricingGroups" :key="g.id" :value="g.id">{{ g.name }} (×{{ g.rate_multiplier }})</option>
-              </select>
-            </div>
-            <!-- Model Search -->
-            <div>
-              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.pricing.selectModel') }}</label>
-              <input v-model="selectedModelName" type="text" :placeholder="t('home.pricing.modelPlaceholder')"
-                list="model-list"
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-dark-600 dark:bg-dark-800 dark:text-white" />
-              <datalist id="model-list">
-                <option v-for="m in filteredModels.slice(0, 100)" :key="m.name" :value="m.name" />
-              </datalist>
-            </div>
-            <!-- Calculate Button -->
-            <div class="flex items-end">
-              <button @click="calculatePricing"
-                :disabled="!selectedGroupId || !selectedModelPricing"
-                class="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-40 dark:shadow-none">
-                {{ t('home.pricing.calculate') }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Token Inputs -->
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.pricing.inputTokens') }}</label>
-              <input v-model="inputTokenCount" type="number" min="0" :placeholder="t('home.pricing.inputPlaceholder')"
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-dark-600 dark:bg-dark-800 dark:text-white font-mono tabular-nums" />
-            </div>
-            <div>
-              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.pricing.outputTokens') }}</label>
-              <input v-model="outputTokenCount" type="number" min="0" :placeholder="t('home.pricing.outputPlaceholder')"
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-dark-600 dark:bg-dark-800 dark:text-white font-mono tabular-nums" />
-            </div>
-          </div>
-
-          <!-- Result -->
-          <div v-if="calculatedCost && selectedModelPricing" class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-dark-700 dark:bg-dark-900">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4 pb-4 border-b border-gray-100 dark:border-dark-800">
-              <div class="flex items-center gap-3">
-                <ModelIcon :model="selectedModelPricing.model_name || selectedModelName" size="28px" />
-                <span class="text-base font-semibold text-gray-900 dark:text-white font-mono">{{ selectedModelPricing.model_name || selectedModelName }}</span>
-              </div>
-              <span v-if="selectedGroup" class="text-sm text-gray-500 dark:text-dark-400">
-                {{ selectedGroup.name }} ×{{ selectedGroup.rate_multiplier }}
-              </span>
-            </div>
-            <div class="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
-              <div>
-                <p class="text-xs text-gray-400 dark:text-dark-500">{{ t('home.pricing.basePrice') }} (Input)</p>
-                <p class="mt-1 text-sm font-mono text-gray-700 dark:text-dark-200">${{ (selectedModelPricing.input_cost_per_token * 1000000).toFixed(2) }}<span class="text-xs text-gray-400">/MTok</span></p>
-              </div>
-              <div>
-                <p class="text-xs text-gray-400 dark:text-dark-500">{{ t('home.pricing.basePrice') }} (Output)</p>
-                <p class="mt-1 text-sm font-mono text-gray-700 dark:text-dark-200">${{ (selectedModelPricing.output_cost_per_token * 1000000).toFixed(2) }}<span class="text-xs text-gray-400">/MTok</span></p>
-              </div>
-              <div>
-                <p class="text-xs text-primary-600 dark:text-primary-400">{{ t('home.pricing.effectivePrice') }} (Input)</p>
-                <p class="mt-1 text-sm font-mono font-semibold text-primary-700 dark:text-primary-300">${{ (calculatedCost.effectiveInput * 1000000).toFixed(2) }}<span class="text-xs text-gray-400">/MTok</span></p>
-              </div>
-              <div>
-                <p class="text-xs text-primary-600 dark:text-primary-400">{{ t('home.pricing.effectivePrice') }} (Output)</p>
-                <p class="mt-1 text-sm font-mono font-semibold text-primary-700 dark:text-primary-300">${{ (calculatedCost.effectiveOutput * 1000000).toFixed(2) }}<span class="text-xs text-gray-400">/MTok</span></p>
-              </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-dark-800">
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.pricing.estimatedCost') }}</span>
-                <span class="text-xl font-bold text-gray-900 dark:text-white tabular-nums">${{ calculatedCost.totalCost.toFixed(6) }}</span>
-              </div>
-              <div class="mt-1 grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-dark-400 tabular-nums">
-                <span>Input: ${{ calculatedCost.inputCost.toFixed(6) }}</span>
-                <span>Output: ${{ calculatedCost.outputCost.toFixed(6) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- CTA Section -->
     <section class="border-t border-gray-100 bg-gray-50/50 py-20 dark:border-dark-800 dark:bg-dark-900/50">
       <div class="mx-auto max-w-7xl px-6">
@@ -354,7 +257,6 @@ import { useAuthStore, useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
 import ModelIcon from '@/components/common/ModelIcon.vue'
-import { pricingAPI, type PublicPricingResponse, type PublicPricingGroup, type LiteLLMModelPricing } from '@/api/pricing'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -440,78 +342,12 @@ function initTheme() {
   }
 }
 
-// Pricing Query
-const pricingData = ref<PublicPricingResponse | null>(null)
-const pricingLoading = ref(false)
-const selectedGroupId = ref<number | null>(null)
-const selectedModelName = ref('')
-const inputTokenCount = ref('')
-const outputTokenCount = ref('')
-const calculatedCost = ref<{ inputCost: number; outputCost: number; totalCost: number; effectiveInput: number; effectiveOutput: number } | null>(null)
-
-const pricingGroups = computed<PublicPricingGroup[]>(() => pricingData.value?.groups ?? [])
-const pricingModels = computed<{ name: string; pricing: LiteLLMModelPricing }[]>(() => {
-  if (!pricingData.value?.pricing) return []
-  const map = pricingData.value.pricing
-  return Object.entries(map)
-    .map(([name, p]) => ({ name, pricing: p }))
-    .sort((a, b) => a.name.localeCompare(b.name))
-})
-
-const filteredModels = computed(() => {
-  const q = selectedModelName.value.toLowerCase().trim()
-  if (!q) return pricingModels.value
-  return pricingModels.value.filter(m => m.name.toLowerCase().includes(q))
-})
-
-const selectedGroup = computed(() => {
-  if (!selectedGroupId.value || !pricingData.value) return null
-  return pricingData.value.groups.find(g => g.id === selectedGroupId.value) || null
-})
-
-const selectedModelPricing = computed(() => {
-  if (!selectedModelName.value.trim() || !pricingData.value?.pricing) return null
-  const key = Object.keys(pricingData.value.pricing).find(k => k.toLowerCase() === selectedModelName.value.toLowerCase().trim())
-  if (!key) return null
-  return pricingData.value.pricing[key]
-})
-
-async function loadPricing() {
-  pricingLoading.value = true
-  try {
-    pricingData.value = await pricingAPI.getPublicPricing()
-  } catch {
-    pricingData.value = null
-  } finally {
-    pricingLoading.value = false
-  }
-}
-
-function calculatePricing() {
-  if (!selectedGroup.value || !selectedModelPricing.value) return
-  const inputTokens = parseFloat(inputTokenCount.value) || 0
-  const outputTokens = parseFloat(outputTokenCount.value) || 0
-  const rate = selectedGroup.value.rate_multiplier
-  const baseIn = selectedModelPricing.value.input_cost_per_token
-  const baseOut = selectedModelPricing.value.output_cost_per_token
-  const effIn = baseIn * rate
-  const effOut = baseOut * rate
-  calculatedCost.value = {
-    inputCost: (baseIn * inputTokens / 1000000),
-    outputCost: (baseOut * outputTokens / 1000000),
-    totalCost: (baseIn * inputTokens / 1000000) + (baseOut * outputTokens / 1000000),
-    effectiveInput: effIn,
-    effectiveOutput: effOut,
-  }
-}
-
 onMounted(() => {
   initTheme()
   authStore.checkAuth()
   if (!appStore.publicSettingsLoaded) {
     appStore.fetchPublicSettings()
   }
-  loadPricing()
 })
 </script>
 

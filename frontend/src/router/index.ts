@@ -130,6 +130,16 @@ const routes: RouteRecordRaw[] = [
       titleKey: 'admin.monitoring.title',
     }
   },
+  {
+    path: '/pricing',
+    name: 'Pricing',
+    component: () => import('@/views/PricingView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Model Pricing',
+      titleKey: 'pricing.title',
+    }
+  },
 
   // ==================== User Routes ====================
   {
@@ -541,7 +551,7 @@ let authInitialized = false
 const navigationLoading = useNavigationLoadingState()
 // 延迟初始化预加载，传入 router 实例
 let routePrefetch: ReturnType<typeof useRoutePrefetch> | null = null
-const BACKEND_MODE_ALLOWED_PATHS = ['/login', '/key-usage', '/monitoring', '/setup']
+const BACKEND_MODE_ALLOWED_PATHS = ['/login', '/key-usage', '/monitoring', '/pricing', '/setup']
 
 router.beforeEach((to, _from, next) => {
   // 开始导航加载状态

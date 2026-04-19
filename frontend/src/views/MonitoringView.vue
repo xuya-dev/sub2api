@@ -14,8 +14,12 @@
             {{ t('home.keyUsage') }}
           </router-link>
           <router-link to="/monitoring"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
+            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-900 bg-gray-100 dark:text-white dark:bg-dark-800 sm:flex">
             {{ t('admin.monitoring.title') }}
+          </router-link>
+          <router-link to="/pricing"
+            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
+            {{ t('pricing.title') }}
           </router-link>
           <LocaleSwitcher />
           <a v-if="docUrl" :href="docUrl" target="_blank" rel="noopener noreferrer"

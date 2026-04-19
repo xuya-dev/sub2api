@@ -5906,4 +5906,20 @@ export default {
     },
   },
 
+  pricing: {
+    title: '模型定价',
+    description: '查看所有分组及其模型的计费价格（每百万 Token）',
+    perMillionTokens: '每百万 Token',
+    modelName: '模型名称',
+    inputPrice: '输入价格',
+    outputPrice: '输出价格',
+    effectiveInput: '实际输入',
+    effectiveOutput: '实际输出',
+    requests7d: '7日请求',
+    model: '个模型',
+    models: '个模型',
+    noModelsInGroup: '该分组暂无可用模型',
+    noData: '暂无定价数据',
+  },
+
 }

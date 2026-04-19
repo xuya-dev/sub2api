@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,9 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
-	entGroup "github.com/Wei-Shaw/sub2api/ent/group"
 	entModelPricing "github.com/Wei-Shaw/sub2api/ent/modelpricing"
 	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
@@ -66,6 +66,7 @@ type SyncStatus struct {
 
 type ModelPricingAdminService struct {
 	client *ent.Client
+	db    *sql.DB
 	cfg    *config.Config
 	mu     sync.RWMutex
 	cache  map[string]*LiteLLMModelPricing
@@ -78,9 +79,10 @@ type ModelPricingAdminService struct {
 	lastSyncedAt    time.Time
 }
 
-func NewModelPricingAdminService(client *ent.Client, cfg *config.Config, remoteClient PricingRemoteClient) *ModelPricingAdminService {
+func NewModelPricingAdminService(client *ent.Client, db *sql.DB, cfg *config.Config, remoteClient PricingRemoteClient) *ModelPricingAdminService {
 	return &ModelPricingAdminService{
 		client:          client,
+		db:              db,
 		cfg:             cfg,
 		remoteClient:    remoteClient,
 		cache:           make(map[string]*LiteLLMModelPricing),
@@ -150,8 +152,8 @@ func (s *ModelPricingAdminService) List(ctx context.Context, params ModelPricing
 	query := s.client.ModelPricing.Query()
 
 	if params.Search != "" {
-		query = query.Where(func(s *sql.Selector) {
-			s.Where(sql.ContainsFold(entModelPricing.FieldModel, params.Search))
+		query = query.Where(func(s *entsql.Selector) {
+			s.Where(entsql.ContainsFold(entModelPricing.FieldModel, params.Search))
 		})
 	}
 	if params.Source != "" {
@@ -770,37 +772,97 @@ func rawEntryToLiteLLM(entry LiteLLMRawEntry) LiteLLMModelPricing {
 }
 
 type PublicPricingGroup struct {
-	ID             int64   `json:"id"`
-	Name           string  `json:"name"`
-	Platform       string  `json:"platform"`
-	RateMultiplier float64 `json:"rate_multiplier"`
+	ID             int64                `json:"id"`
+	Name           string               `json:"name"`
+	Platform       string               `json:"platform"`
+	RateMultiplier float64              `json:"rate_multiplier"`
+	Models         []PublicPricingModel `json:"models"`
 }
 
-func (s *ModelPricingAdminService) GetActiveGroups(ctx context.Context) ([]PublicPricingGroup, error) {
-	rows, err := s.client.Group.Query().
-		Where(
-			entGroup.StatusEQ("active"),
-			entGroup.DeletedAtIsNil(),
-		).
-		Select(
-			entGroup.FieldID,
-			entGroup.FieldName,
-			entGroup.FieldPlatform,
-			entGroup.FieldRateMultiplier,
-		).
-		Order(ent.Asc(entGroup.FieldSortOrder)).
-		All(ctx)
+type PublicPricingModel struct {
+	ModelName           string  `json:"model_name"`
+	InputCostPerMillion  float64 `json:"input_cost_per_million"`
+	OutputCostPerMillion float64 `json:"output_cost_per_million"`
+	EffectiveInput      float64 `json:"effective_input"`
+	EffectiveOutput     float64 `json:"effective_output"`
+	RequestCount         int     `json:"request_count"`
+}
+
+func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Context) ([]PublicPricingGroup, error) {
+	query := `
+		WITH group_models AS (
+			SELECT
+				u.group_id,
+				COALESCE(u.requested_model, u.model) AS model_name,
+				COUNT(*) AS request_count
+			FROM usage_logs u
+			WHERE u.created_at >= NOW() - INTERVAL '168 hours'
+			GROUP BY u.group_id, COALESCE(u.requested_model, u.model)
+		)
+		SELECT
+			g.id,
+			COALESCE(g.name, '') AS name,
+			COALESCE(g.platform, '') AS platform,
+			g.rate_multiplier,
+			COALESCE(
+				json_agg(
+					json_build_object(
+						'model_name', gm.model_name,
+						'input_cost_per_million', CASE WHEN p.input_cost_per_token IS NOT NULL THEN p.input_cost_per_token * 1000000 ELSE 0 END,
+						'output_cost_per_million', CASE WHEN p.output_cost_per_token IS NOT NULL THEN p.output_cost_per_token * 1000000 ELSE 0 END,
+						'effective_input', CASE WHEN p.input_cost_per_token IS NOT NULL THEN p.input_cost_per_token * g.rate_multiplier * 1000000 ELSE 0 END,
+						'effective_output', CASE WHEN p.output_cost_per_token IS NOT NULL THEN p.output_cost_per_token * g.rate_multiplier * 1000000 ELSE 0 END,
+						'request_count', COALESCE(gm.request_count, 0)
+					) ORDER BY gm.request_count DESC
+				),
+				'[]'::json
+			) AS models
+		FROM groups g
+		LEFT JOIN group_models gm ON gm.group_id = g.id
+		LEFT JOIN LATERAL (
+				SELECT input_cost_per_token, output_cost_per_token, model_name
+				FROM (
+					SELECT DISTINCT ON (model_name)
+						lower(model_name) AS model_name,
+						input_cost_per_token,
+						output_cost_per_token
+					FROM model_pricing
+					ORDER BY model_name
+				) sub
+			) p ON lower(p.model_name) = lower(COALESCE(gm.model_name, ''))
+		WHERE g.status = 'active'
+		  AND g.deleted_at IS NULL
+		GROUP BY g.id, g.name, g.platform, g.rate_multiplier
+		ORDER BY g.sort_order, g.name`
+
+	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("query active groups: %w", err)
+		return nil, fmt.Errorf("query groups with models: %w", err)
 	}
-	result := make([]PublicPricingGroup, len(rows))
-	for i, g := range rows {
-		result[i] = PublicPricingGroup{
-			ID:             g.ID,
-			Name:           g.Name,
-			Platform:       g.Platform,
-			RateMultiplier: g.RateMultiplier,
+	defer rows.Close()
+
+	groupMap := make(map[int64]*PublicPricingGroup)
+	var order []int64
+
+	for rows.Next() {
+		var g PublicPricingGroup
+		var modelsJSON string
+		if err := rows.Scan(&g.ID, &g.Name, &g.Platform, &g.RateMultiplier, &modelsJSON); err != nil {
+			return nil, fmt.Errorf("scan group row: %w", err)
 		}
+		if err := json.Unmarshal([]byte(modelsJSON), &g.Models); err != nil {
+			g.Models = []PublicPricingModel{}
+		}
+		groupMap[g.ID] = &g
+		order = append(order, g.ID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	result := make([]PublicPricingGroup, len(order))
+	for i, id := range order {
+		result[i] = *groupMap[id]
 	}
 	return result, nil
 }

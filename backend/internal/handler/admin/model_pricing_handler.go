@@ -131,7 +131,7 @@ func (h *ModelPricingHandler) GetSyncStatus(c *gin.Context) {
 
 func (h *ModelPricingHandler) SetAutoSync(c *gin.Context) {
 	var req struct {
-		Enabled bool `json:"enabled"`
+			Enabled bool `json:"enabled"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request body")
@@ -144,27 +144,19 @@ func (h *ModelPricingHandler) SetAutoSync(c *gin.Context) {
 
 type PublicPricingResponse struct {
 	Groups  []service.PublicPricingGroup `json:"groups"`
-	Pricing map[string]interface{}        `json:"pricing"`
 }
 
 func (h *ModelPricingHandler) GetPublicPricing(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	groups, err := h.service.GetActiveGroups(ctx)
+	groups, err := h.service.GetGroupsWithModelsAndPricing(ctx)
 	if err != nil {
-		log.Printf("[ModelPricing] GetActiveGroups failed: %v", err)
-		response.InternalError(c, "Failed to get groups")
+		log.Printf("[ModelPricing] GetGroupsWithModelsAndPricing failed: %v", err)
+		response.InternalError(c, "Failed to get pricing data")
 		return
 	}
 
-	pricing := h.service.GetAllPricingFromCache()
-	pricingMap := make(map[string]interface{}, len(pricing))
-	for k, v := range pricing {
-		pricingMap[k] = v
-	}
-
 	response.Success(c, PublicPricingResponse{
-		Groups:  groups,
-		Pricing: pricingMap,
+		Groups: groups,
 	})
 }
