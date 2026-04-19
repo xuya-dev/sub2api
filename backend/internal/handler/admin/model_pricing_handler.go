@@ -141,3 +141,30 @@ func (h *ModelPricingHandler) SetAutoSync(c *gin.Context) {
 	h.service.SetAutoSync(req.Enabled)
 	response.Success(c, gin.H{"auto_sync_enabled": req.Enabled})
 }
+
+type PublicPricingResponse struct {
+	Groups  []service.PublicPricingGroup `json:"groups"`
+	Pricing map[string]interface{}        `json:"pricing"`
+}
+
+func (h *ModelPricingHandler) GetPublicPricing(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	groups, err := h.service.GetActiveGroups(ctx)
+	if err != nil {
+		log.Printf("[ModelPricing] GetActiveGroups failed: %v", err)
+		response.InternalError(c, "Failed to get groups")
+		return
+	}
+
+	pricing := h.service.GetAllPricingFromCache()
+	pricingMap := make(map[string]interface{}, len(pricing))
+	for k, v := range pricing {
+		pricingMap[k] = v
+	}
+
+	response.Success(c, PublicPricingResponse{
+		Groups:  groups,
+		Pricing: pricingMap,
+	})
+}

@@ -37,4 +37,7 @@ func RegisterCommonRoutes(r *gin.Engine, h *handler.Handlers) {
 	{
 		monitoring.GET("/overview", h.Admin.Monitoring.GetOverview)
 	}
+
+	// 公开模型定价查询
+	r.GET("/api/v1/public/pricing", h.Admin.ModelPricing.GetPublicPricing)
 }

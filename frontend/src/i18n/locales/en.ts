@@ -108,6 +108,24 @@ export default {
     },
     footer: {
       allRightsReserved: 'All rights reserved.'
+    },
+    pricing: {
+      title: 'Model Pricing Query',
+      description: 'Select a group and model, enter token counts to estimate cost',
+      selectGroup: 'Select Group',
+      selectModel: 'Search Model',
+      inputTokens: 'Input Tokens',
+      outputTokens: 'Output Tokens',
+      calculate: 'Calculate Cost',
+      basePrice: 'Base Price',
+      groupRate: 'Group Rate',
+      effectivePrice: 'Effective Price',
+      estimatedCost: 'Estimated Cost',
+      perMillionTokens: '/MTok',
+      noData: 'No data available',
+      modelPlaceholder: 'Type model name...',
+      inputPlaceholder: 'e.g. 1000',
+      outputPlaceholder: 'e.g. 2000'
     }
   },
 

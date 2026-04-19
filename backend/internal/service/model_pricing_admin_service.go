@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
+	entGroup "github.com/Wei-Shaw/sub2api/ent/group"
 	entModelPricing "github.com/Wei-Shaw/sub2api/ent/modelpricing"
 	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
@@ -766,4 +767,40 @@ func rawEntryToLiteLLM(entry LiteLLMRawEntry) LiteLLMModelPricing {
 	p.Mode = entry.Mode
 	p.SupportsPromptCaching = entry.SupportsPromptCaching
 	return p
+}
+
+type PublicPricingGroup struct {
+	ID             int64   `json:"id"`
+	Name           string  `json:"name"`
+	Platform       string  `json:"platform"`
+	RateMultiplier float64 `json:"rate_multiplier"`
+}
+
+func (s *ModelPricingAdminService) GetActiveGroups(ctx context.Context) ([]PublicPricingGroup, error) {
+	rows, err := s.client.Group.Query().
+		Where(
+			entGroup.StatusEQ("active"),
+			entGroup.DeletedAtIsNil(),
+		).
+		Select(
+			entGroup.FieldID,
+			entGroup.FieldName,
+			entGroup.FieldPlatform,
+			entGroup.FieldRateMultiplier,
+		).
+		Order(ent.Asc(entGroup.FieldSortOrder)).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("query active groups: %w", err)
+	}
+	result := make([]PublicPricingGroup, len(rows))
+	for i, g := range rows {
+		result[i] = PublicPricingGroup{
+			ID:             g.ID,
+			Name:           g.Name,
+			Platform:       g.Platform,
+			RateMultiplier: g.RateMultiplier,
+		}
+	}
+	return result, nil
 }

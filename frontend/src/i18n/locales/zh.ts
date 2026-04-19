@@ -108,6 +108,24 @@ export default {
     },
     footer: {
       allRightsReserved: '保留所有权利。'
+    },
+    pricing: {
+      title: '模型定价查询',
+      description: '选择分组和模型，输入 Token 数量计算预估费用',
+      selectGroup: '选择分组',
+      selectModel: '搜索模型',
+      inputTokens: '输入 Tokens',
+      outputTokens: '输出 Tokens',
+      calculate: '计算费用',
+      basePrice: '基础价格',
+      groupRate: '分组倍率',
+      effectivePrice: '实际单价',
+      estimatedCost: '预估费用',
+      perMillionTokens: '/百万Token',
+      noData: '暂无数据',
+      modelPlaceholder: '输入模型名称...',
+      inputPlaceholder: '如 1000',
+      outputPlaceholder: '如 2000'
     }
   },
 
