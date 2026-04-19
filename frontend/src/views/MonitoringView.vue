@@ -60,10 +60,18 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-5">
           <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
             <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.todayRequests') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ data?.total_requests_today?.toLocaleString() ?? '-' }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
+            <p class="text-sm text-green-600 dark:text-green-400">Success</p>
+            <p class="mt-1 text-2xl font-bold text-green-600 dark:text-green-400">{{ data?.success_count_today?.toLocaleString() ?? '-' }}</p>
+          </div>
+          <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
+            <p class="text-sm text-red-500 dark:text-red-400">Errors</p>
+            <p class="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">{{ data?.error_count_today?.toLocaleString() ?? '-' }}</p>
           </div>
           <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
             <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.avgLatency') }}</p>
@@ -72,10 +80,6 @@
           <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
             <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.totalGroups') }}</p>
             <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ data?.groups?.length ?? 0 }}</p>
-          </div>
-          <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-900">
-            <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('admin.monitoring.modelLatency') }}</p>
-            <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ data?.model_latencies?.length ?? 0 }}</p>
           </div>
         </div>
 

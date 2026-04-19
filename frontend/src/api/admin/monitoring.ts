@@ -42,6 +42,8 @@ export interface MonitoringOverview {
   model_latencies: ModelLatency[]
   error_accounts: ErrorAccount[]
   total_requests_today: number
+  success_count_today: number
+  error_count_today: number
   avg_latency_ms_today: number
 }
 
@@ -53,14 +55,6 @@ export interface ErrorAccount {
   error_message: string
   rate_limited_at?: string
   overload_until?: string
-}
-
-export interface MonitoringOverview {
-  groups: GroupHealth[]
-  model_latencies: ModelLatency[]
-  error_accounts: ErrorAccount[]
-  total_requests_today: number
-  avg_latency_ms_today: number
 }
 
 export async function getMonitoringOverview(): Promise<MonitoringOverview> {
