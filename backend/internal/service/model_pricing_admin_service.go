@@ -821,8 +821,8 @@ func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Con
 		LEFT JOIN group_models gm ON gm.group_id = g.id
 		LEFT JOIN LATERAL (
 			SELECT input_cost_per_token, output_cost_per_token
-			FROM model_pricing
-			WHERE lower(model_name) = lower(gm.model_name)
+			FROM model_pricings
+			WHERE lower(model) = lower(gm.model_name)
 			LIMIT 1
 		) mp ON true
 		WHERE g.status = 'active'
