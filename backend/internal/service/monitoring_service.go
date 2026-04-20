@@ -269,6 +269,7 @@ func (s *MonitoringService) queryGroupModelStats(ctx context.Context, overview *
 		WHERE e.created_at >= $1
 		  AND e.is_count_tokens = false
 		  AND e.group_id IS NOT NULL
+		  AND COALESCE(e.requested_model, e.model) IS NOT NULL
 		GROUP BY e.group_id, COALESCE(e.requested_model, e.model)`
 
 	errRows, err := s.db.QueryContext(ctx, errQ, since)
