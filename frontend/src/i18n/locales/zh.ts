@@ -197,6 +197,13 @@ export default {
     querySuccess: '查询成功',
     queryFailed: '查询失败',
     queryFailedRetry: '查询失败，请稍后重试',
+    generateHud: '生成 Claude Code HUD',
+    hudTitle: 'Claude Code HUD 安装指南',
+    hudStep1: '1. 创建插件目录',
+    hudStep2: '2. 将以下脚本保存为 ~/.claude/plugins/sub2api-hud/hud.mjs',
+    hudStep3: '3. 测试运行（应显示 HUD 输出）',
+    hudStep4: '4. 将以下内容添加到 ~/.claude/settings.json',
+    hudCopy: '复制',
   },
 
   // Setup Wizard

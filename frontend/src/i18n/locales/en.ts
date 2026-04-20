@@ -197,6 +197,13 @@ export default {
     querySuccess: 'Query successful',
     queryFailed: 'Query failed',
     queryFailedRetry: 'Query failed, please try again later',
+    generateHud: 'Generate Claude Code HUD',
+    hudTitle: 'Claude Code HUD Setup Guide',
+    hudStep1: '1. Create plugin directory',
+    hudStep2: '2. Save the script below as ~/.claude/plugins/sub2api-hud/hud.mjs',
+    hudStep3: '3. Test run (should show HUD output)',
+    hudStep4: '4. Add the following to ~/.claude/settings.json',
+    hudCopy: 'Copy',
   },
 
   // Setup Wizard
