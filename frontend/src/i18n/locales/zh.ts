@@ -204,6 +204,8 @@ export default {
     hudStep3: '3. 测试运行（应显示 HUD 输出）',
     hudStep4: '4. 将以下内容添加到 ~/.claude/settings.json',
     hudCopy: '复制',
+    codexHudTitle: 'Codex CLI HUD 安装指南',
+    codexStep4Desc: '在 ~/.bashrc 或 ~/.zshrc 中添加 alias，然后运行 codex-hud 即可在 tmux 分屏中启动 HUD：',
   },
 
   // Setup Wizard

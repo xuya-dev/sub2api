@@ -180,15 +180,24 @@
           </div>
 
           <!-- Generate HUD Button -->
-          <div v-if="statusInfo" class="fade-up flex items-center justify-center mb-2 mt-4">
+          <div v-if="statusInfo" class="fade-up flex items-center justify-center gap-3 mb-2 mt-4">
             <button
-              @click="generateHudScript"
+              @click="hudType = 'claude'; generateHudScript()"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 bg-white text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 dark:border-dark-700 dark:bg-dark-900 dark:text-dark-200 dark:hover:bg-dark-800"
             >
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
               </svg>
-              {{ t('keyUsage.generateHud') }}
+              Claude Code HUD
+            </button>
+            <button
+              @click="hudType = 'codex'; generateHudScript()"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 bg-white text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 dark:border-dark-700 dark:bg-dark-900 dark:text-dark-200 dark:hover:bg-dark-800"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+              Codex CLI HUD
             </button>
           </div>
 
@@ -376,7 +385,7 @@
     <div v-if="showHudModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="showHudModal = false">
       <div class="bg-white dark:bg-dark-900 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col border border-gray-200 dark:border-dark-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-dark-700 flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('keyUsage.hudTitle') }}</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ hudType === 'codex' ? t('keyUsage.codexHudTitle') : t('keyUsage.hudTitle') }}</h3>
           <button @click="showHudModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -384,12 +393,12 @@
         <div class="px-6 py-4 overflow-y-auto space-y-4 text-sm text-gray-700 dark:text-dark-200">
           <div>
             <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ t('keyUsage.hudStep1') }}</h4>
-            <pre class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto"><code>mkdir -p ~/.claude/plugins/sub2api-hud</code></pre>
+            <pre class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto"><code>mkdir -p {{ hudType === 'codex' ? '~/.codex/plugins/sub2api-hud' : '~/.claude/plugins/sub2api-hud' }}</code></pre>
           </div>
           <div>
             <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ t('keyUsage.hudStep2') }}</h4>
             <div class="relative">
-              <button @click="copyHudScript" class="absolute top-2 right-2 px-2 py-1 rounded text-xs bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors">
+              <button @click="copyHudScript" class="absolute top-2 right-2 px-2 py-1 rounded text-xs bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors z-10">
                 {{ hudCopied ? '✓' : t('keyUsage.hudCopy') }}
               </button>
               <pre class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto max-h-64"><code>{{ hudScript }}</code></pre>
@@ -397,11 +406,17 @@
           </div>
           <div>
             <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ t('keyUsage.hudStep3') }}</h4>
-            <pre class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto"><code>node ~/.claude/plugins/sub2api-hud/hud.mjs</code></pre>
+            <pre v-if="hudType === 'codex'" class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto whitespace-pre-wrap"><code>{{ codexRunCommand }}</code></pre>
+            <pre v-else class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto"><code>node ~/.claude/plugins/sub2api-hud/hud.mjs</code></pre>
           </div>
-          <div>
+          <div v-if="hudType !== 'codex'">
             <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ t('keyUsage.hudStep4') }}</h4>
             <pre class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto whitespace-pre-wrap"><code>{{ hudSettingsJson }}</code></pre>
+          </div>
+          <div v-else>
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ t('keyUsage.hudStep4') }}</h4>
+            <p class="text-gray-500 dark:text-dark-400 text-xs">{{ t('keyUsage.codexStep4Desc') }}</p>
+            <pre class="bg-gray-900 text-green-400 rounded-lg p-3 text-xs overflow-x-auto mt-2"><code>{{ codexAlias }}</code></pre>
           </div>
         </div>
       </div>
@@ -454,6 +469,7 @@ const showResults = ref(false)
 const showLoading = ref(false)
 const showDatePicker = ref(false)
 const showHudModal = ref(false)
+const hudType = ref<'claude' | 'codex'>('claude')
 const hudScript = ref('')
 const hudCopied = ref(false)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -818,7 +834,24 @@ const hudSettingsJson = computed(() => {
   }, null, 2)
 })
 
+const codexRunCommand = computed(() => {
+  return 'node ~/.codex/plugins/sub2api-hud/hud.mjs'
+})
+
+const codexAlias = computed(() => {
+  return 'alias codex-hud=\'tmux split-window -v -l 3 "node ~/.codex/plugins/sub2api-hud/hud.mjs"\''
+})
+
 function generateHudScript() {
+  if (hudType.value === 'codex') {
+    generateCodexHudScript()
+  } else {
+    generateClaudeHudScript()
+  }
+  showHudModal.value = true
+}
+
+function generateClaudeHudScript() {
   const key = apiKey.value.trim()
   const baseUrl = window.location.origin
 
@@ -996,7 +1029,337 @@ async function readStdin() {
     console.log(colorize('[sub2api] connecting...', DIM));
   }
 })();`
-  showHudModal.value = true
+}
+
+function generateCodexHudScript() {
+  const key = apiKey.value.trim()
+  const baseUrl = window.location.origin
+
+  hudScript.value = `#!/usr/bin/env node
+// sub2api-hud: Codex CLI HUD plugin
+// Reads Codex session JSONL files + sub2api API usage
+// Generated at ${new Date().toISOString()}
+//
+// Usage:
+//   1. Save as ~/.codex/plugins/sub2api-hud/hud.mjs
+//   2. Run alongside codex in a tmux split:
+//      tmux split-window -v -l 3 "node ~/.codex/plugins/sub2api-hud/hud.mjs"
+//   3. Or add alias: alias codex-hud='tmux split-window -v -l 3 "node ~/.codex/plugins/sub2api-hud/hud.mjs"'
+
+import { createRequire } from 'module';
+import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
+import { join, resolve } from 'path';
+import { homedir } from 'os';
+const require = createRequire(import.meta.url);
+const https = require('https');
+const http = require('http');
+
+const API_URL = '${baseUrl}/v1/usage';
+const API_KEY = '${key}';
+const REFRESH_INTERVAL = 2000;
+
+const RESET = '\\x1b[0m';
+const DIM = '\\x1b[2m';
+const RED = '\\x1b[31m';
+const GREEN = '\\x1b[32m';
+const YELLOW = '\\x1b[33m';
+const CYAN = '\\x1b[36m';
+const BRIGHT_BLUE = '\\x1b[94m';
+const BRIGHT_MAGENTA = '\\x1b[95m';
+const OPENAI_GREEN = '\\x1b[38;2;16;163;127m';
+
+function c(text, color) { return color + text + RESET; }
+function bar(pct, width = 10) {
+  const p = Math.min(100, Math.max(0, Math.round(pct)));
+  const f = Math.round((p / 100) * width);
+  const cl = p >= 85 ? RED : p >= 70 ? YELLOW : GREEN;
+  return cl + '\\u2588'.repeat(f) + DIM + '\\u2591'.repeat(width - f) + RESET;
+}
+function qBar(pct, width = 8) {
+  const p = Math.min(100, Math.max(0, Math.round(pct)));
+  const f = Math.round((p / 100) * width);
+  const cl = p >= 90 ? RED : p >= 75 ? BRIGHT_MAGENTA : BRIGHT_BLUE;
+  return cl + '\\u2588'.repeat(f) + DIM + '\\u2591'.repeat(width - f) + RESET;
+}
+function fmt(n) {
+  if (n == null) return '-';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return String(n);
+}
+function usd(v) { return v == null ? '-' : '$' + Number(v).toFixed(2); }
+function clearScreen() { process.stdout.write('\\x1b[2J\\x1b[H'); }
+
+function getGitBranch() {
+  try {
+    const { execSync } = require('child_process');
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { timeout: 2000, encoding: 'utf8' }).trim();
+    const dirty = execSync('git status --porcelain', { timeout: 2000, encoding: 'utf8' }).trim().length > 0;
+    return { branch, dirty };
+  } catch { return null; }
+}
+
+// ==================== Codex Session Reader ====================
+
+const CODEX_HOME = process.env.CODEX_HOME || join(homedir(), '.codex');
+
+function findLatestSession() {
+  const sessionsDir = join(CODEX_HOME, 'sessions');
+  if (!existsSync(sessionsDir)) return null;
+
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const todayDir = join(sessionsDir, String(y), m, d);
+
+  if (!existsSync(todayDir)) return null;
+
+  const files = readdirSync(todayDir).filter(f => f.startsWith('rollout-') && f.endsWith('.jsonl'));
+  if (!files.length) return null;
+
+  let latest = null;
+  let latestTime = 0;
+  for (const f of files) {
+    const stat = statSync(join(todayDir, f));
+    if (stat.mtimeMs > latestTime) {
+      latestTime = stat.mtimeMs;
+      latest = join(todayDir, f);
+    }
+  }
+  return latest;
+}
+
+let sessionState = {
+  model: null,
+  reasoningEffort: null,
+  totalTokens: 0,
+  inputTokens: 0,
+  cachedTokens: 0,
+  outputTokens: 0,
+  contextWindow: 0,
+  toolsCompleted: 0,
+  toolsRunning: 0,
+  compactCount: 0,
+  cliVersion: null,
+  lastReadOffset: 0,
+  lastFile: null,
+};
+
+function parseSession() {
+  const filePath = findLatestSession();
+  if (!filePath) return;
+
+  let startOffset = 0;
+  if (filePath === sessionState.lastFile) {
+    startOffset = sessionState.lastReadOffset;
+  } else {
+    sessionState.lastFile = filePath;
+    sessionState.lastReadOffset = 0;
+    sessionState.toolsCompleted = 0;
+    sessionState.toolsRunning = 0;
+    sessionState.compactCount = 0;
+    startOffset = 0;
+  }
+
+  try {
+    const stat = statSync(filePath);
+    if (stat.size <= startOffset) return;
+    const content = readFileSync(filePath, 'utf8');
+    const lines = content.slice(startOffset).split('\\n');
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const entry = JSON.parse(line);
+        const p = entry.payload;
+
+        if (entry.type === 'session_meta') {
+          sessionState.cliVersion = p.cli_version || null;
+        }
+
+        if (entry.type === 'turn_context') {
+          if (p.model) sessionState.model = p.model;
+          if (p.reasoning_effort) sessionState.reasoningEffort = p.reasoning_effort;
+        }
+
+        if (entry.type === 'response_item') {
+          if (p.type === 'function_call') {
+            sessionState.toolsRunning++;
+          }
+          if (p.type === 'function_call_output') {
+            sessionState.toolsRunning = Math.max(0, sessionState.toolsRunning - 1);
+            sessionState.toolsCompleted++;
+          }
+        }
+
+        if (entry.type === 'event_msg') {
+          if (p.type === 'token_count' && p.info) {
+            const t = p.info.total_token_usage || p.info.last_token_usage;
+            if (t) {
+              sessionState.inputTokens = t.input_tokens || 0;
+              sessionState.cachedTokens = t.cached_input_tokens || 0;
+              sessionState.outputTokens = t.output_tokens || 0;
+              sessionState.totalTokens = t.total_tokens || 0;
+            }
+            if (p.info.model_context_window) {
+              sessionState.contextWindow = p.info.model_context_window;
+            }
+          }
+          if (p.type === 'context_compacted') {
+            sessionState.compactCount++;
+          }
+        }
+      } catch {}
+    }
+
+    sessionState.lastReadOffset = stat.size;
+  } catch {}
+}
+
+// ==================== API Usage Fetcher ====================
+
+let cachedUsage = null;
+let lastFetch = 0;
+const CACHE_TTL = 30000;
+
+function fetchUsage() {
+  return new Promise((resolve) => {
+    const now = Date.now();
+    if (cachedUsage && (now - lastFetch) < CACHE_TTL) {
+      resolve(cachedUsage);
+      return;
+    }
+    const mod = API_URL.startsWith('https') ? https : http;
+    const url = API_URL + '?start_date=' + new Date().toISOString().split('T')[0];
+    const req = mod.get(url, { headers: { 'Authorization': 'Bearer ' + API_KEY }, timeout: 5000 }, (res) => {
+      let body = '';
+      res.on('data', (chunk) => body += chunk);
+      res.on('end', () => {
+        try {
+          cachedUsage = JSON.parse(body);
+          lastFetch = now;
+          resolve(cachedUsage);
+        } catch { resolve(cachedUsage); }
+      });
+    });
+    req.on('error', () => resolve(cachedUsage));
+    req.on('timeout', () => { req.destroy(); resolve(cachedUsage); });
+  });
+}
+
+// ==================== Render ====================
+
+async function render() {
+  parseSession();
+  const usage = await fetchUsage();
+  const parts = [];
+
+  // Model line
+  const model = sessionState.model || 'Unknown';
+  const modelName = model.replace(/^(gpt-4|gpt-5|o[134])/, (m) => m);
+  const effort = sessionState.reasoningEffort;
+  const modelDisplay = effort ? \`[\${modelName} | \${effort}]\` : \`[\${modelName}]\`;
+  parts.push(c(modelDisplay, OPENAI_GREEN));
+
+  // Context bar
+  if (sessionState.contextWindow > 0 && sessionState.totalTokens > 0) {
+    const pct = Math.min(100, Math.round((sessionState.totalTokens / sessionState.contextWindow) * 100));
+    parts.push(bar(pct) + ' ' + c(pct + '%', pct >= 85 ? RED : pct >= 70 ? YELLOW : GREEN));
+    parts.push(c(\`\${fmt(sessionState.totalTokens)}/\${fmt(sessionState.contextWindow)}\`, DIM));
+  }
+
+  // Token breakdown
+  if (sessionState.totalTokens > 0) {
+    const tokParts = [];
+    if (sessionState.inputTokens > 0) tokParts.push('in:' + fmt(sessionState.inputTokens));
+    if (sessionState.cachedTokens > 0) tokParts.push('cache:' + fmt(sessionState.cachedTokens));
+    if (sessionState.outputTokens > 0) tokParts.push('out:' + fmt(sessionState.outputTokens));
+    if (tokParts.length) parts.push(c(tokParts.join(' '), DIM));
+  }
+
+  // Tools
+  if (sessionState.toolsCompleted > 0 || sessionState.toolsRunning > 0) {
+    const toolStr = sessionState.toolsRunning > 0
+      ? \`\\u2699 \${sessionState.toolsRunning} running | \${sessionState.toolsCompleted} done\`
+      : \`\\u2713 \${sessionState.toolsCompleted} tools\`;
+    parts.push(c(toolStr, CYAN));
+  }
+
+  // Compact count
+  if (sessionState.compactCount > 0) {
+    parts.push(c(\`\\u21BB\${sessionState.compactCount} compacted\`, YELLOW));
+  }
+
+  // Git
+  const git = getGitBranch();
+  if (git) {
+    const gitStr = git.dirty ? \`git:(\${git.branch}*)\` : \`git:(\${git.branch})\`;
+    parts.push(c(gitStr, DIM));
+  }
+
+  // Version
+  if (sessionState.cliVersion) {
+    parts.push(c(\`CC \${sessionState.cliVersion}\`, DIM));
+  }
+
+  // Separator
+  parts.push(c('|', DIM));
+
+  // Sub2api usage
+  if (usage && !usage.error) {
+    const u = usage;
+    const quotaParts = [];
+
+    if (u.mode === 'quota_limited' && u.quota) {
+      const pct = u.quota.limit > 0 ? Math.round((u.quota.used / u.quota.limit) * 100) : 0;
+      quotaParts.push(c('quota', DIM) + ' ' + qBar(pct, 8) + ' ' + c(pct + '% ' + usd(u.quota.used) + '/' + usd(u.quota.limit), pct >= 90 ? RED : pct >= 70 ? YELLOW : BRIGHT_BLUE));
+      if (u.rate_limits) {
+        for (const rl of u.rate_limits) {
+          const rp = rl.limit > 0 ? Math.round((rl.used / rl.limit) * 100) : 0;
+          quotaParts.push(c(rl.window, DIM) + ' ' + qBar(rp, 6) + ' ' + usd(rl.used) + '/' + usd(rl.limit));
+        }
+      }
+    } else if (u.subscription) {
+      const s = u.subscription;
+      if (s.daily_limit_usd > 0) {
+        const p = Math.round((s.daily_usage_usd / s.daily_limit_usd) * 100);
+        quotaParts.push(c('daily', DIM) + ' ' + qBar(p, 6) + ' ' + usd(s.daily_usage_usd) + '/' + usd(s.daily_limit_usd));
+      }
+      if (s.monthly_limit_usd > 0) {
+        const p = Math.round((s.monthly_usage_usd / s.monthly_limit_usd) * 100);
+        quotaParts.push(c('monthly', DIM) + ' ' + qBar(p, 6) + ' ' + usd(s.monthly_usage_usd) + '/' + usd(s.monthly_limit_usd));
+      }
+    }
+
+    if (u.remaining != null) {
+      const rc = u.remaining <= 0 ? RED : u.remaining < 10 ? YELLOW : GREEN;
+      quotaParts.push(c('remain', DIM) + ' ' + c(usd(u.remaining), rc));
+    }
+
+    if (quotaParts.length) parts.push(quotaParts.join(' '));
+
+    const today = u.usage?.today;
+    if (today && today.requests > 0) {
+      parts.push(c('today', DIM) + ' ' + today.requests + 'req ' + fmt(today.total_tokens) + 'tok ' + usd(today.actual_cost || today.cost));
+    }
+  }
+
+  clearScreen();
+  if (parts.length) {
+    process.stdout.write(parts.join(' ') + '\\n');
+  } else {
+    process.stdout.write(c('[sub2api-codex] waiting for session...', DIM) + '\\n');
+  }
+}
+
+// Main loop
+(async () => {
+  while (true) {
+    try { await render(); } catch {}
+    await new Promise(r => setTimeout(r, REFRESH_INTERVAL));
+  }
+})();`
 }
 
 function copyHudScript() {
