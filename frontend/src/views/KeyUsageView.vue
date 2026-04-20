@@ -833,10 +833,6 @@ const hudSettingsJson = computed(() => {
   }, null, 2)
 })
 
-const codexRunCommand = computed(() => {
-  return 'node ~/.codex/plugins/sub2api-hud/hud.mjs'
-})
-
 const codexStep3Commands = computed(() => {
   return `${t('keyUsage.codexNewTerminal')}:\n\nCMD:\n  start cmd /k "node %USERPROFILE%\\.codex\\plugins\\sub2api-hud\\hud.mjs"\n\nPowerShell:\n  Start-Process pwsh -ArgumentList "-NoExit","-Command","node ~/.codex/plugins/sub2api-hud/hud.mjs"\n\nWindows Terminal (split pane):\n  wt -w 0 sp -V -s 0.15 cmd /k "node %USERPROFILE%\\.codex\\plugins\\sub2api-hud\\hud.mjs"\n\nLinux/macOS (tmux):\n  tmux split-window -v -l 3 "node ~/.codex/plugins/sub2api-hud/hud.mjs"`
 })
