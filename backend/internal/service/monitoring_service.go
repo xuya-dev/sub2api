@@ -226,7 +226,7 @@ func (s *MonitoringService) queryGroupModelStats(ctx context.Context, overview *
 		SELECT
 			g.id,
 			COALESCE(g.name, ''),
-			COALESCE(u.requested_model, u.model),
+			COALESCE(u.requested_model, u.model, ''),
 			COUNT(*) AS cnt,
 			COUNT(*) FILTER (WHERE u.output_tokens > 0) AS success_cnt,
 			COUNT(*) FILTER (WHERE u.output_tokens = 0) AS error_cnt,
@@ -238,6 +238,7 @@ func (s *MonitoringService) queryGroupModelStats(ctx context.Context, overview *
 		JOIN groups g ON u.group_id = g.id
 		WHERE u.created_at >= $1
 		  AND g.deleted_at IS NULL
+		  AND COALESCE(u.requested_model, u.model) IS NOT NULL
 		GROUP BY g.id, g.name, COALESCE(u.requested_model, u.model)
 		HAVING COUNT(*) > 0
 		ORDER BY g.name, cnt DESC`
@@ -262,11 +263,12 @@ func (s *MonitoringService) queryGroupModelStats(ctx context.Context, overview *
 	errQ := `
 		SELECT
 			e.group_id,
-			COALESCE(e.requested_model, e.model),
+			COALESCE(e.requested_model, e.model, ''),
 			COUNT(*) AS err_cnt
 		FROM ops_error_logs e
 		WHERE e.created_at >= $1
 		  AND e.is_count_tokens = false
+		  AND e.group_id IS NOT NULL
 		GROUP BY e.group_id, COALESCE(e.requested_model, e.model)`
 
 	errRows, err := s.db.QueryContext(ctx, errQ, since)
@@ -324,7 +326,7 @@ func (s *MonitoringService) queryModelLatency(ctx context.Context, overview *Mon
 	since := time.Now().UTC().Add(-24 * time.Hour)
 	query := `
 		SELECT
-			COALESCE(requested_model, model),
+			COALESCE(requested_model, model, ''),
 			COUNT(*) as cnt,
 			COUNT(*) FILTER (WHERE output_tokens > 0) as success_cnt,
 			COUNT(*) FILTER (WHERE output_tokens = 0) as error_cnt,
@@ -335,6 +337,7 @@ func (s *MonitoringService) queryModelLatency(ctx context.Context, overview *Mon
 			COALESCE(AVG(first_token_ms) FILTER (WHERE first_token_ms IS NOT NULL AND first_token_ms > 0), 0)::float8
 		FROM usage_logs
 		WHERE created_at >= $1
+		  AND COALESCE(requested_model, model) IS NOT NULL
 		GROUP BY COALESCE(requested_model, model)
 		ORDER BY cnt DESC
 		LIMIT 30`
@@ -358,11 +361,12 @@ func (s *MonitoringService) queryModelLatency(ctx context.Context, overview *Mon
 
 	errQ := `
 		SELECT
-			COALESCE(requested_model, model),
+			COALESCE(requested_model, model, ''),
 			COUNT(*) AS err_cnt
 		FROM ops_error_logs
 		WHERE created_at >= $1
 		  AND is_count_tokens = false
+		  AND COALESCE(requested_model, model) IS NOT NULL
 		GROUP BY COALESCE(requested_model, model)`
 
 	errRows, err := s.db.QueryContext(ctx, errQ, since)
@@ -534,6 +538,8 @@ func (s *MonitoringService) queryModelHourlyStats(ctx context.Context, overview 
 				COUNT(*) FILTER (WHERE u.output_tokens > 0) AS success
 			FROM usage_logs u
 			WHERE u.created_at >= $1
+			  AND u.group_id IS NOT NULL
+			  AND COALESCE(u.requested_model, u.model) IS NOT NULL
 			GROUP BY u.group_id, COALESCE(u.requested_model, u.model), DATE_TRUNC('hour', u.created_at)
 		),
 		error_hours AS (
@@ -545,11 +551,13 @@ func (s *MonitoringService) queryModelHourlyStats(ctx context.Context, overview 
 			FROM ops_error_logs e
 			WHERE e.created_at >= $1
 			  AND e.is_count_tokens = false
+			  AND e.group_id IS NOT NULL
+			  AND COALESCE(e.requested_model, e.model) IS NOT NULL
 			GROUP BY e.group_id, COALESCE(e.requested_model, e.model), DATE_TRUNC('hour', e.created_at)
 		)
 		SELECT
 			COALESCE(u.group_id, e.group_id) AS group_id,
-			COALESCE(u.model, e.model) AS model,
+			COALESCE(u.model, e.model, '') AS model,
 			COALESCE(u.hour, e.hour) AS hour,
 			COALESCE(u.total, 0) + COALESCE(e.total, 0) AS total,
 			COALESCE(u.success, 0) AS success
