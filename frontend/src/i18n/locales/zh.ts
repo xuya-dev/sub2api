@@ -3683,7 +3683,7 @@ export default {
     monitoring: {
       title: '平台监控',
       description: '账号健康状态、模型延迟与请求量监控',
-      todayRequests: '24小时请求',
+      todayRequests: '今日请求',
       avgLatency: '平均延迟',
       errorAccounts: '异常账号',
       totalGroups: '监控分组',

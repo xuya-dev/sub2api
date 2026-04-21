@@ -3524,7 +3524,7 @@ export default {
     monitoring: {
       title: 'Platform Monitoring',
       description: 'Account health, model latency and request volume monitoring',
-      todayRequests: '24h Requests',
+      todayRequests: 'Today Requests',
       avgLatency: 'Avg Latency',
       errorAccounts: 'Error Accounts',
       totalGroups: 'Groups',
