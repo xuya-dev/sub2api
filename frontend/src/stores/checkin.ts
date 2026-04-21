@@ -16,6 +16,7 @@ export const useCheckinStore = defineStore('checkin', () => {
   const streakDays = computed(() => status.value?.streak_days ?? 0)
   const todayReward = computed(() => status.value?.today_reward ?? null)
   const todayCheckinType = computed(() => status.value?.today_checkin_type ?? null)
+  const todayMultiplier = computed(() => status.value?.today_multiplier ?? null)
 
   async function fetchStatus() {
     try {
@@ -62,6 +63,9 @@ export const useCheckinStore = defineStore('checkin', () => {
         status.value.streak_days = result.streak_days
         status.value.today_reward = result.reward_amount
         status.value.today_checkin_type = result.checkin_type
+        if (result.multiplier !== undefined) {
+          status.value.today_multiplier = result.multiplier
+        }
       }
 
       const authStore = useAuthStore()
@@ -93,6 +97,7 @@ export const useCheckinStore = defineStore('checkin', () => {
     streakDays,
     todayReward,
     todayCheckinType,
+    todayMultiplier,
     fetchStatus,
     doCheckin,
     doLuckCheckin,

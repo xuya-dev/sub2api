@@ -31,8 +31,8 @@
                 <template v-else-if="checkinStore.todayReward !== null">
                   <span v-if="checkinStore.todayCheckinType === 'luck'">
                     {{ t('checkin.luckTitle') }}:
-                    <template v-if="(checkinStore.todayReward ?? 0) > 0">{{ t('checkin.luckSuccess', { multiplier: '—', amount: checkinStore.todayReward?.toFixed(2) }) }}</template>
-                    <template v-else-if="(checkinStore.todayReward ?? 0) < 0">{{ t('checkin.luckLoss', { multiplier: '—', amount: Math.abs(checkinStore.todayReward ?? 0).toFixed(2) }) }}</template>
+                    <template v-if="(checkinStore.todayReward ?? 0) > 0">{{ t('checkin.luckSuccess', { multiplier: checkinStore.todayMultiplier?.toFixed(2) ?? '—', amount: checkinStore.todayReward?.toFixed(2) }) }}</template>
+                    <template v-else-if="(checkinStore.todayReward ?? 0) < 0">{{ t('checkin.luckLoss', { multiplier: checkinStore.todayMultiplier?.toFixed(2) ?? '—', amount: Math.abs(checkinStore.todayReward ?? 0).toFixed(2) }) }}</template>
                     <template v-else>{{ t('checkin.luckEven') }}</template>
                   </span>
                   <span v-else>{{ t('checkin.todayReward', { amount: checkinStore.todayReward?.toFixed(2) }) }}</span>

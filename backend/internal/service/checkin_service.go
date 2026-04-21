@@ -43,6 +43,7 @@ type CheckinStatus struct {
 	StreakDays       int      `json:"streak_days"`
 	TodayReward      *float64 `json:"today_reward,omitempty"`
 	TodayCheckinType string   `json:"today_checkin_type,omitempty"`
+	TodayMultiplier  *float64 `json:"today_multiplier,omitempty"`
 	MinReward        float64  `json:"min_reward"`
 	MaxReward        float64  `json:"max_reward"`
 	MinMultiplier    float64  `json:"min_multiplier"`
@@ -317,6 +318,10 @@ func (s *CheckinService) GetStatus(ctx context.Context, userID int64) (*CheckinS
 		reward := todayCheckin.RewardAmount
 		status.TodayReward = &reward
 		status.TodayCheckinType = todayCheckin.CheckinType
+		if todayCheckin.CheckinType == CheckinTypeLuck {
+			multiplier := todayCheckin.Multiplier
+			status.TodayMultiplier = &multiplier
+		}
 	} else {
 		status.StreakDays = s.calculateStreak(ctx, userID, today)
 	}

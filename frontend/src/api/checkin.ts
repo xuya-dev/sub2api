@@ -16,6 +16,7 @@ export interface CheckinStatus {
   streak_days: number
   today_reward: number | null
   today_checkin_type?: string
+  today_multiplier?: number
   min_reward: number
   max_reward: number
   min_multiplier: number
