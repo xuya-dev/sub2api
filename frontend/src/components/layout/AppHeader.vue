@@ -110,70 +110,57 @@
         </div>
 
         <!-- Luck Checkin Modal -->
-        <transition name="modal">
-          <div v-if="showLuckModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showLuckModal = false">
-            <div class="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-dark-800">
-              <div class="mb-4 flex items-center gap-3">
-                <div class="rounded-xl bg-purple-100 p-2.5 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
-                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('checkin.luckTitle') }}</h3>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ t('checkin.multiplierRange', { min: checkinStore.status?.min_multiplier?.toFixed(1), max: checkinStore.status?.max_multiplier?.toFixed(1) }) }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="space-y-3">
-                <div>
-                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('checkin.betAmount') }}</label>
-                  <input
-                    v-model.number="luckBetAmount"
-                    type="number"
-                    step="0.01"
-                    :min="0.01"
-                    :max="checkinStore.status?.balance ?? 0"
-                    class="input"
-                    :placeholder="t('checkin.betAmountPlaceholder')"
-                    @keyup.enter="submitLuckCheckin"
-                  />
-                </div>
-
-                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span>{{ t('profile.accountBalance') }}: ${{ checkinStore.status?.balance?.toFixed(2) ?? '0.00' }}</span>
-                  <button type="button" class="text-primary-600 hover:text-primary-700 dark:text-primary-400" @click="luckBetAmount = checkinStore.status?.balance ?? 0">
-                    {{ t('checkin.betAmount') }} MAX
-                  </button>
-                </div>
-
-                <div class="rounded-lg bg-gray-50 p-3 dark:bg-dark-700">
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('checkin.luckDesc', { min: checkinStore.status?.min_multiplier?.toFixed(1), max: checkinStore.status?.max_multiplier?.toFixed(1) }) }}</p>
-                </div>
-              </div>
-
-              <div class="mt-5 flex gap-3">
-                <button
-                  type="button"
-                  class="flex-1 rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-dark-600 dark:text-dark-300 dark:hover:bg-dark-700"
-                  @click="showLuckModal = false"
-                >
-                  {{ t('common.cancel') || 'Cancel' }}
-                </button>
-                <button
-                  type="button"
-                  :disabled="checkinLoading || !luckBetAmount || luckBetAmount <= 0 || luckBetAmount > (checkinStore.status?.balance ?? 0)"
-                  class="flex-1 rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-purple-600 disabled:opacity-50"
-                  @click="submitLuckCheckin"
-                >
-                  {{ checkinLoading ? '...' : t('checkin.luckButton') }}
-                </button>
-              </div>
+        <BaseDialog :show="showLuckModal" :title="t('checkin.luckTitle')" width="narrow" :close-on-click-outside="true" @close="showLuckModal = false">
+          <div class="mb-3 rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
+            <p class="text-xs text-purple-700 dark:text-purple-300">
+              {{ t('checkin.multiplierRange', { min: checkinStore.status?.min_multiplier?.toFixed(1), max: checkinStore.status?.max_multiplier?.toFixed(1) }) }}
+            </p>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('checkin.betAmount') }}</label>
+              <input
+                ref="luckBetInputRef"
+                v-model.number="luckBetAmount"
+                type="number"
+                step="0.01"
+                :min="0.01"
+                :max="checkinStore.status?.balance ?? 0"
+                class="input"
+                :placeholder="t('checkin.betAmountPlaceholder')"
+                @keyup.enter="submitLuckCheckin"
+              />
+            </div>
+            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span>{{ t('profile.accountBalance') }}: ${{ checkinStore.status?.balance?.toFixed(2) ?? '0.00' }}</span>
+              <button type="button" class="text-primary-600 hover:text-primary-700 dark:text-primary-400" @click="luckBetAmount = checkinStore.status?.balance ?? 0">
+                MAX
+              </button>
+            </div>
+            <div class="rounded-lg bg-gray-50 p-3 dark:bg-dark-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('checkin.luckDesc', { min: checkinStore.status?.min_multiplier?.toFixed(1), max: checkinStore.status?.max_multiplier?.toFixed(1) }) }}</p>
             </div>
           </div>
-        </transition>
+          <template #footer>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                class="flex-1 rounded-xl border border-gray-300 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-dark-600 dark:text-dark-300 dark:hover:bg-dark-700"
+                @click="showLuckModal = false"
+              >
+                {{ t('common.cancel') }}
+              </button>
+              <button
+                type="button"
+                :disabled="checkinLoading || !luckBetAmount || luckBetAmount <= 0 || luckBetAmount > (checkinStore.status?.balance ?? 0)"
+                class="flex-1 rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-purple-600 disabled:opacity-50"
+                @click="submitLuckCheckin"
+              >
+                {{ checkinLoading ? '...' : t('checkin.luckButton') }}
+              </button>
+            </div>
+          </template>
+        </BaseDialog>
 
         <!-- User Dropdown -->
         <div v-if="user" class="relative" ref="dropdownRef">
@@ -306,6 +293,7 @@ import { useAppStore, useAuthStore, useOnboardingStore } from '@/stores'
 import { useAdminSettingsStore } from '@/stores/adminSettings'
 import { useCheckinStore } from '@/stores/checkin'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
+import BaseDialog from '@/components/common/BaseDialog.vue'
 import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMini.vue'
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -459,13 +447,4 @@ onBeforeUnmount(() => {
   transform: scale(0.95) translateY(-4px);
 }
 
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.2s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
 </style>
