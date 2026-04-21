@@ -39,6 +39,10 @@ type RedeemCode struct {
 	GroupID *int64 `json:"group_id,omitempty"`
 	// ValidityDays holds the value of the "validity_days" field.
 	ValidityDays int `json:"validity_days,omitempty"`
+	// Multiplier holds the value of the "multiplier" field.
+	Multiplier float64 `json:"multiplier,omitempty"`
+	// BetAmount holds the value of the "bet_amount" field.
+	BetAmount float64 `json:"bet_amount,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RedeemCodeQuery when eager-loading is set.
 	Edges        RedeemCodeEdges `json:"edges"`
@@ -83,7 +87,7 @@ func (*RedeemCode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case redeemcode.FieldValue:
+		case redeemcode.FieldValue, redeemcode.FieldMultiplier, redeemcode.FieldBetAmount:
 			values[i] = new(sql.NullFloat64)
 		case redeemcode.FieldID, redeemcode.FieldUsedBy, redeemcode.FieldGroupID, redeemcode.FieldValidityDays:
 			values[i] = new(sql.NullInt64)
@@ -176,6 +180,18 @@ func (_m *RedeemCode) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ValidityDays = int(value.Int64)
 			}
+		case redeemcode.FieldMultiplier:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field multiplier", values[i])
+			} else if value.Valid {
+				_m.Multiplier = value.Float64
+			}
+		case redeemcode.FieldBetAmount:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field bet_amount", values[i])
+			} else if value.Valid {
+				_m.BetAmount = value.Float64
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -259,6 +275,12 @@ func (_m *RedeemCode) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("validity_days=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ValidityDays))
+	builder.WriteString(", ")
+	builder.WriteString("multiplier=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Multiplier))
+	builder.WriteString(", ")
+	builder.WriteString("bet_amount=")
+	builder.WriteString(fmt.Sprintf("%v", _m.BetAmount))
 	builder.WriteByte(')')
 	return builder.String()
 }

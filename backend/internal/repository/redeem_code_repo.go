@@ -30,6 +30,8 @@ func (r *redeemCodeRepository) Create(ctx context.Context, code *service.RedeemC
 		SetStatus(code.Status).
 		SetNotes(code.Notes).
 		SetValidityDays(code.ValidityDays).
+		SetMultiplier(code.Multiplier).
+		SetBetAmount(code.BetAmount).
 		SetNillableUsedBy(code.UsedBy).
 		SetNillableUsedAt(code.UsedAt).
 		SetNillableGroupID(code.GroupID).
@@ -309,6 +311,8 @@ func redeemCodeEntityToService(m *dbent.RedeemCode) *service.RedeemCode {
 		CreatedAt:    m.CreatedAt,
 		GroupID:      m.GroupID,
 		ValidityDays: m.ValidityDays,
+		Multiplier:   m.Multiplier,
+		BetAmount:    m.BetAmount,
 	}
 	if m.Edges.User != nil {
 		out.User = userEntityToService(m.Edges.User)

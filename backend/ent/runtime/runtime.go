@@ -1003,6 +1003,14 @@ func init() {
 	redeemcodeDescValidityDays := redeemcodeFields[9].Descriptor()
 	// redeemcode.DefaultValidityDays holds the default value on creation for the validity_days field.
 	redeemcode.DefaultValidityDays = redeemcodeDescValidityDays.Default.(int)
+	// redeemcodeDescMultiplier is the schema descriptor for multiplier field.
+	redeemcodeDescMultiplier := redeemcodeFields[10].Descriptor()
+	// redeemcode.DefaultMultiplier holds the default value on creation for the multiplier field.
+	redeemcode.DefaultMultiplier = redeemcodeDescMultiplier.Default.(float64)
+	// redeemcodeDescBetAmount is the schema descriptor for bet_amount field.
+	redeemcodeDescBetAmount := redeemcodeFields[11].Descriptor()
+	// redeemcode.DefaultBetAmount holds the default value on creation for the bet_amount field.
+	redeemcode.DefaultBetAmount = redeemcodeDescBetAmount.Default.(float64)
 	securitysecretMixin := schema.SecuritySecret{}.Mixin()
 	securitysecretMixinFields0 := securitysecretMixin[0].Fields()
 	_ = securitysecretMixinFields0

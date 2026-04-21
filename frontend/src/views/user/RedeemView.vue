@@ -398,7 +398,14 @@ const getHistoryItemTitle = (item: RedeemHistoryItem) => {
   } else if (item.type === 'checkin') {
     return t('admin.users.typeCheckin')
   } else if (item.type === 'checkin_luck') {
-    return item.value >= 0 ? t('checkin.luckSuccess', { multiplier: '', amount: '' }).replace('—', '').trim() || t('checkin.luckTitle') : t('checkin.luckTitle')
+    const m = item.multiplier?.toFixed(2) ?? '—'
+    const a = Math.abs(item.value).toFixed(2)
+    if (item.value > 0) {
+      return t('checkin.luckSuccess', { multiplier: m, amount: a })
+    } else if (item.value < 0) {
+      return t('checkin.luckLoss', { multiplier: m, amount: a })
+    }
+    return t('checkin.luckEven')
   } else if (item.type === 'registration') {
     return t('admin.users.typeRegistration')
   } else if (item.type === 'invitation') {

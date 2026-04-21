@@ -194,6 +194,48 @@ func (_u *RedeemCodeUpdate) AddValidityDays(v int) *RedeemCodeUpdate {
 	return _u
 }
 
+// SetMultiplier sets the "multiplier" field.
+func (_u *RedeemCodeUpdate) SetMultiplier(v float64) *RedeemCodeUpdate {
+	_u.mutation.ResetMultiplier()
+	_u.mutation.SetMultiplier(v)
+	return _u
+}
+
+// SetNillableMultiplier sets the "multiplier" field if the given value is not nil.
+func (_u *RedeemCodeUpdate) SetNillableMultiplier(v *float64) *RedeemCodeUpdate {
+	if v != nil {
+		_u.SetMultiplier(*v)
+	}
+	return _u
+}
+
+// AddMultiplier adds value to the "multiplier" field.
+func (_u *RedeemCodeUpdate) AddMultiplier(v float64) *RedeemCodeUpdate {
+	_u.mutation.AddMultiplier(v)
+	return _u
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (_u *RedeemCodeUpdate) SetBetAmount(v float64) *RedeemCodeUpdate {
+	_u.mutation.ResetBetAmount()
+	_u.mutation.SetBetAmount(v)
+	return _u
+}
+
+// SetNillableBetAmount sets the "bet_amount" field if the given value is not nil.
+func (_u *RedeemCodeUpdate) SetNillableBetAmount(v *float64) *RedeemCodeUpdate {
+	if v != nil {
+		_u.SetBetAmount(*v)
+	}
+	return _u
+}
+
+// AddBetAmount adds value to the "bet_amount" field.
+func (_u *RedeemCodeUpdate) AddBetAmount(v float64) *RedeemCodeUpdate {
+	_u.mutation.AddBetAmount(v)
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *RedeemCodeUpdate) SetUserID(id int64) *RedeemCodeUpdate {
 	_u.mutation.SetUserID(id)
@@ -326,6 +368,18 @@ func (_u *RedeemCodeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.AddedValidityDays(); ok {
 		_spec.AddField(redeemcode.FieldValidityDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Multiplier(); ok {
+		_spec.SetField(redeemcode.FieldMultiplier, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedMultiplier(); ok {
+		_spec.AddField(redeemcode.FieldMultiplier, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.BetAmount(); ok {
+		_spec.SetField(redeemcode.FieldBetAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedBetAmount(); ok {
+		_spec.AddField(redeemcode.FieldBetAmount, field.TypeFloat64, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -569,6 +623,48 @@ func (_u *RedeemCodeUpdateOne) AddValidityDays(v int) *RedeemCodeUpdateOne {
 	return _u
 }
 
+// SetMultiplier sets the "multiplier" field.
+func (_u *RedeemCodeUpdateOne) SetMultiplier(v float64) *RedeemCodeUpdateOne {
+	_u.mutation.ResetMultiplier()
+	_u.mutation.SetMultiplier(v)
+	return _u
+}
+
+// SetNillableMultiplier sets the "multiplier" field if the given value is not nil.
+func (_u *RedeemCodeUpdateOne) SetNillableMultiplier(v *float64) *RedeemCodeUpdateOne {
+	if v != nil {
+		_u.SetMultiplier(*v)
+	}
+	return _u
+}
+
+// AddMultiplier adds value to the "multiplier" field.
+func (_u *RedeemCodeUpdateOne) AddMultiplier(v float64) *RedeemCodeUpdateOne {
+	_u.mutation.AddMultiplier(v)
+	return _u
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (_u *RedeemCodeUpdateOne) SetBetAmount(v float64) *RedeemCodeUpdateOne {
+	_u.mutation.ResetBetAmount()
+	_u.mutation.SetBetAmount(v)
+	return _u
+}
+
+// SetNillableBetAmount sets the "bet_amount" field if the given value is not nil.
+func (_u *RedeemCodeUpdateOne) SetNillableBetAmount(v *float64) *RedeemCodeUpdateOne {
+	if v != nil {
+		_u.SetBetAmount(*v)
+	}
+	return _u
+}
+
+// AddBetAmount adds value to the "bet_amount" field.
+func (_u *RedeemCodeUpdateOne) AddBetAmount(v float64) *RedeemCodeUpdateOne {
+	_u.mutation.AddBetAmount(v)
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *RedeemCodeUpdateOne) SetUserID(id int64) *RedeemCodeUpdateOne {
 	_u.mutation.SetUserID(id)
@@ -731,6 +827,18 @@ func (_u *RedeemCodeUpdateOne) sqlSave(ctx context.Context) (_node *RedeemCode, 
 	}
 	if value, ok := _u.mutation.AddedValidityDays(); ok {
 		_spec.AddField(redeemcode.FieldValidityDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Multiplier(); ok {
+		_spec.SetField(redeemcode.FieldMultiplier, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedMultiplier(); ok {
+		_spec.AddField(redeemcode.FieldMultiplier, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.BetAmount(); ok {
+		_spec.SetField(redeemcode.FieldBetAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedBetAmount(); ok {
+		_spec.AddField(redeemcode.FieldBetAmount, field.TypeFloat64, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

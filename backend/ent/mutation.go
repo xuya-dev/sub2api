@@ -22337,6 +22337,10 @@ type RedeemCodeMutation struct {
 	created_at       *time.Time
 	validity_days    *int
 	addvalidity_days *int
+	multiplier       *float64
+	addmultiplier    *float64
+	bet_amount       *float64
+	addbet_amount    *float64
 	clearedFields    map[string]struct{}
 	user             *int64
 	cleareduser      bool
@@ -22897,6 +22901,118 @@ func (m *RedeemCodeMutation) ResetValidityDays() {
 	m.addvalidity_days = nil
 }
 
+// SetMultiplier sets the "multiplier" field.
+func (m *RedeemCodeMutation) SetMultiplier(f float64) {
+	m.multiplier = &f
+	m.addmultiplier = nil
+}
+
+// Multiplier returns the value of the "multiplier" field in the mutation.
+func (m *RedeemCodeMutation) Multiplier() (r float64, exists bool) {
+	v := m.multiplier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMultiplier returns the old "multiplier" field's value of the RedeemCode entity.
+// If the RedeemCode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RedeemCodeMutation) OldMultiplier(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMultiplier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMultiplier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMultiplier: %w", err)
+	}
+	return oldValue.Multiplier, nil
+}
+
+// AddMultiplier adds f to the "multiplier" field.
+func (m *RedeemCodeMutation) AddMultiplier(f float64) {
+	if m.addmultiplier != nil {
+		*m.addmultiplier += f
+	} else {
+		m.addmultiplier = &f
+	}
+}
+
+// AddedMultiplier returns the value that was added to the "multiplier" field in this mutation.
+func (m *RedeemCodeMutation) AddedMultiplier() (r float64, exists bool) {
+	v := m.addmultiplier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMultiplier resets all changes to the "multiplier" field.
+func (m *RedeemCodeMutation) ResetMultiplier() {
+	m.multiplier = nil
+	m.addmultiplier = nil
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (m *RedeemCodeMutation) SetBetAmount(f float64) {
+	m.bet_amount = &f
+	m.addbet_amount = nil
+}
+
+// BetAmount returns the value of the "bet_amount" field in the mutation.
+func (m *RedeemCodeMutation) BetAmount() (r float64, exists bool) {
+	v := m.bet_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBetAmount returns the old "bet_amount" field's value of the RedeemCode entity.
+// If the RedeemCode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RedeemCodeMutation) OldBetAmount(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBetAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBetAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBetAmount: %w", err)
+	}
+	return oldValue.BetAmount, nil
+}
+
+// AddBetAmount adds f to the "bet_amount" field.
+func (m *RedeemCodeMutation) AddBetAmount(f float64) {
+	if m.addbet_amount != nil {
+		*m.addbet_amount += f
+	} else {
+		m.addbet_amount = &f
+	}
+}
+
+// AddedBetAmount returns the value that was added to the "bet_amount" field in this mutation.
+func (m *RedeemCodeMutation) AddedBetAmount() (r float64, exists bool) {
+	v := m.addbet_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBetAmount resets all changes to the "bet_amount" field.
+func (m *RedeemCodeMutation) ResetBetAmount() {
+	m.bet_amount = nil
+	m.addbet_amount = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *RedeemCodeMutation) SetUserID(id int64) {
 	m.user = &id
@@ -22998,7 +23114,7 @@ func (m *RedeemCodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RedeemCodeMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 12)
 	if m.code != nil {
 		fields = append(fields, redeemcode.FieldCode)
 	}
@@ -23029,6 +23145,12 @@ func (m *RedeemCodeMutation) Fields() []string {
 	if m.validity_days != nil {
 		fields = append(fields, redeemcode.FieldValidityDays)
 	}
+	if m.multiplier != nil {
+		fields = append(fields, redeemcode.FieldMultiplier)
+	}
+	if m.bet_amount != nil {
+		fields = append(fields, redeemcode.FieldBetAmount)
+	}
 	return fields
 }
 
@@ -23057,6 +23179,10 @@ func (m *RedeemCodeMutation) Field(name string) (ent.Value, bool) {
 		return m.GroupID()
 	case redeemcode.FieldValidityDays:
 		return m.ValidityDays()
+	case redeemcode.FieldMultiplier:
+		return m.Multiplier()
+	case redeemcode.FieldBetAmount:
+		return m.BetAmount()
 	}
 	return nil, false
 }
@@ -23086,6 +23212,10 @@ func (m *RedeemCodeMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldGroupID(ctx)
 	case redeemcode.FieldValidityDays:
 		return m.OldValidityDays(ctx)
+	case redeemcode.FieldMultiplier:
+		return m.OldMultiplier(ctx)
+	case redeemcode.FieldBetAmount:
+		return m.OldBetAmount(ctx)
 	}
 	return nil, fmt.Errorf("unknown RedeemCode field %s", name)
 }
@@ -23165,6 +23295,20 @@ func (m *RedeemCodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetValidityDays(v)
 		return nil
+	case redeemcode.FieldMultiplier:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMultiplier(v)
+		return nil
+	case redeemcode.FieldBetAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBetAmount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown RedeemCode field %s", name)
 }
@@ -23179,6 +23323,12 @@ func (m *RedeemCodeMutation) AddedFields() []string {
 	if m.addvalidity_days != nil {
 		fields = append(fields, redeemcode.FieldValidityDays)
 	}
+	if m.addmultiplier != nil {
+		fields = append(fields, redeemcode.FieldMultiplier)
+	}
+	if m.addbet_amount != nil {
+		fields = append(fields, redeemcode.FieldBetAmount)
+	}
 	return fields
 }
 
@@ -23191,6 +23341,10 @@ func (m *RedeemCodeMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedValue()
 	case redeemcode.FieldValidityDays:
 		return m.AddedValidityDays()
+	case redeemcode.FieldMultiplier:
+		return m.AddedMultiplier()
+	case redeemcode.FieldBetAmount:
+		return m.AddedBetAmount()
 	}
 	return nil, false
 }
@@ -23213,6 +23367,20 @@ func (m *RedeemCodeMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddValidityDays(v)
+		return nil
+	case redeemcode.FieldMultiplier:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMultiplier(v)
+		return nil
+	case redeemcode.FieldBetAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBetAmount(v)
 		return nil
 	}
 	return fmt.Errorf("unknown RedeemCode numeric field %s", name)
@@ -23297,6 +23465,12 @@ func (m *RedeemCodeMutation) ResetField(name string) error {
 		return nil
 	case redeemcode.FieldValidityDays:
 		m.ResetValidityDays()
+		return nil
+	case redeemcode.FieldMultiplier:
+		m.ResetMultiplier()
+		return nil
+	case redeemcode.FieldBetAmount:
+		m.ResetBetAmount()
 		return nil
 	}
 	return fmt.Errorf("unknown RedeemCode field %s", name)

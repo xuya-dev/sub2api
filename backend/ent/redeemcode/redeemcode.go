@@ -34,6 +34,10 @@ const (
 	FieldGroupID = "group_id"
 	// FieldValidityDays holds the string denoting the validity_days field in the database.
 	FieldValidityDays = "validity_days"
+	// FieldMultiplier holds the string denoting the multiplier field in the database.
+	FieldMultiplier = "multiplier"
+	// FieldBetAmount holds the string denoting the bet_amount field in the database.
+	FieldBetAmount = "bet_amount"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
@@ -69,6 +73,8 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldGroupID,
 	FieldValidityDays,
+	FieldMultiplier,
+	FieldBetAmount,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -98,6 +104,10 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultValidityDays holds the default value on creation for the "validity_days" field.
 	DefaultValidityDays int
+	// DefaultMultiplier holds the default value on creation for the "multiplier" field.
+	DefaultMultiplier float64
+	// DefaultBetAmount holds the default value on creation for the "bet_amount" field.
+	DefaultBetAmount float64
 )
 
 // OrderOption defines the ordering options for the RedeemCode queries.
@@ -156,6 +166,16 @@ func ByGroupID(opts ...sql.OrderTermOption) OrderOption {
 // ByValidityDays orders the results by the validity_days field.
 func ByValidityDays(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValidityDays, opts...).ToFunc()
+}
+
+// ByMultiplier orders the results by the multiplier field.
+func ByMultiplier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMultiplier, opts...).ToFunc()
+}
+
+// ByBetAmount orders the results by the bet_amount field.
+func ByBetAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBetAmount, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

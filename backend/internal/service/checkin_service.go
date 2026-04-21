@@ -146,7 +146,7 @@ func (s *CheckinService) Checkin(ctx context.Context, userID int64) (*CheckinRes
 		return nil, fmt.Errorf("update user balance: %w", err)
 	}
 
-	s.createAuditRecord(txCtx, userID, rewardAmount, AdjustmentTypeCheckin)
+	s.createAuditRecord(txCtx, userID, rewardAmount, AdjustmentTypeCheckin, 0, 0)
 
 	if err := tx.Commit(); err != nil {
 		return nil, fmt.Errorf("commit transaction: %w", err)
@@ -244,7 +244,7 @@ func (s *CheckinService) LuckCheckin(ctx context.Context, userID int64, betAmoun
 		}
 	}
 
-	s.createAuditRecord(txCtx, userID, rewardAmount, AdjustmentTypeCheckinLuck)
+	s.createAuditRecord(txCtx, userID, rewardAmount, AdjustmentTypeCheckinLuck, multiplier, betAmount)
 
 	if err := tx.Commit(); err != nil {
 		return nil, fmt.Errorf("commit transaction: %w", err)
@@ -351,19 +351,21 @@ func (s *CheckinService) calculateStreak(ctx context.Context, userID int64, toda
 	return 1
 }
 
-func (s *CheckinService) createAuditRecord(txCtx context.Context, userID int64, rewardAmount float64, adjType string) {
+func (s *CheckinService) createAuditRecord(txCtx context.Context, userID int64, rewardAmount float64, adjType string, multiplier float64, betAmount float64) {
 	code, err := GenerateRedeemCode()
 	if err != nil {
 		return
 	}
 	now := time.Now()
 	adjustmentRecord := &RedeemCode{
-		Code:   code,
-		Type:   adjType,
-		Value:  rewardAmount,
-		Status: StatusUsed,
-		UsedBy: &userID,
-		UsedAt: &now,
+		Code:       code,
+		Type:       adjType,
+		Value:      rewardAmount,
+		Status:     StatusUsed,
+		UsedBy:     &userID,
+		UsedAt:     &now,
+		Multiplier: multiplier,
+		BetAmount:  betAmount,
 	}
 	if createErr := s.redeemCodeRepo.Create(txCtx, adjustmentRecord); createErr != nil {
 		logger.LegacyPrintf("service.checkin", "failed to create checkin redeem code record: %v", createErr)

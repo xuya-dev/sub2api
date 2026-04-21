@@ -16,6 +16,9 @@ export interface RedeemHistoryItem {
   created_at: string
   // Notes from admin for admin_balance/admin_concurrency types
   notes?: string
+  // Checkin luck-specific fields
+  multiplier?: number
+  bet_amount?: number
   // Subscription-specific fields
   group_id?: number
   validity_days?: number

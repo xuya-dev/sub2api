@@ -156,6 +156,34 @@ func (_c *RedeemCodeCreate) SetNillableValidityDays(v *int) *RedeemCodeCreate {
 	return _c
 }
 
+// SetMultiplier sets the "multiplier" field.
+func (_c *RedeemCodeCreate) SetMultiplier(v float64) *RedeemCodeCreate {
+	_c.mutation.SetMultiplier(v)
+	return _c
+}
+
+// SetNillableMultiplier sets the "multiplier" field if the given value is not nil.
+func (_c *RedeemCodeCreate) SetNillableMultiplier(v *float64) *RedeemCodeCreate {
+	if v != nil {
+		_c.SetMultiplier(*v)
+	}
+	return _c
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (_c *RedeemCodeCreate) SetBetAmount(v float64) *RedeemCodeCreate {
+	_c.mutation.SetBetAmount(v)
+	return _c
+}
+
+// SetNillableBetAmount sets the "bet_amount" field if the given value is not nil.
+func (_c *RedeemCodeCreate) SetNillableBetAmount(v *float64) *RedeemCodeCreate {
+	if v != nil {
+		_c.SetBetAmount(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_c *RedeemCodeCreate) SetUserID(id int64) *RedeemCodeCreate {
 	_c.mutation.SetUserID(id)
@@ -235,6 +263,14 @@ func (_c *RedeemCodeCreate) defaults() {
 		v := redeemcode.DefaultValidityDays
 		_c.mutation.SetValidityDays(v)
 	}
+	if _, ok := _c.mutation.Multiplier(); !ok {
+		v := redeemcode.DefaultMultiplier
+		_c.mutation.SetMultiplier(v)
+	}
+	if _, ok := _c.mutation.BetAmount(); !ok {
+		v := redeemcode.DefaultBetAmount
+		_c.mutation.SetBetAmount(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -271,6 +307,12 @@ func (_c *RedeemCodeCreate) check() error {
 	}
 	if _, ok := _c.mutation.ValidityDays(); !ok {
 		return &ValidationError{Name: "validity_days", err: errors.New(`ent: missing required field "RedeemCode.validity_days"`)}
+	}
+	if _, ok := _c.mutation.Multiplier(); !ok {
+		return &ValidationError{Name: "multiplier", err: errors.New(`ent: missing required field "RedeemCode.multiplier"`)}
+	}
+	if _, ok := _c.mutation.BetAmount(); !ok {
+		return &ValidationError{Name: "bet_amount", err: errors.New(`ent: missing required field "RedeemCode.bet_amount"`)}
 	}
 	return nil
 }
@@ -330,6 +372,14 @@ func (_c *RedeemCodeCreate) createSpec() (*RedeemCode, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ValidityDays(); ok {
 		_spec.SetField(redeemcode.FieldValidityDays, field.TypeInt, value)
 		_node.ValidityDays = value
+	}
+	if value, ok := _c.mutation.Multiplier(); ok {
+		_spec.SetField(redeemcode.FieldMultiplier, field.TypeFloat64, value)
+		_node.Multiplier = value
+	}
+	if value, ok := _c.mutation.BetAmount(); ok {
+		_spec.SetField(redeemcode.FieldBetAmount, field.TypeFloat64, value)
+		_node.BetAmount = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -561,6 +611,42 @@ func (u *RedeemCodeUpsert) AddValidityDays(v int) *RedeemCodeUpsert {
 	return u
 }
 
+// SetMultiplier sets the "multiplier" field.
+func (u *RedeemCodeUpsert) SetMultiplier(v float64) *RedeemCodeUpsert {
+	u.Set(redeemcode.FieldMultiplier, v)
+	return u
+}
+
+// UpdateMultiplier sets the "multiplier" field to the value that was provided on create.
+func (u *RedeemCodeUpsert) UpdateMultiplier() *RedeemCodeUpsert {
+	u.SetExcluded(redeemcode.FieldMultiplier)
+	return u
+}
+
+// AddMultiplier adds v to the "multiplier" field.
+func (u *RedeemCodeUpsert) AddMultiplier(v float64) *RedeemCodeUpsert {
+	u.Add(redeemcode.FieldMultiplier, v)
+	return u
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (u *RedeemCodeUpsert) SetBetAmount(v float64) *RedeemCodeUpsert {
+	u.Set(redeemcode.FieldBetAmount, v)
+	return u
+}
+
+// UpdateBetAmount sets the "bet_amount" field to the value that was provided on create.
+func (u *RedeemCodeUpsert) UpdateBetAmount() *RedeemCodeUpsert {
+	u.SetExcluded(redeemcode.FieldBetAmount)
+	return u
+}
+
+// AddBetAmount adds v to the "bet_amount" field.
+func (u *RedeemCodeUpsert) AddBetAmount(v float64) *RedeemCodeUpsert {
+	u.Add(redeemcode.FieldBetAmount, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -771,6 +857,48 @@ func (u *RedeemCodeUpsertOne) AddValidityDays(v int) *RedeemCodeUpsertOne {
 func (u *RedeemCodeUpsertOne) UpdateValidityDays() *RedeemCodeUpsertOne {
 	return u.Update(func(s *RedeemCodeUpsert) {
 		s.UpdateValidityDays()
+	})
+}
+
+// SetMultiplier sets the "multiplier" field.
+func (u *RedeemCodeUpsertOne) SetMultiplier(v float64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetMultiplier(v)
+	})
+}
+
+// AddMultiplier adds v to the "multiplier" field.
+func (u *RedeemCodeUpsertOne) AddMultiplier(v float64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.AddMultiplier(v)
+	})
+}
+
+// UpdateMultiplier sets the "multiplier" field to the value that was provided on create.
+func (u *RedeemCodeUpsertOne) UpdateMultiplier() *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateMultiplier()
+	})
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (u *RedeemCodeUpsertOne) SetBetAmount(v float64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetBetAmount(v)
+	})
+}
+
+// AddBetAmount adds v to the "bet_amount" field.
+func (u *RedeemCodeUpsertOne) AddBetAmount(v float64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.AddBetAmount(v)
+	})
+}
+
+// UpdateBetAmount sets the "bet_amount" field to the value that was provided on create.
+func (u *RedeemCodeUpsertOne) UpdateBetAmount() *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateBetAmount()
 	})
 }
 
@@ -1150,6 +1278,48 @@ func (u *RedeemCodeUpsertBulk) AddValidityDays(v int) *RedeemCodeUpsertBulk {
 func (u *RedeemCodeUpsertBulk) UpdateValidityDays() *RedeemCodeUpsertBulk {
 	return u.Update(func(s *RedeemCodeUpsert) {
 		s.UpdateValidityDays()
+	})
+}
+
+// SetMultiplier sets the "multiplier" field.
+func (u *RedeemCodeUpsertBulk) SetMultiplier(v float64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetMultiplier(v)
+	})
+}
+
+// AddMultiplier adds v to the "multiplier" field.
+func (u *RedeemCodeUpsertBulk) AddMultiplier(v float64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.AddMultiplier(v)
+	})
+}
+
+// UpdateMultiplier sets the "multiplier" field to the value that was provided on create.
+func (u *RedeemCodeUpsertBulk) UpdateMultiplier() *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateMultiplier()
+	})
+}
+
+// SetBetAmount sets the "bet_amount" field.
+func (u *RedeemCodeUpsertBulk) SetBetAmount(v float64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetBetAmount(v)
+	})
+}
+
+// AddBetAmount adds v to the "bet_amount" field.
+func (u *RedeemCodeUpsertBulk) AddBetAmount(v float64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.AddBetAmount(v)
+	})
+}
+
+// UpdateBetAmount sets the "bet_amount" field to the value that was provided on create.
+func (u *RedeemCodeUpsertBulk) UpdateBetAmount() *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateBetAmount()
 	})
 }
 

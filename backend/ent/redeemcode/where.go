@@ -105,6 +105,16 @@ func ValidityDays(v int) predicate.RedeemCode {
 	return predicate.RedeemCode(sql.FieldEQ(FieldValidityDays, v))
 }
 
+// Multiplier applies equality check predicate on the "multiplier" field. It's identical to MultiplierEQ.
+func Multiplier(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldEQ(FieldMultiplier, v))
+}
+
+// BetAmount applies equality check predicate on the "bet_amount" field. It's identical to BetAmountEQ.
+func BetAmount(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldEQ(FieldBetAmount, v))
+}
+
 // CodeEQ applies the EQ predicate on the "code" field.
 func CodeEQ(v string) predicate.RedeemCode {
 	return predicate.RedeemCode(sql.FieldEQ(FieldCode, v))
@@ -603,6 +613,86 @@ func ValidityDaysLT(v int) predicate.RedeemCode {
 // ValidityDaysLTE applies the LTE predicate on the "validity_days" field.
 func ValidityDaysLTE(v int) predicate.RedeemCode {
 	return predicate.RedeemCode(sql.FieldLTE(FieldValidityDays, v))
+}
+
+// MultiplierEQ applies the EQ predicate on the "multiplier" field.
+func MultiplierEQ(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldEQ(FieldMultiplier, v))
+}
+
+// MultiplierNEQ applies the NEQ predicate on the "multiplier" field.
+func MultiplierNEQ(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldNEQ(FieldMultiplier, v))
+}
+
+// MultiplierIn applies the In predicate on the "multiplier" field.
+func MultiplierIn(vs ...float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldIn(FieldMultiplier, vs...))
+}
+
+// MultiplierNotIn applies the NotIn predicate on the "multiplier" field.
+func MultiplierNotIn(vs ...float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldNotIn(FieldMultiplier, vs...))
+}
+
+// MultiplierGT applies the GT predicate on the "multiplier" field.
+func MultiplierGT(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldGT(FieldMultiplier, v))
+}
+
+// MultiplierGTE applies the GTE predicate on the "multiplier" field.
+func MultiplierGTE(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldGTE(FieldMultiplier, v))
+}
+
+// MultiplierLT applies the LT predicate on the "multiplier" field.
+func MultiplierLT(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldLT(FieldMultiplier, v))
+}
+
+// MultiplierLTE applies the LTE predicate on the "multiplier" field.
+func MultiplierLTE(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldLTE(FieldMultiplier, v))
+}
+
+// BetAmountEQ applies the EQ predicate on the "bet_amount" field.
+func BetAmountEQ(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldEQ(FieldBetAmount, v))
+}
+
+// BetAmountNEQ applies the NEQ predicate on the "bet_amount" field.
+func BetAmountNEQ(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldNEQ(FieldBetAmount, v))
+}
+
+// BetAmountIn applies the In predicate on the "bet_amount" field.
+func BetAmountIn(vs ...float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldIn(FieldBetAmount, vs...))
+}
+
+// BetAmountNotIn applies the NotIn predicate on the "bet_amount" field.
+func BetAmountNotIn(vs ...float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldNotIn(FieldBetAmount, vs...))
+}
+
+// BetAmountGT applies the GT predicate on the "bet_amount" field.
+func BetAmountGT(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldGT(FieldBetAmount, v))
+}
+
+// BetAmountGTE applies the GTE predicate on the "bet_amount" field.
+func BetAmountGTE(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldGTE(FieldBetAmount, v))
+}
+
+// BetAmountLT applies the LT predicate on the "bet_amount" field.
+func BetAmountLT(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldLT(FieldBetAmount, v))
+}
+
+// BetAmountLTE applies the LTE predicate on the "bet_amount" field.
+func BetAmountLTE(v float64) predicate.RedeemCode {
+	return predicate.RedeemCode(sql.FieldLTE(FieldBetAmount, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

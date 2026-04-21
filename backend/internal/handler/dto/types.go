@@ -332,6 +332,10 @@ type RedeemCode struct {
 	// so users can see why they were charged or credited
 	Notes *string `json:"notes,omitempty"`
 
+	// Multiplier and BetAmount are populated for checkin_luck type
+	Multiplier float64 `json:"multiplier,omitempty"`
+	BetAmount  float64 `json:"bet_amount,omitempty"`
+
 	User  *User  `json:"user,omitempty"`
 	Group *Group `json:"group,omitempty"`
 }
