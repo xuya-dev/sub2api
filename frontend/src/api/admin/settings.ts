@@ -149,6 +149,10 @@ export interface SystemSettings {
   checkin_enabled: boolean
   checkin_min_balance: number
   checkin_max_balance: number
+  // Checkin Luck 运气签到设置
+  checkin_luck_enabled: boolean
+  checkin_luck_min_multiplier: number
+  checkin_luck_max_multiplier: number
 }
 
 export interface UpdateSettingsRequest {
@@ -260,6 +264,10 @@ export interface UpdateSettingsRequest {
   checkin_enabled?: boolean
   checkin_min_balance?: number
   checkin_max_balance?: number
+  // Checkin Luck 运气签到设置
+  checkin_luck_enabled?: boolean
+  checkin_luck_min_multiplier?: number
+  checkin_luck_max_multiplier?: number
 }
 
 /**
