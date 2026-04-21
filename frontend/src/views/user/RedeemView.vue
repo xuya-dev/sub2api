@@ -401,8 +401,7 @@ const getHistoryItemTitle = (item: RedeemHistoryItem) => {
   } else if (item.type === 'checkin') {
     return t('admin.users.typeCheckin')
   } else if (item.type === 'checkin_luck') {
-    const m = item.multiplier?.toFixed(2) ?? '—'
-    return t('checkin.luckRewardTitle', { multiplier: m })
+    return t('checkin.luckCheckinReward')
   } else if (item.type === 'registration') {
     return t('admin.users.typeRegistration')
   } else if (item.type === 'invitation') {
