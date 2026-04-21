@@ -379,7 +379,7 @@ const contactInfo = ref('')
 
 // Helper functions for history display
 const isBalanceType = (type: string) => {
-  return type === 'balance' || type === 'admin_balance'
+  return type === 'balance' || type === 'admin_balance' || type === 'checkin' || type === 'checkin_luck' || type === 'registration' || type === 'invitation'
 }
 
 const isSubscriptionType = (type: string) => {
@@ -395,6 +395,14 @@ const getHistoryItemTitle = (item: RedeemHistoryItem) => {
     return t('redeem.balanceAddedRedeem')
   } else if (item.type === 'admin_balance') {
     return item.value >= 0 ? t('redeem.balanceAddedAdmin') : t('redeem.balanceDeductedAdmin')
+  } else if (item.type === 'checkin') {
+    return t('admin.users.typeCheckin')
+  } else if (item.type === 'checkin_luck') {
+    return item.value >= 0 ? t('checkin.luckSuccess', { multiplier: '', amount: '' }).replace('—', '').trim() || t('checkin.luckTitle') : t('checkin.luckTitle')
+  } else if (item.type === 'registration') {
+    return t('admin.users.typeRegistration')
+  } else if (item.type === 'invitation') {
+    return t('admin.users.typeInvitation')
   } else if (item.type === 'concurrency') {
     return t('redeem.concurrencyAddedRedeem')
   } else if (item.type === 'admin_concurrency') {
