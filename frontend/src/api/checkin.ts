@@ -5,6 +5,7 @@ export interface BlindboxResult {
   rarity: string
   reward_type: string
   reward_value: number
+  subscription_days?: number
 }
 
 export interface CheckinResult {

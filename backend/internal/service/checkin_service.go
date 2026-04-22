@@ -172,6 +172,8 @@ func (s *CheckinService) Checkin(ctx context.Context, userID int64) (*CheckinRes
 		blindboxResult, err := s.blindboxService.Draw(ctx, userID, streakDays)
 		if err == nil && blindboxResult != nil {
 			result.Blindbox = blindboxResult
+		} else if err != nil {
+			logger.LegacyPrintf("service.checkin", "blindbox draw failed for user %d: %v", userID, err)
 		}
 	}
 
@@ -281,6 +283,8 @@ func (s *CheckinService) LuckCheckin(ctx context.Context, userID int64, betAmoun
 		blindboxResult, err := s.blindboxService.Draw(ctx, userID, streakDays)
 		if err == nil && blindboxResult != nil {
 			result.Blindbox = blindboxResult
+		} else if err != nil {
+			logger.LegacyPrintf("service.checkin", "blindbox draw failed for user %d (luck): %v", userID, err)
 		}
 	}
 

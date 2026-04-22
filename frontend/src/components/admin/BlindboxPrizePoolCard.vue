@@ -195,6 +195,7 @@ import Icon from '@/components/icons/Icon.vue'
 import Toggle from '@/components/common/Toggle.vue'
 import { blindboxAPI, type PrizeItem } from '@/api/admin/blindbox'
 import * as groupAPI from '@/api/admin/groups'
+import { useAppStore } from '@/stores/app'
 
 const props = defineProps<{
   enabled: boolean
@@ -209,6 +210,7 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
+const appStore = useAppStore()
 const loading = ref(false)
 const saving = ref(false)
 const items = ref<PrizeItem[]>([])
@@ -286,7 +288,8 @@ async function saveItem() {
     }
     closeModal()
     await loadData()
-  } catch {
+  } catch (e: any) {
+    appStore.showError(e?.response?.data?.detail || t('common.error'))
   } finally {
     saving.value = false
   }
@@ -297,7 +300,8 @@ async function deleteItem(item: PrizeItem) {
   try {
     await blindboxAPI.deletePrizeItem(item.id)
     await loadData()
-  } catch {
+  } catch (e: any) {
+    appStore.showError(e?.response?.data?.detail || t('common.error'))
   }
 }
 
@@ -335,8 +339,8 @@ watch([showCreate, editingItem, () => form.value.reward_type], ([isCreating, isE
   }
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await loadSubscriptionGroups()
   if (props.enabled) loadData()
-  loadSubscriptionGroups()
 })
 </script>

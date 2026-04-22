@@ -84,7 +84,7 @@ const rewardText = computed(() => {
     case 'concurrency':
       return t('checkin.blindboxConcurrencyReward', { value: v })
     case 'subscription':
-      return t('checkin.blindboxSubscriptionReward', { days: v })
+      return t('checkin.blindboxSubscriptionReward', { days: props.result.subscription_days || 0 })
     case 'invitation_code':
       return t('checkin.blindboxInvitationReward')
     default:

@@ -79,11 +79,6 @@
         </div>
       </div>
 
-      <BlindboxModal
-        :show="!!checkinStore.blindboxResult"
-        :result="checkinStore.blindboxResult"
-        @close="checkinStore.clearBlindboxResult()"
-      />
       <!-- Profile Luck Checkin Modal -->
       <BaseDialog :show="showProfileLuckModal" :title="t('checkin.luckTitle')" width="narrow" :close-on-click-outside="true" @close="showProfileLuckModal = false">
         <div class="mb-3 rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
@@ -143,7 +138,6 @@ import ProfileEditForm from '@/components/user/profile/ProfileEditForm.vue'
 import ProfileBalanceNotifyCard from '@/components/user/profile/ProfileBalanceNotifyCard.vue'
 import ProfilePasswordForm from '@/components/user/profile/ProfilePasswordForm.vue'
 import ProfileTotpCard from '@/components/user/profile/ProfileTotpCard.vue'
-import BlindboxModal from '@/components/user/profile/BlindboxModal.vue'
 import { Icon } from '@/components/icons'
 
 const { t } = useI18n(); const authStore = useAuthStore(); const checkinStore = useCheckinStore(); const user = computed(() => authStore.user)

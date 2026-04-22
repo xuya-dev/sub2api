@@ -41,10 +41,11 @@ type PrizeItem struct {
 }
 
 type BlindboxResult struct {
-	PrizeName   string  `json:"prize_name"`
-	Rarity      string  `json:"rarity"`
-	RewardType  string  `json:"reward_type"`
-	RewardValue float64 `json:"reward_value"`
+	PrizeName       string  `json:"prize_name"`
+	Rarity          string  `json:"rarity"`
+	RewardType      string  `json:"reward_type"`
+	RewardValue     float64 `json:"reward_value"`
+	SubscriptionDays int    `json:"subscription_days,omitempty"`
 }
 
 type BlindboxRecord struct {
@@ -280,10 +281,11 @@ func (s *BlindBoxService) Draw(ctx context.Context, userID int64, streakDays int
 	}
 
 	return &BlindboxResult{
-		PrizeName:   selected.Name,
-		Rarity:      selected.Rarity,
-		RewardType:  selected.RewardType,
-		RewardValue: rewardValue,
+		PrizeName:        selected.Name,
+		Rarity:           selected.Rarity,
+		RewardType:       selected.RewardType,
+		RewardValue:      rewardValue,
+		SubscriptionDays: selected.SubscriptionDays,
 	}, nil
 }
 
@@ -308,7 +310,7 @@ func (s *BlindBoxService) applyReward(ctx context.Context, userID int64, item *d
 				UserID:       userID,
 				GroupID:      *item.SubscriptionID,
 				ValidityDays: item.SubscriptionDays,
-				Notes:        "签到盲盒奖励",
+				Notes:        "check-in blind box reward",
 			})
 			if err != nil {
 				return fmt.Errorf("assign subscription: %w", err)
