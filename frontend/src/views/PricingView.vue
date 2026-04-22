@@ -9,6 +9,10 @@
           <span class="text-lg font-bold text-gray-900 dark:text-white">{{ siteName }}</span>
         </router-link>
         <div class="flex items-center gap-2">
+          <router-link to="/leaderboard"
+            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
+            {{ t('leaderboard.title') }}
+          </router-link>
           <router-link to="/key-usage"
             class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
             {{ t('home.keyUsage') }}
@@ -122,9 +126,16 @@
       </div>
     </main>
 
-    <footer class="border-t border-gray-100 bg-white dark:border-dark-800 dark:bg-dark-950">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <span class="text-sm text-gray-500 dark:text-dark-400">&copy; {{ currentYear }} {{ siteName }}</span>
+    <footer class="border-t border-gray-100 py-10 dark:border-dark-800">
+      <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-500 dark:text-dark-400">&copy; {{ currentYear }} {{ siteName }}</span>
+        </div>
+        <div class="flex items-center gap-6">
+          <router-link to="/leaderboard" class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">{{ t('leaderboard.title') }}</router-link>
+          <router-link to="/key-usage" class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">{{ t('home.keyUsage') }}</router-link>
+          <router-link to="/monitoring" class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">{{ t('admin.monitoring.title') }}</router-link>
+        </div>
       </div>
     </footer>
   </div>

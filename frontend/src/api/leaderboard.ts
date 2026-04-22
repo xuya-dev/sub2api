@@ -1,5 +1,4 @@
 import { apiClient } from './client'
-import type { ApiResponse } from '@/types'
 
 export interface LeaderboardEntry {
   rank: number
@@ -16,18 +15,18 @@ export interface LeaderboardData {
 }
 
 export async function getBalanceLeaderboard(page = 1, pageSize = 10): Promise<LeaderboardData> {
-  const { data } = await apiClient.get<ApiResponse<LeaderboardData>>('/public/leaderboard/balance', { params: { page, page_size: pageSize } })
-  return data.data
+  const { data } = await apiClient.get<LeaderboardData>('/public/leaderboard/balance', { params: { page, page_size: pageSize } })
+  return data
 }
 
 export async function getConsumptionLeaderboard(period: 'daily' | 'weekly' | 'monthly' = 'daily', page = 1, pageSize = 10): Promise<LeaderboardData> {
-  const { data } = await apiClient.get<ApiResponse<LeaderboardData>>('/public/leaderboard/consumption', { params: { period, page, page_size: pageSize } })
-  return data.data
+  const { data } = await apiClient.get<LeaderboardData>('/public/leaderboard/consumption', { params: { period, page, page_size: pageSize } })
+  return data
 }
 
 export async function getCheckinLeaderboard(page = 1, pageSize = 10): Promise<LeaderboardData> {
-  const { data } = await apiClient.get<ApiResponse<LeaderboardData>>('/public/leaderboard/checkin', { params: { page, page_size: pageSize } })
-  return data.data
+  const { data } = await apiClient.get<LeaderboardData>('/public/leaderboard/checkin', { params: { page, page_size: pageSize } })
+  return data
 }
 
 export const leaderboardAPI = {
