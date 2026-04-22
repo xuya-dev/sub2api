@@ -6,6 +6,7 @@ export interface LeaderboardEntry {
   value: number
   extra_int?: number
   extra_int2?: number
+  extra_float?: number
   extra_date?: string
 }
 

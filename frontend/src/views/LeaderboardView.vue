@@ -133,7 +133,7 @@ function getSubtitle(entry: LeaderboardEntry): string {
     if (entry.extra_int) return t('leaderboard.consumptionSubtitle', { count: entry.extra_int })
   } else if (activeTab.value === 'checkin') {
     if (entry.extra_int || entry.extra_date) {
-      return t('leaderboard.checkinSubtitle', { total: entry.extra_int || 0, date: entry.extra_date || '' })
+      return t('leaderboard.checkinSubtitle', { total: entry.extra_int || 0, date: entry.extra_date || '', reward: entry.extra_float?.toFixed(2) || '0.00' })
     }
   }
   return ''

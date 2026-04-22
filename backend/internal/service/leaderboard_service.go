@@ -18,6 +18,7 @@ type LeaderboardEntry struct {
 	Value         float64 `json:"value"`
 	ExtraInt      int     `json:"extra_int,omitempty"`
 	ExtraInt2     int     `json:"extra_int2,omitempty"`
+	ExtraFloat    float64 `json:"extra_float,omitempty"`
 	ExtraDate     string  `json:"extra_date,omitempty"`
 }
 
@@ -176,7 +177,7 @@ func (s *LeaderboardService) GetCheckinLeaderboard(ctx context.Context, page, pa
 	}
 
 	dataQuery := `
-		SELECT u.username, u.email, c.streak_days,
+		SELECT u.username, u.email, c.streak_days, c.reward_amount,
 			(SELECT COUNT(*) FROM checkins WHERE user_id = c.user_id) as total_checkins,
 			(SELECT MAX(checkin_date) FROM checkins WHERE user_id = c.user_id) as last_date
 		FROM checkins c
@@ -202,17 +203,19 @@ func (s *LeaderboardService) GetCheckinLeaderboard(ctx context.Context, page, pa
 		rank++
 		var username, email string
 		var streakDays int
+		var rewardAmount float64
 		var totalCheckins int
 		var lastDate time.Time
-		if err := rows.Scan(&username, &email, &streakDays, &totalCheckins, &lastDate); err != nil {
+		if err := rows.Scan(&username, &email, &streakDays, &rewardAmount, &totalCheckins, &lastDate); err != nil {
 			return nil, fmt.Errorf("scan checkin row: %w", err)
 		}
 		entries = append(entries, LeaderboardEntry{
-			Rank:      rank,
-			Username:  maskUsername(username, email),
-			Value:     float64(streakDays),
-			ExtraInt:  totalCheckins,
-			ExtraDate: lastDate.Format("2006-01-02"),
+			Rank:       rank,
+			Username:   maskUsername(username, email),
+			Value:      float64(streakDays),
+			ExtraInt:   totalCheckins,
+			ExtraFloat: math.Round(rewardAmount*100) / 100,
+			ExtraDate:  lastDate.Format("2006-01-02"),
 		})
 	}
 

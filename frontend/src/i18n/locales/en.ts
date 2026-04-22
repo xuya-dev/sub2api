@@ -905,7 +905,7 @@ export default {
     streakDays: '{days} days',
     balanceSubtitle: '{count} check-ins',
     consumptionSubtitle: '{count} requests',
-    checkinSubtitle: '{total} total · last {date}',
+    checkinSubtitle: '{total} total · last {date} · earned ${reward}',
     tabs: {
       balance: 'Balance',
       consumption: 'Consumption',

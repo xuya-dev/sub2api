@@ -909,7 +909,7 @@ export default {
     streakDays: '{days} 天',
     balanceSubtitle: '累计签到 {count} 次',
     consumptionSubtitle: '{count} 次请求',
-    checkinSubtitle: '累计 {total} 次 · 最近 {date}',
+    checkinSubtitle: '累计 {total} 次 · 最近 {date} · 获得 ${reward}',
     tabs: {
       balance: '余额排行',
       consumption: '消耗排行',
