@@ -4,6 +4,7 @@ export interface LeaderboardEntry {
   rank: number
   username: string
   value: number
+  subtitle?: string
 }
 
 export interface LeaderboardData {

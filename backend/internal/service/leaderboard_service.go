@@ -16,6 +16,7 @@ type LeaderboardEntry struct {
 	Rank     int     `json:"rank"`
 	Username string  `json:"username"`
 	Value    float64 `json:"value"`
+	Subtitle string  `json:"subtitle,omitempty"`
 }
 
 type LeaderboardResult struct {
@@ -109,7 +110,7 @@ func (s *LeaderboardService) GetConsumptionLeaderboard(ctx context.Context, peri
 	}
 
 	dataQuery := `
-		SELECT u.username, u.email, COALESCE(SUM(ul.actual_cost), 0) as total_cost
+		SELECT u.username, u.email, COALESCE(SUM(ul.actual_cost), 0) as total_cost, COUNT(*) as request_count
 		FROM usage_logs ul
 		INNER JOIN users u ON ul.user_id = u.id AND u.deleted_at IS NULL
 		WHERE ul.created_at >= $1 AND u.status = 'active' AND u.role != 'admin'
@@ -130,13 +131,15 @@ func (s *LeaderboardService) GetConsumptionLeaderboard(ctx context.Context, peri
 		rank++
 		var username, email string
 		var totalCost float64
-		if err := rows.Scan(&username, &email, &totalCost); err != nil {
+		var requestCount int
+		if err := rows.Scan(&username, &email, &totalCost, &requestCount); err != nil {
 			return nil, fmt.Errorf("scan consumption row: %w", err)
 		}
 		entries = append(entries, LeaderboardEntry{
 			Rank:     rank,
 			Username: maskUsername(username, email),
 			Value:    math.Round(totalCost*100) / 100,
+			Subtitle: fmt.Sprintf("%d requests", requestCount),
 		})
 	}
 
@@ -168,7 +171,9 @@ func (s *LeaderboardService) GetCheckinLeaderboard(ctx context.Context, page, pa
 	}
 
 	dataQuery := `
-		SELECT u.username, u.email, c.streak_days
+		SELECT u.username, u.email, c.streak_days,
+			(SELECT COUNT(*) FROM checkins WHERE user_id = c.user_id) as total_checkins,
+			(SELECT MAX(checkin_date) FROM checkins WHERE user_id = c.user_id) as last_date
 		FROM checkins c
 		INNER JOIN (
 			SELECT user_id, MAX(checkin_date) as max_date
@@ -192,13 +197,17 @@ func (s *LeaderboardService) GetCheckinLeaderboard(ctx context.Context, page, pa
 		rank++
 		var username, email string
 		var streakDays int
-		if err := rows.Scan(&username, &email, &streakDays); err != nil {
+		var totalCheckins int
+		var lastDate time.Time
+		if err := rows.Scan(&username, &email, &streakDays, &totalCheckins, &lastDate); err != nil {
 			return nil, fmt.Errorf("scan checkin row: %w", err)
 		}
+		subtitle := fmt.Sprintf("%d total · last %s", totalCheckins, lastDate.Format("2006-01-02"))
 		entries = append(entries, LeaderboardEntry{
 			Rank:     rank,
 			Username: maskUsername(username, email),
 			Value:    float64(streakDays),
+			Subtitle: subtitle,
 		})
 	}
 

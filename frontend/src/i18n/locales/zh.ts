@@ -907,6 +907,9 @@ export default {
     subtitle: '看看谁是活跃之星',
     empty: '暂无数据',
     streakDays: '{days} 天',
+    totalCheckins: '累计 {count} 次',
+    requests: '{count} 次请求',
+    lastCheckin: '最近 {date}',
     tabs: {
       balance: '余额排行',
       consumption: '消耗排行',

@@ -42,33 +42,40 @@
             </button>
           </div>
 
-          <div class="p-4">
-            <div v-if="loading" class="flex items-center justify-center py-12">
-              <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
+          <div class="relative min-h-[200px]">
+            <div v-if="loading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-dark-900/80">
+              <div class="flex flex-col items-center gap-3">
+                <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
+                <span class="text-xs text-gray-400 dark:text-dark-500">{{ t('common.loading') }}</span>
+              </div>
             </div>
-            <div v-else-if="entries.length === 0" class="py-12 text-center text-sm text-gray-400 dark:text-dark-500">
+
+            <div v-if="!loading && entries.length === 0" class="py-16 text-center text-sm text-gray-400 dark:text-dark-500">
               {{ t('leaderboard.empty') }}
             </div>
-            <div v-else class="space-y-1">
+
+            <div v-else class="divide-y divide-gray-50 dark:divide-dark-800/50">
               <div
                 v-for="entry in entries"
                 :key="entry.rank"
-                class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-dark-800/50"
+                class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-800/50 sm:px-6"
               >
-                <div :class="rankClass(entry.rank)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">
+                <div :class="rankClass(entry.rank)" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold">
                   <span v-if="entry.rank <= 3">{{ ['🥇', '🥈', '🥉'][entry.rank - 1] }}</span>
-                  <span v-else>{{ entry.rank }}</span>
+                  <span v-else class="text-gray-500 dark:text-dark-400">{{ entry.rank }}</span>
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ entry.username }}</p>
+                  <p v-if="entry.subtitle" class="mt-0.5 truncate text-xs text-gray-400 dark:text-dark-500">{{ entry.subtitle }}</p>
                 </div>
                 <div class="shrink-0 text-right">
-                  <span v-if="activeTab === 'checkin'" class="text-sm font-semibold text-amber-600 dark:text-amber-400">
-                    {{ t('leaderboard.streakDays', { days: entry.value }) }}
-                  </span>
-                  <span v-else class="text-sm font-semibold text-gray-900 dark:text-white">
-                    ${{ entry.value.toFixed(2) }}
-                  </span>
+                  <template v-if="activeTab === 'checkin'">
+                    <span class="text-sm font-bold text-amber-600 dark:text-amber-400">{{ entry.value }}</span>
+                    <span class="text-xs text-amber-500/70 dark:text-amber-400/50"> {{ t('leaderboard.streakDays', { days: '' }).trim() }}</span>
+                  </template>
+                  <template v-else>
+                    <span class="text-sm font-bold text-gray-900 dark:text-white">${{ entry.value.toFixed(2) }}</span>
+                  </template>
                 </div>
               </div>
             </div>
