@@ -151,8 +151,17 @@
             <input v-model.number="form.reward_value" type="number" min="1" class="input" />
           </div>
           <div v-if="form.reward_type === 'subscription'">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.blindbox.subscriptionDays') }}</label>
-            <input v-model.number="form.subscription_days" type="number" min="1" class="input" />
+            <div class="mb-3">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.blindbox.subscriptionGroup') }}</label>
+              <select v-model.number="form.subscription_id" class="input">
+                <option :value="0" disabled>{{ t('admin.blindbox.selectGroup') }}</option>
+                <option v-for="g in subscriptionGroups" :key="g.id" :value="g.id">{{ g.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.blindbox.subscriptionDays') }}</label>
+              <input v-model.number="form.subscription_days" type="number" min="1" class="input" />
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -185,6 +194,7 @@ import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import Toggle from '@/components/common/Toggle.vue'
 import { blindboxAPI, type PrizeItem } from '@/api/admin/blindbox'
+import * as groupAPI from '@/api/admin/groups'
 
 const props = defineProps<{
   enabled: boolean
@@ -205,8 +215,9 @@ const items = ref<PrizeItem[]>([])
 const stats = ref<{ total_items: number; enabled_items: number; total_draws: number } | null>(null)
 const showCreate = ref(false)
 const editingItem = ref<PrizeItem | null>(null)
+const subscriptionGroups = ref<{ id: number; name: string }[]>([])
 
-const defaultForm = { name: '', rarity: 'common', reward_type: 'balance', reward_value: 0, reward_value_max: 0, subscription_days: 0, weight: 100, is_enabled: true }
+const defaultForm = { name: '', rarity: 'common', reward_type: 'balance', reward_value: 0, reward_value_max: 0, subscription_id: 0, subscription_days: 0, weight: 100, is_enabled: true }
 const form = ref({ ...defaultForm })
 
 function rarityClass(rarity: string): string {
@@ -232,7 +243,11 @@ function formatReward(item: PrizeItem): string {
   switch (item.reward_type) {
     case 'balance': return item.reward_value_max > item.reward_value ? `$${item.reward_value}~$${item.reward_value_max}` : `$${item.reward_value}`
     case 'concurrency': return `+${item.reward_value}`
-    case 'subscription': return t('checkin.blindboxSubscriptionReward', { days: item.subscription_days })
+    case 'subscription': {
+      const days = item.subscription_days
+      const group = subscriptionGroups.value.find(g => g.id === item.subscription_id)
+      return group ? `${group.name} ${days}${t('admin.blindbox.days')}` : t('checkin.blindboxSubscriptionReward', { days })
+    }
     case 'invitation_code': return '×1'
     default: return `${item.reward_value}`
   }
@@ -240,7 +255,7 @@ function formatReward(item: PrizeItem): string {
 
 function editItem(item: PrizeItem) {
   editingItem.value = item
-  form.value = { name: item.name, rarity: item.rarity, reward_type: item.reward_type, reward_value: item.reward_value, reward_value_max: item.reward_value_max, subscription_days: item.subscription_days, weight: item.weight, is_enabled: item.is_enabled }
+  form.value = { name: item.name, rarity: item.rarity, reward_type: item.reward_type, reward_value: item.reward_value, reward_value_max: item.reward_value_max, subscription_id: item.subscription_id || 0, subscription_days: item.subscription_days, weight: item.weight, is_enabled: item.is_enabled }
 }
 
 function closeModal() {
@@ -252,10 +267,22 @@ function closeModal() {
 async function saveItem() {
   saving.value = true
   try {
+    const f = form.value
+    const payload = {
+      name: f.name,
+      rarity: f.rarity,
+      reward_type: f.reward_type,
+      reward_value: f.reward_value,
+      reward_value_max: f.reward_value_max,
+      subscription_id: f.reward_type === 'subscription' ? (f.subscription_id || null) : null,
+      subscription_days: f.reward_type === 'subscription' ? f.subscription_days : 0,
+      weight: f.weight,
+      is_enabled: f.is_enabled,
+    }
     if (editingItem.value) {
-      await blindboxAPI.updatePrizeItem(editingItem.value.id, form.value)
+      await blindboxAPI.updatePrizeItem(editingItem.value.id, payload)
     } else {
-      await blindboxAPI.createPrizeItem(form.value)
+      await blindboxAPI.createPrizeItem(payload)
     }
     closeModal()
     await loadData()
@@ -287,11 +314,29 @@ async function loadData() {
   }
 }
 
+async function loadSubscriptionGroups() {
+  try {
+    const groups = await groupAPI.getAll()
+    subscriptionGroups.value = groups
+      .filter(g => g.subscription_type === 'subscription' && g.status === 'active')
+      .map(g => ({ id: g.id, name: g.name }))
+  } catch {
+    subscriptionGroups.value = []
+  }
+}
+
 watch(() => props.enabled, (val) => {
   if (val && items.value.length === 0) loadData()
 })
 
+watch([showCreate, editingItem, () => form.value.reward_type], ([isCreating, isEditing, rewardType]) => {
+  if ((isCreating || isEditing) && rewardType === 'subscription' && subscriptionGroups.value.length === 0) {
+    loadSubscriptionGroups()
+  }
+})
+
 onMounted(() => {
   if (props.enabled) loadData()
+  loadSubscriptionGroups()
 })
 </script>

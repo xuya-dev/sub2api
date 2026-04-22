@@ -63,11 +63,12 @@ type BlindboxRecordList struct {
 }
 
 type BlindBoxService struct {
-	entClient    *dbent.Client
-	db           *sql.DB
-	settingSvc   *SettingService
-	userRepo     UserRepository
-	billingCache *BillingCacheService
+	entClient         *dbent.Client
+	db                *sql.DB
+	settingSvc        *SettingService
+	userRepo          UserRepository
+	billingCache      *BillingCacheService
+	subscriptionSvc   *SubscriptionService
 }
 
 func NewBlindBoxService(
@@ -76,13 +77,15 @@ func NewBlindBoxService(
 	settingSvc *SettingService,
 	userRepo UserRepository,
 	billingCache *BillingCacheService,
+	subscriptionSvc *SubscriptionService,
 ) *BlindBoxService {
 	return &BlindBoxService{
-		entClient:    entClient,
-		db:           db,
-		settingSvc:   settingSvc,
-		userRepo:     userRepo,
-		billingCache: billingCache,
+		entClient:       entClient,
+		db:              db,
+		settingSvc:      settingSvc,
+		userRepo:        userRepo,
+		billingCache:    billingCache,
+		subscriptionSvc: subscriptionSvc,
 	}
 }
 
@@ -301,7 +304,15 @@ func (s *BlindBoxService) applyReward(ctx context.Context, userID int64, item *d
 		}
 	case BlindboxRewardSubscription:
 		if item.SubscriptionID != nil && item.SubscriptionDays > 0 {
-			// TODO: apply subscription via SubscriptionService if needed
+			_, _, err := s.subscriptionSvc.AssignOrExtendSubscription(ctx, &AssignSubscriptionInput{
+				UserID:       userID,
+				GroupID:      *item.SubscriptionID,
+				ValidityDays: item.SubscriptionDays,
+				Notes:        "签到盲盒奖励",
+			})
+			if err != nil {
+				return fmt.Errorf("assign subscription: %w", err)
+			}
 		}
 	case BlindboxRewardInvitationCode:
 		// invitation code generation is informational only - record is stored
