@@ -1,48 +1,6 @@
 <template>
   <div class="relative flex min-h-screen flex-col bg-gray-50 dark:bg-dark-950">
-    <header class="relative z-20 border-b border-gray-100 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80">
-      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <router-link to="/home" class="flex items-center gap-3">
-          <div class="h-8 w-8 overflow-hidden rounded-lg">
-            <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
-          </div>
-          <span class="text-lg font-bold text-gray-900 dark:text-white">{{ siteName }}</span>
-        </router-link>
-        <div class="flex items-center gap-2">
-          <router-link to="/leaderboard"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-900 bg-gray-100 dark:text-white dark:bg-dark-800 sm:flex">
-            {{ t('leaderboard.title') }}
-          </router-link>
-          <router-link to="/key-usage"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('home.keyUsage') }}
-          </router-link>
-          <router-link to="/monitoring"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('admin.monitoring.title') }}
-          </router-link>
-          <router-link to="/pricing"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('pricing.title') }}
-          </router-link>
-          <LocaleSwitcher />
-          <button @click="toggleTheme"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-800">
-            <Icon v-if="isDark" name="sun" size="sm" />
-            <Icon v-else name="moon" size="sm" />
-          </button>
-          <router-link v-if="isAuthenticated" :to="dashboardPath"
-            class="ml-1 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100">
-            {{ t('home.dashboard') }}
-            <Icon name="arrowRight" size="xs" :stroke-width="2" />
-          </router-link>
-          <router-link v-else to="/login"
-            class="ml-1 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100">
-            {{ t('home.login') }}
-          </router-link>
-        </div>
-      </nav>
-    </header>
+    <PublicPageHeader active-path="/leaderboard" />
 
     <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
       <div class="space-y-6">
@@ -127,23 +85,12 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
-import { useAuthStore } from '@/stores/auth'
-import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
-import Icon from '@/components/icons/Icon.vue'
+import PublicPageHeader from '@/components/common/PublicPageHeader.vue'
 import PublicPageFooter from '@/components/common/PublicPageFooter.vue'
 import { leaderboardAPI, type LeaderboardEntry } from '@/api/leaderboard'
 
 const { t } = useI18n()
 const appStore = useAppStore()
-const authStore = useAuthStore()
-
-const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Sub2API')
-const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-const isAdmin = computed(() => authStore.isAdmin)
-const dashboardPath = computed(() => isAdmin.value ? '/admin/dashboard' : '/dashboard')
-
-const isDark = ref(document.documentElement.classList.contains('dark'))
 
 type TabKey = 'balance' | 'consumption' | 'checkin'
 type PeriodKey = 'daily' | 'weekly' | 'monthly'
@@ -172,12 +119,6 @@ function rankClass(rank: number): string {
   return 'bg-gray-100 dark:bg-dark-800'
 }
 
-function toggleTheme() {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-}
-
 async function fetchData() {
   loading.value = true
   try {
@@ -204,15 +145,9 @@ async function fetchData() {
 watch([activeTab, activePeriod], () => fetchData())
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
   if (!appStore.publicSettingsLoaded) {
     appStore.fetchPublicSettings()
   }
-  authStore.checkAuth()
   fetchData()
 })
 </script>

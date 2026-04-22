@@ -1,53 +1,6 @@
 <template>
   <div class="relative flex min-h-screen flex-col bg-gray-50 dark:bg-dark-950">
-    <!-- Header -->
-    <header class="relative z-20 border-b border-gray-100 bg-white/80 backdrop-blur-xl dark:border-dark-800 dark:bg-dark-950/80">
-      <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <router-link to="/home" class="flex items-center gap-3">
-          <div class="h-8 w-8 overflow-hidden rounded-lg">
-            <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
-          </div>
-          <span class="text-lg font-bold text-gray-900 dark:text-white">{{ siteName }}</span>
-        </router-link>
-        <div class="flex items-center gap-2">
-          <router-link to="/leaderboard"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('leaderboard.title') }}
-          </router-link>
-          <router-link to="/key-usage"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-900 bg-gray-100 dark:text-white dark:bg-dark-800 sm:flex">
-            {{ t('home.keyUsage') }}
-          </router-link>
-          <router-link to="/monitoring"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('admin.monitoring.title') }}
-          </router-link>
-          <router-link to="/pricing"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('pricing.title') }}
-          </router-link>
-          <LocaleSwitcher />
-          <a v-if="docUrl" :href="docUrl" target="_blank" rel="noopener noreferrer"
-            class="hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-dark-300 dark:hover:bg-dark-800 dark:hover:text-white sm:flex">
-            {{ t('home.docs') }}
-          </a>
-          <button @click="toggleTheme"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:text-dark-400 dark:hover:bg-dark-800">
-            <Icon v-if="isDark" name="sun" size="sm" />
-            <Icon v-else name="moon" size="sm" />
-          </button>
-          <router-link v-if="isAuthenticated" :to="dashboardPath"
-            class="ml-1 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100">
-            {{ t('home.dashboard') }}
-            <Icon name="arrowRight" size="xs" :stroke-width="2" />
-          </router-link>
-          <router-link v-else to="/login"
-            class="ml-1 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100">
-            {{ t('home.login') }}
-          </router-link>
-        </div>
-      </nav>
-    </header>
+    <PublicPageHeader active-path="/key-usage" />
 
     <!-- Main Content -->
     <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
@@ -363,18 +316,7 @@
       </div>
     </main>
 
-    <footer class="border-t border-gray-100 py-10 dark:border-dark-800">
-      <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
-        <div class="flex items-center gap-3">
-          <span class="text-sm text-gray-500 dark:text-dark-400">&copy; {{ currentYear }} {{ siteName }}</span>
-        </div>
-        <div class="flex items-center gap-6">
-          <router-link to="/leaderboard" class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">{{ t('leaderboard.title') }}</router-link>
-          <router-link to="/monitoring" class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">{{ t('admin.monitoring.title') }}</router-link>
-          <router-link to="/pricing" class="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-dark-400 dark:hover:text-white">{{ t('pricing.title') }}</router-link>
-        </div>
-      </div>
-    </footer>
+    <PublicPageFooter />
 
     <!-- HUD Script Modal (at root level for full-screen overlay) -->
     <div v-if="showHudModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" @click.self="showHudModal = false">
@@ -417,37 +359,13 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
-import { useAuthStore } from '@/stores/auth'
-import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
-import Icon from '@/components/icons/Icon.vue'
+import PublicPageHeader from '@/components/common/PublicPageHeader.vue'
+import PublicPageFooter from '@/components/common/PublicPageFooter.vue'
 
 const { t, locale } = useI18n()
 const appStore = useAppStore()
-const authStore = useAuthStore()
-
-// ==================== Site Settings (same as HomeView) ====================
-
-const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Sub2API')
-const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
-const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || '')
-
-// ==================== Auth ====================
-
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-const isAdmin = computed(() => authStore.isAdmin)
-const dashboardPath = computed(() => isAdmin.value ? '/admin/dashboard' : '/dashboard')
-
-// ==================== Theme (same as HomeView) ====================
 
 const isDark = ref(document.documentElement.classList.contains('dark'))
-
-function toggleTheme() {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-}
-
-const currentYear = computed(() => new Date().getFullYear())
 
 // ==================== Key Query State ====================
 
@@ -1062,14 +980,6 @@ async function queryKey() {
 
 // ==================== Lifecycle ====================
 
-function initTheme() {
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
-}
-
 function formatResetTime(resetAt: string | null | undefined): string {
   if (!resetAt) return ''
   const diff = new Date(resetAt).getTime() - now.value.getTime()
@@ -1083,7 +993,6 @@ function formatResetTime(resetAt: string | null | undefined): string {
 }
 
 onMounted(() => {
-  initTheme()
   if (!appStore.publicSettingsLoaded) {
     appStore.fetchPublicSettings()
   }
