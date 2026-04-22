@@ -336,7 +336,7 @@ func (s *CheckinService) calculateStreak(ctx context.Context, userID int64, toda
 		Query().
 		Where(
 			checkin.UserID(userID),
-			checkin.CheckinDateLTE(today),
+			checkin.CheckinDateLT(today),
 		).
 		Order(dbent.Desc(checkin.FieldCheckinDate)).
 		First(ctx)

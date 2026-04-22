@@ -41,8 +41,11 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <span v-if="checkinStore.streakDays > 0" class="text-sm text-gray-500 dark:text-dark-400">
-              {{ t('checkin.streakDays', { days: checkinStore.streakDays }) }}
+            <span v-if="checkinStore.streakDays > 0" class="inline-flex items-center gap-1 text-sm" :class="streakColor">
+              <svg :class="streakFlameClass" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 23c-3.866 0-7-2.686-7-6 0-2.972 1.637-5.342 3.276-7.097A1 1 0 019.2 10.1c-.48.907-.7 1.747-.7 2.4 0 1.933 1.567 3.5 3.5 3.5s3.5-1.567 3.5-3.5c0-1.073-.423-2.177-1.104-3.207C13.216 7.246 12 5.764 12 3.5c0-.578.077-1.16.236-1.72a1 1 0 011.69-.481C16.44 3.678 19 7.223 19 11c0 4.314-2.957 7-5.463 8.565A6.96 6.96 0 0112 23z"/>
+              </svg>
+              <span class="font-semibold">{{ t('checkin.streakDays', { days: checkinStore.streakDays }) }}</span>
             </span>
 
             <template v-if="checkinStore.canCheckin">
@@ -143,6 +146,21 @@ const balanceLowNotifyEnabled = ref(false)
 const systemDefaultThreshold = ref(0)
 const showProfileLuckModal = ref(false)
 const profileLuckBet = ref<number>(0)
+
+const streakColor = computed(() => {
+  const d = checkinStore.streakDays
+  if (d >= 30) return 'text-orange-500 dark:text-orange-400'
+  if (d >= 7) return 'text-amber-500 dark:text-amber-400'
+  return 'text-gray-500 dark:text-dark-400'
+})
+
+const streakFlameClass = computed(() => {
+  const d = checkinStore.streakDays
+  if (d >= 100) return 'h-6 w-6 animate-pulse'
+  if (d >= 30) return 'h-5 w-5'
+  if (d >= 7) return 'h-4 w-4'
+  return 'h-3.5 w-3.5'
+})
 
 async function submitProfileLuck() {
   if (!profileLuckBet.value || profileLuckBet.value <= 0) return

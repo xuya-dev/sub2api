@@ -902,6 +902,23 @@ export default {
     insufficientBalance: '余额不足'
   },
 
+  leaderboard: {
+    title: '排行榜',
+    subtitle: '看看谁是活跃之星',
+    empty: '暂无数据',
+    streakDays: '{days} 天',
+    tabs: {
+      balance: '余额排行',
+      consumption: '消耗排行',
+      checkin: '签到排行',
+    },
+    periods: {
+      daily: '日',
+      weekly: '周',
+      monthly: '月',
+    },
+  },
+
   // Profile
   profile: {
     title: '个人设置',

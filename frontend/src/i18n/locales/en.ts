@@ -898,6 +898,23 @@ export default {
     insufficientBalance: 'Insufficient balance'
   },
 
+  leaderboard: {
+    title: 'Leaderboard',
+    subtitle: 'See who are the top users',
+    empty: 'No data yet',
+    streakDays: '{days} days',
+    tabs: {
+      balance: 'Balance',
+      consumption: 'Consumption',
+      checkin: 'Check-in',
+    },
+    periods: {
+      daily: 'Day',
+      weekly: 'Week',
+      monthly: 'Month',
+    },
+  },
+
   // Profile
   profile: {
     title: 'Profile Settings',

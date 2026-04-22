@@ -131,6 +131,9 @@
       </div>
     </section>
 
+    <!-- Leaderboard -->
+    <LeaderboardSection />
+
     <!-- Pain Points -->
     <section class="py-20 sm:py-24">
       <div class="mx-auto max-w-7xl px-6">
@@ -260,6 +263,7 @@ import { useAuthStore, useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
 import ModelIcon from '@/components/common/ModelIcon.vue'
+import LeaderboardSection from '@/components/home/LeaderboardSection.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()

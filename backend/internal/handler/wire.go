@@ -97,6 +97,7 @@ func ProvideHandlers(
 	paymentHandler *PaymentHandler,
 	paymentWebhookHandler *PaymentWebhookHandler,
 	checkinHandler *CheckinHandler,
+	leaderboardHandler *LeaderboardHandler,
 	_ *service.IdempotencyCoordinator,
 	_ *service.IdempotencyCleanupService,
 ) *Handlers {
@@ -116,6 +117,7 @@ func ProvideHandlers(
 		Payment:        paymentHandler,
 		PaymentWebhook: paymentWebhookHandler,
 		Checkin:        checkinHandler,
+		Leaderboard:    leaderboardHandler,
 	}
 }
 
@@ -136,6 +138,7 @@ var ProviderSet = wire.NewSet(
 	NewPaymentHandler,
 	NewPaymentWebhookHandler,
 	NewCheckinHandler,
+	NewLeaderboardHandler,
 
 	// Admin handlers
 	admin.NewDashboardHandler,

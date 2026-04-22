@@ -43,4 +43,12 @@ func RegisterCommonRoutes(r *gin.Engine, h *handler.Handlers) {
 
 	// 公开模型定价查询
 	r.GET("/api/v1/public/pricing", h.Admin.ModelPricing.GetPublicPricing)
+
+	// 公开排行榜
+	leaderboard := r.Group("/api/v1/public/leaderboard")
+	{
+		leaderboard.GET("/balance", h.Leaderboard.GetBalanceLeaderboard)
+		leaderboard.GET("/consumption", h.Leaderboard.GetConsumptionLeaderboard)
+		leaderboard.GET("/checkin", h.Leaderboard.GetCheckinLeaderboard)
+	}
 }
