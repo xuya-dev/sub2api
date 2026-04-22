@@ -34,7 +34,8 @@
               {{ t('admin.settings.checkin.blindboxIntervalHint') }}
             </p>
           </div>
-          <div class="flex items-end">
+          <div>
+            <label class="mb-2 block text-sm font-medium opacity-0">&nbsp;</label>
             <button type="button" @click="showCreate = true" class="btn btn-primary">
               <Icon name="plus" size="md" class="mr-1" />
               {{ t('admin.blindbox.createItem') }}
@@ -59,14 +60,14 @@
         </div>
 
         <!-- Prize Items Table -->
-        <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-700">
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-dark-700">
           <div v-if="loading" class="flex items-center justify-center py-8">
             <div class="h-5 w-5 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
           </div>
           <div v-else-if="items.length === 0" class="py-8 text-center text-sm text-gray-400 dark:text-gray-500">
             {{ t('admin.blindbox.empty') }}
           </div>
-          <table v-else class="w-full text-sm">
+          <table v-else class="w-full min-w-[640px] text-sm">
             <thead class="border-b border-gray-100 bg-gray-50 dark:border-dark-700 dark:bg-dark-800">
               <tr>
                 <th class="px-3 py-2 text-left font-medium text-gray-500 dark:text-gray-400">{{ t('admin.blindbox.colName') }}</th>
