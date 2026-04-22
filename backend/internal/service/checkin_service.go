@@ -329,6 +329,12 @@ func (s *CheckinService) GetStatus(ctx context.Context, userID int64) (*CheckinS
 	return status, nil
 }
 
+func sameDate(a, b time.Time) bool {
+	aY, aM, aD := a.Date()
+	bY, bM, bD := b.Date()
+	return aY == bY && aM == bM && aD == bD
+}
+
 func (s *CheckinService) calculateStreak(ctx context.Context, userID int64, today time.Time) int {
 	yesterday := today.AddDate(0, 0, -1)
 
@@ -344,7 +350,7 @@ func (s *CheckinService) calculateStreak(ctx context.Context, userID int64, toda
 		return 1
 	}
 
-	if lastCheckin.CheckinDate.Equal(yesterday) {
+	if sameDate(lastCheckin.CheckinDate, yesterday) {
 		return lastCheckin.StreakDays + 1
 	}
 
