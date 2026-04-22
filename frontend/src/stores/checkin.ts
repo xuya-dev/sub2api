@@ -82,6 +82,10 @@ export const useCheckinStore = defineStore('checkin', () => {
     }
   }
 
+  function clearBlindboxResult() {
+    blindboxResult.value = null
+  }
+
   function $reset() {
     status.value = null
     loading.value = false
@@ -106,6 +110,7 @@ export const useCheckinStore = defineStore('checkin', () => {
     fetchStatus,
     doCheckin,
     doLuckCheckin,
+    clearBlindboxResult,
     $reset
   }
 })

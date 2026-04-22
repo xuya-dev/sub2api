@@ -1584,148 +1584,149 @@
                 </div>
               </div>
             </div>
-
-            <!-- Checkin 签到设置 -->
-            <div class="mt-4 border-t pt-4 dark:border-dark-700">
-              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('admin.settings.checkin.title') }}
-              </h4>
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('admin.settings.checkin.enabled') }}
-                    </label>
-                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      {{ t('admin.settings.checkin.enabledHint') }}
-                    </p>
-                  </div>
-                  <button type="button"
-                    :class="form.checkin_enabled ? 'bg-primary-600' : 'bg-gray-300 dark:bg-dark-600'"
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                    @click="form.checkin_enabled = !form.checkin_enabled">
-                    <span :class="form.checkin_enabled ? 'translate-x-5' : 'translate-x-0'"
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
-                  </button>
-                </div>
-                <template v-if="form.checkin_enabled">
-                  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ t('admin.settings.checkin.minBalance') }}
-                      </label>
-                      <input v-model.number="form.checkin_min_balance" type="number" step="0.01" min="0"
-                        class="input" placeholder="0.10" />
-                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        {{ t('admin.settings.checkin.minBalanceHint') }}
-                      </p>
-                    </div>
-                    <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ t('admin.settings.checkin.maxBalance') }}
-                      </label>
-                      <input v-model.number="form.checkin_max_balance" type="number" step="0.01" min="0"
-                        class="input" placeholder="1.00" />
-                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        {{ t('admin.settings.checkin.maxBalanceHint') }}
-                      </p>
-                    </div>
-                  </div>
-                </template>
-
-                <div class="flex items-center justify-between border-t pt-4 dark:border-dark-700">
-                  <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ t('admin.settings.checkin.luckEnabled') }}
-                    </label>
-                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      {{ t('admin.settings.checkin.luckEnabledHint') }}
-                    </p>
-                  </div>
-                  <button type="button"
-                    :class="form.checkin_luck_enabled ? 'bg-primary-600' : 'bg-gray-300 dark:bg-dark-600'"
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                    @click="form.checkin_luck_enabled = !form.checkin_luck_enabled">
-                    <span :class="form.checkin_luck_enabled ? 'translate-x-5' : 'translate-x-0'"
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
-                  </button>
-                </div>
-                <template v-if="form.checkin_luck_enabled">
-                  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ t('admin.settings.checkin.luckMinMultiplier') }}
-                      </label>
-                      <input v-model.number="form.checkin_luck_min_multiplier" type="number" step="0.01" min="0"
-                        class="input" placeholder="0.10" />
-                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        {{ t('admin.settings.checkin.luckMinMultiplierHint') }}
-                      </p>
-                    </div>
-                    <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ t('admin.settings.checkin.luckMaxMultiplier') }}
-                      </label>
-                      <input v-model.number="form.checkin_luck_max_multiplier" type="number" step="0.01" min="0"
-                        class="input" placeholder="3.00" />
-                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        {{ t('admin.settings.checkin.luckMaxMultiplierHint') }}
-                      </p>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
-
-            <!-- Blind Box Settings -->
-            <div class="card">
-              <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                      {{ t('admin.settings.checkin.blindboxTitle') }}
-                    </h2>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      {{ t('admin.settings.checkin.blindboxDescription') }}
-                    </p>
-                  </div>
-                  <Toggle v-model="form.checkin_blindbox_enabled" />
-                </div>
-              </div>
-              <template v-if="form.checkin_blindbox_enabled">
-                <div class="space-y-4 p-6">
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ t('admin.settings.checkin.blindboxTriggerType') }}
-                      </label>
-                      <select v-model="form.checkin_blindbox_trigger_type" class="input">
-                        <option value="streak">{{ t('admin.settings.checkin.blindboxTriggerStreak') }}</option>
-                        <option value="total">{{ t('admin.settings.checkin.blindboxTriggerTotal') }}</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ t('admin.settings.checkin.blindboxInterval') }}
-                      </label>
-                      <input v-model.number="form.checkin_blindbox_interval" type="number" min="1"
-                        class="input" placeholder="7" />
-                      <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        {{ t('admin.settings.checkin.blindboxIntervalHint') }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <router-link to="/admin/blindbox" class="btn btn-primary text-sm">
-                      {{ t('admin.settings.checkin.blindboxManagePool') }}
-                    </router-link>
-                  </div>
-                </div>
-              </template>
-            </div>
           </div>
         </div>
         </div><!-- /Tab: Users -->
+
+        <!-- Tab: Check-in -->
+        <div v-show="activeTab === 'checkin'" class="space-y-6">
+
+        <!-- Checkin 签到设置 -->
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.checkin.title') }}
+            </h2>
+          </div>
+          <div class="space-y-5 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="font-medium text-gray-900 dark:text-white">
+                  {{ t('admin.settings.checkin.enabled') }}
+                </label>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.checkin.enabledHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.checkin_enabled" />
+            </div>
+            <template v-if="form.checkin_enabled">
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-2 border-t pt-4 dark:border-dark-700">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.checkin.minBalance') }}
+                  </label>
+                  <input v-model.number="form.checkin_min_balance" type="number" step="0.01" min="0"
+                    class="input" placeholder="0.10" />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.checkin.minBalanceHint') }}
+                  </p>
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.checkin.maxBalance') }}
+                  </label>
+                  <input v-model.number="form.checkin_max_balance" type="number" step="0.01" min="0"
+                    class="input" placeholder="1.00" />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.checkin.maxBalanceHint') }}
+                  </p>
+                </div>
+              </div>
+            </template>
+
+            <div class="flex items-center justify-between border-t pt-4 dark:border-dark-700">
+              <div>
+                <label class="font-medium text-gray-900 dark:text-white">
+                  {{ t('admin.settings.checkin.luckEnabled') }}
+                </label>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.checkin.luckEnabledHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.checkin_luck_enabled" />
+            </div>
+            <template v-if="form.checkin_luck_enabled">
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-2 border-t pt-4 dark:border-dark-700">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.checkin.luckMinMultiplier') }}
+                  </label>
+                  <input v-model.number="form.checkin_luck_min_multiplier" type="number" step="0.01" min="0"
+                    class="input" placeholder="0.10" />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.checkin.luckMinMultiplierHint') }}
+                  </p>
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.checkin.luckMaxMultiplier') }}
+                  </label>
+                  <input v-model.number="form.checkin_luck_max_multiplier" type="number" step="0.01" min="0"
+                    class="input" placeholder="3.00" />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.checkin.luckMaxMultiplierHint') }}
+                  </p>
+                </div>
+              </div>
+            </template>
+
+            <div class="flex justify-end border-t pt-4 dark:border-dark-700">
+              <button type="button" @click="saveSettings" :disabled="saving" class="btn btn-primary btn-sm">
+                {{ saving ? t('common.saving') : t('common.save') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blind Box Settings -->
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ t('admin.settings.checkin.blindboxTitle') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.checkin.blindboxDescription') }}
+                </p>
+              </div>
+              <Toggle v-model="form.checkin_blindbox_enabled" />
+            </div>
+          </div>
+          <template v-if="form.checkin_blindbox_enabled">
+            <div class="space-y-4 p-6">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.checkin.blindboxTriggerType') }}
+                  </label>
+                  <select v-model="form.checkin_blindbox_trigger_type" class="input">
+                    <option value="streak">{{ t('admin.settings.checkin.blindboxTriggerStreak') }}</option>
+                    <option value="total">{{ t('admin.settings.checkin.blindboxTriggerTotal') }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ t('admin.settings.checkin.blindboxInterval') }}
+                  </label>
+                  <input v-model.number="form.checkin_blindbox_interval" type="number" min="1"
+                    class="input" placeholder="7" />
+                  <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.checkin.blindboxIntervalHint') }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 border-t pt-4 dark:border-dark-700">
+                <router-link to="/admin/blindbox" class="btn btn-primary text-sm">
+                  {{ t('admin.settings.checkin.blindboxManagePool') }}
+                </router-link>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        </div><!-- /Tab: Check-in -->
 
         <!-- Tab: Gateway — Claude Code, Scheduling -->
         <div v-show="activeTab === 'gateway'" class="space-y-6">
@@ -3003,13 +3004,14 @@ const { t, locale } = useI18n()
 const appStore = useAppStore()
 const adminSettingsStore = useAdminSettingsStore()
 
-type SettingsTab = 'general' | 'security' | 'users' | 'gateway' | 'payment' | 'email' | 'backup'
+type SettingsTab = 'general' | 'security' | 'users' | 'gateway' | 'checkin' | 'payment' | 'email' | 'backup'
 const activeTab = ref<SettingsTab>('general')
 const settingsTabs = [
   { key: 'general'  as SettingsTab, icon: 'home'   as const },
   { key: 'security' as SettingsTab, icon: 'shield' as const },
   { key: 'users'    as SettingsTab, icon: 'user'   as const },
   { key: 'gateway'  as SettingsTab, icon: 'server' as const },
+  { key: 'checkin'  as SettingsTab, icon: 'gift'   as const },
   { key: 'payment'  as SettingsTab, icon: 'creditCard' as const },
   { key: 'email'    as SettingsTab, icon: 'mail'   as const },
   { key: 'backup'   as SettingsTab, icon: 'database' as const },

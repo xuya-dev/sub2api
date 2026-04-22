@@ -283,6 +283,11 @@
       </div>
     </div>
   </header>
+  <BlindboxModal
+    :show="!!checkinStore.blindboxResult"
+    :result="checkinStore.blindboxResult"
+    @close="checkinStore.clearBlindboxResult()"
+  />
 </template>
 
 <script setup lang="ts">
@@ -297,6 +302,7 @@ import BaseDialog from '@/components/common/BaseDialog.vue'
 import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMini.vue'
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
 import Icon from '@/components/icons/Icon.vue'
+import BlindboxModal from '@/components/user/profile/BlindboxModal.vue'
 
 const router = useRouter()
 const route = useRoute()

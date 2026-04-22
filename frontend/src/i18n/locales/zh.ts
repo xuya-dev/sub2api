@@ -390,7 +390,8 @@ export default {
     paymentConfig: '支付配置',
     paymentPlans: '订阅套餐',
     monitoring: '平台监控',
-    modelPricing: '模型定价'
+    modelPricing: '模型定价',
+    blindbox: '盲盒管理'
   },
 
   // Auth
@@ -4600,6 +4601,7 @@ export default {
         security: '安全与认证',
         users: '用户默认值',
         gateway: '网关服务',
+        checkin: '签到管理',
         email: '邮件设置',
         backup: '数据备份',
         payment: '支付设置',
