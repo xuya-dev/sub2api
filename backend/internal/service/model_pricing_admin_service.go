@@ -19,27 +19,27 @@ import (
 )
 
 type ModelPricingEntry struct {
-	ID                                  int64   `json:"id"`
-	Model                               string  `json:"model"`
-	InputCostPerToken                   float64 `json:"input_cost_per_token"`
-	OutputCostPerToken                  float64 `json:"output_cost_per_token"`
-	CacheCreationInputTokenCost         *float64 `json:"cache_creation_input_token_cost"`
-	CacheCreationInputTokenCostAbove1hr *float64 `json:"cache_creation_input_token_cost_above_1hr"`
-	CacheReadInputTokenCost             *float64 `json:"cache_read_input_token_cost"`
-	InputCostPerTokenPriority           *float64 `json:"input_cost_per_token_priority"`
-	OutputCostPerTokenPriority          *float64 `json:"output_cost_per_token_priority"`
-	CacheReadInputTokenCostPriority     *float64 `json:"cache_read_input_token_cost_priority"`
-	OutputCostPerImage                  *float64 `json:"output_cost_per_image"`
-	OutputCostPerImageToken             *float64 `json:"output_cost_per_image_token"`
-	LongContextInputTokenThreshold      *int     `json:"long_context_input_token_threshold"`
-	LongContextInputCostMultiplier      *float64 `json:"long_context_input_cost_multiplier"`
-	LongContextOutputCostMultiplier     *float64 `json:"long_context_output_cost_multiplier"`
-	SupportsServiceTier                 bool     `json:"supports_service_tier"`
-	LitellmProvider                     string   `json:"litellm_provider"`
-	Mode                                string   `json:"mode"`
-	SupportsPromptCaching               bool     `json:"supports_prompt_caching"`
-	Locked                              bool     `json:"locked"`
-	Source                              string   `json:"source"`
+	ID                                  int64     `json:"id"`
+	Model                               string    `json:"model"`
+	InputCostPerToken                   float64   `json:"input_cost_per_token"`
+	OutputCostPerToken                  float64   `json:"output_cost_per_token"`
+	CacheCreationInputTokenCost         *float64  `json:"cache_creation_input_token_cost"`
+	CacheCreationInputTokenCostAbove1hr *float64  `json:"cache_creation_input_token_cost_above_1hr"`
+	CacheReadInputTokenCost             *float64  `json:"cache_read_input_token_cost"`
+	InputCostPerTokenPriority           *float64  `json:"input_cost_per_token_priority"`
+	OutputCostPerTokenPriority          *float64  `json:"output_cost_per_token_priority"`
+	CacheReadInputTokenCostPriority     *float64  `json:"cache_read_input_token_cost_priority"`
+	OutputCostPerImage                  *float64  `json:"output_cost_per_image"`
+	OutputCostPerImageToken             *float64  `json:"output_cost_per_image_token"`
+	LongContextInputTokenThreshold      *int      `json:"long_context_input_token_threshold"`
+	LongContextInputCostMultiplier      *float64  `json:"long_context_input_cost_multiplier"`
+	LongContextOutputCostMultiplier     *float64  `json:"long_context_output_cost_multiplier"`
+	SupportsServiceTier                 bool      `json:"supports_service_tier"`
+	LitellmProvider                     string    `json:"litellm_provider"`
+	Mode                                string    `json:"mode"`
+	SupportsPromptCaching               bool      `json:"supports_prompt_caching"`
+	Locked                              bool      `json:"locked"`
+	Source                              string    `json:"source"`
 	CreatedAt                           time.Time `json:"created_at"`
 	UpdatedAt                           time.Time `json:"updated_at"`
 }
@@ -52,24 +52,25 @@ type ModelPricingListParams struct {
 }
 
 type ModelPricingListResult struct {
-	Items      []ModelPricingEntry `json:"items"`
-	Total      int                 `json:"total"`
-	Page       int                 `json:"page"`
-	PageSize   int                 `json:"page_size"`
+	Items    []ModelPricingEntry `json:"items"`
+	Total    int                 `json:"total"`
+	Page     int                 `json:"page"`
+	PageSize int                 `json:"page_size"`
 }
 
 type SyncStatus struct {
-	AutoSyncEnabled bool      `json:"auto_sync_enabled"`
+	AutoSyncEnabled bool       `json:"auto_sync_enabled"`
 	LastSyncedAt    *time.Time `json:"last_synced_at"`
-	ModelCount      int       `json:"model_count"`
+	ModelCount      int        `json:"model_count"`
 }
 
 type ModelPricingAdminService struct {
-	client *ent.Client
-	db    *sql.DB
-	cfg    *config.Config
-	mu     sync.RWMutex
-	cache  map[string]*LiteLLMModelPricing
+	client         *ent.Client
+	db             *sql.DB
+	cfg            *config.Config
+	channelService *ChannelService
+	mu             sync.RWMutex
+	cache          map[string]*LiteLLMModelPricing
 
 	remoteClient PricingRemoteClient
 	stopCh       chan struct{}
@@ -79,11 +80,12 @@ type ModelPricingAdminService struct {
 	lastSyncedAt    time.Time
 }
 
-func NewModelPricingAdminService(client *ent.Client, db *sql.DB, cfg *config.Config, remoteClient PricingRemoteClient) *ModelPricingAdminService {
+func NewModelPricingAdminService(client *ent.Client, db *sql.DB, cfg *config.Config, remoteClient PricingRemoteClient, channelService *ChannelService) *ModelPricingAdminService {
 	return &ModelPricingAdminService{
 		client:          client,
 		db:              db,
 		cfg:             cfg,
+		channelService:  channelService,
 		remoteClient:    remoteClient,
 		cache:           make(map[string]*LiteLLMModelPricing),
 		stopCh:          make(chan struct{}),
@@ -780,11 +782,11 @@ type PublicPricingGroup struct {
 }
 
 type PublicPricingModel struct {
-	ModelName           string  `json:"model_name"`
+	ModelName            string  `json:"model_name"`
 	InputCostPerMillion  float64 `json:"input_cost_per_million"`
 	OutputCostPerMillion float64 `json:"output_cost_per_million"`
-	EffectiveInput      float64 `json:"effective_input"`
-	EffectiveOutput     float64 `json:"effective_output"`
+	EffectiveInput       float64 `json:"effective_input"`
+	EffectiveOutput      float64 `json:"effective_output"`
 	RequestCount         int     `json:"request_count"`
 }
 
@@ -856,6 +858,57 @@ func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Con
 		}
 		if err := json.Unmarshal([]byte(modelsJSON), &g.Models); err != nil {
 			g.Models = []PublicPricingModel{}
+		}
+		for i := range g.Models {
+			basePricing := s.GetPricingFromCache(g.Models[i].ModelName)
+			if basePricing != nil {
+				if basePricing.InputCostPerToken > 0 {
+					g.Models[i].InputCostPerMillion = basePricing.InputCostPerToken * 1000000
+					g.Models[i].EffectiveInput = g.Models[i].InputCostPerMillion * g.RateMultiplier
+				}
+				if basePricing.OutputCostPerToken > 0 {
+					g.Models[i].OutputCostPerMillion = basePricing.OutputCostPerToken * 1000000
+					g.Models[i].EffectiveOutput = g.Models[i].OutputCostPerMillion * g.RateMultiplier
+				} else if basePricing.OutputCostPerImage > 0 {
+					g.Models[i].OutputCostPerMillion = basePricing.OutputCostPerImage
+					g.Models[i].EffectiveOutput = g.Models[i].OutputCostPerMillion * g.RateMultiplier
+				}
+			}
+			if s.channelService == nil {
+				continue
+			}
+			channelPricing := s.channelService.GetChannelModelPricing(ctx, g.ID, g.Models[i].ModelName)
+			if channelPricing == nil {
+				continue
+			}
+			switch channelPricing.BillingMode {
+			case BillingModePerRequest, BillingModeImage:
+				price := 0.0
+				if channelPricing.PerRequestPrice != nil {
+					price = *channelPricing.PerRequestPrice
+				}
+				if price <= 0 {
+					if iv := channelPricing.GetIntervalForContext(0); iv != nil && iv.PerRequestPrice != nil {
+						price = *iv.PerRequestPrice
+					}
+				}
+				g.Models[i].InputCostPerMillion = 0
+				g.Models[i].EffectiveInput = 0
+				g.Models[i].OutputCostPerMillion = price
+				g.Models[i].EffectiveOutput = price * g.RateMultiplier
+			default:
+				if channelPricing.InputPrice != nil {
+					g.Models[i].InputCostPerMillion = *channelPricing.InputPrice * 1000000
+					g.Models[i].EffectiveInput = g.Models[i].InputCostPerMillion * g.RateMultiplier
+				}
+				if channelPricing.OutputPrice != nil {
+					g.Models[i].OutputCostPerMillion = *channelPricing.OutputPrice * 1000000
+					g.Models[i].EffectiveOutput = g.Models[i].OutputCostPerMillion * g.RateMultiplier
+				} else if channelPricing.ImageOutputPrice != nil {
+					g.Models[i].OutputCostPerMillion = *channelPricing.ImageOutputPrice
+					g.Models[i].EffectiveOutput = g.Models[i].OutputCostPerMillion * g.RateMultiplier
+				}
+			}
 		}
 		groupMap[g.ID] = &g
 		order = append(order, g.ID)

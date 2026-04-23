@@ -76,26 +76,26 @@ type ModelHourlyStats struct {
 }
 
 type MonitoringOverview struct {
-	Groups            []GroupHealth       `json:"groups"`
-	GroupModels       []GroupModelStats   `json:"group_models"`
-	ModelLatencies    []ModelLatency      `json:"model_latencies"`
-	ErrorAccounts     []ErrorAccount      `json:"error_accounts"`
-	HourlyStats       []HourlyStats       `json:"hourly_stats"`
-	ModelHourlyStats  []ModelHourlyStats  `json:"model_hourly_stats"`
-	TotalRequests     int64               `json:"total_requests_today"`
-	SuccessCount      int64               `json:"success_count_today"`
-	ErrorCount        int64               `json:"error_count_today"`
-	AvgLatencyMs      float64             `json:"avg_latency_ms_today"`
+	Groups           []GroupHealth      `json:"groups"`
+	GroupModels      []GroupModelStats  `json:"group_models"`
+	ModelLatencies   []ModelLatency     `json:"model_latencies"`
+	ErrorAccounts    []ErrorAccount     `json:"error_accounts"`
+	HourlyStats      []HourlyStats      `json:"hourly_stats"`
+	ModelHourlyStats []ModelHourlyStats `json:"model_hourly_stats"`
+	TotalRequests    int64              `json:"total_requests_today"`
+	SuccessCount     int64              `json:"success_count_today"`
+	ErrorCount       int64              `json:"error_count_today"`
+	AvgLatencyMs     float64            `json:"avg_latency_ms_today"`
 }
 
 type MonitoringSummary struct {
-	Groups           []GroupHealth   `json:"groups"`
-	ErrorAccounts    []ErrorAccount  `json:"error_accounts"`
-	HourlyStats      []HourlyStats   `json:"hourly_stats"`
-	TotalRequests    int64           `json:"total_requests_today"`
-	SuccessCount     int64           `json:"success_count_today"`
-	ErrorCount       int64           `json:"error_count_today"`
-	AvgLatencyMs     float64         `json:"avg_latency_ms_today"`
+	Groups        []GroupHealth  `json:"groups"`
+	ErrorAccounts []ErrorAccount `json:"error_accounts"`
+	HourlyStats   []HourlyStats  `json:"hourly_stats"`
+	TotalRequests int64          `json:"total_requests_today"`
+	SuccessCount  int64          `json:"success_count_today"`
+	ErrorCount    int64          `json:"error_count_today"`
+	AvgLatencyMs  float64        `json:"avg_latency_ms_today"`
 }
 
 type MonitoringGroupModels struct {
@@ -228,8 +228,8 @@ func (s *MonitoringService) queryGroupModelStats(ctx context.Context, overview *
 			COALESCE(g.name, ''),
 			COALESCE(u.requested_model, u.model),
 			COUNT(*) AS cnt,
-			COUNT(*) FILTER (WHERE u.output_tokens > 0) AS success_cnt,
-			COUNT(*) FILTER (WHERE u.output_tokens = 0) AS error_cnt,
+			COUNT(*) FILTER (WHERE u.output_tokens > 0 OR COALESCE(u.image_count, 0) > 0) AS success_cnt,
+			COUNT(*) FILTER (WHERE u.output_tokens = 0 AND COALESCE(u.image_count, 0) = 0) AS error_cnt,
 			COALESCE(AVG(u.duration_ms) FILTER (WHERE u.duration_ms IS NOT NULL AND u.duration_ms > 0), 0)::float8,
 			COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY CASE WHEN u.duration_ms IS NOT NULL AND u.duration_ms > 0 THEN u.duration_ms END), 0)::float8,
 			COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY CASE WHEN u.duration_ms IS NOT NULL AND u.duration_ms > 0 THEN u.duration_ms END), 0)::float8,
@@ -329,8 +329,8 @@ func (s *MonitoringService) queryModelLatency(ctx context.Context, overview *Mon
 		SELECT
 			COALESCE(requested_model, model),
 			COUNT(*) as cnt,
-			COUNT(*) FILTER (WHERE output_tokens > 0) as success_cnt,
-			COUNT(*) FILTER (WHERE output_tokens = 0) as error_cnt,
+			COUNT(*) FILTER (WHERE output_tokens > 0 OR COALESCE(image_count, 0) > 0) as success_cnt,
+			COUNT(*) FILTER (WHERE output_tokens = 0 AND COALESCE(image_count, 0) = 0) as error_cnt,
 			COALESCE(AVG(duration_ms) FILTER (WHERE duration_ms IS NOT NULL AND duration_ms > 0), 0)::float8,
 			COALESCE(percentile_cont(0.5) WITHIN GROUP (ORDER BY CASE WHEN duration_ms IS NOT NULL AND duration_ms > 0 THEN duration_ms END), 0)::float8,
 			COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY CASE WHEN duration_ms IS NOT NULL AND duration_ms > 0 THEN duration_ms END), 0)::float8,
@@ -461,8 +461,8 @@ func (s *MonitoringService) queryTodaySummary(ctx context.Context, overview *Mon
 	query := `
 		SELECT
 			COUNT(*),
-			COUNT(*) FILTER (WHERE output_tokens > 0),
-			COUNT(*) FILTER (WHERE output_tokens = 0),
+			COUNT(*) FILTER (WHERE output_tokens > 0 OR COALESCE(image_count, 0) > 0),
+			COUNT(*) FILTER (WHERE output_tokens = 0 AND COALESCE(image_count, 0) = 0),
 			COALESCE(AVG(duration_ms) FILTER (WHERE duration_ms IS NOT NULL AND duration_ms > 0), 0)::float8
 		FROM usage_logs
 		WHERE created_at >= $1`
