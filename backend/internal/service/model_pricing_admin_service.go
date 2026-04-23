@@ -872,6 +872,9 @@ func (s *ModelPricingAdminService) GetGroupsWithModelsAndPricing(ctx context.Con
 				} else if basePricing.OutputCostPerImage > 0 {
 					g.Models[i].OutputCostPerMillion = basePricing.OutputCostPerImage
 					g.Models[i].EffectiveOutput = g.Models[i].OutputCostPerMillion * g.RateMultiplier
+				} else if basePricing.OutputCostPerImageToken > 0 {
+					g.Models[i].OutputCostPerMillion = basePricing.OutputCostPerImageToken * 1000000
+					g.Models[i].EffectiveOutput = g.Models[i].OutputCostPerMillion * g.RateMultiplier
 				}
 			}
 			if s.channelService == nil {
