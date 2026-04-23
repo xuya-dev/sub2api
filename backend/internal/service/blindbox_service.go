@@ -378,7 +378,7 @@ func (s *BlindBoxService) createAuditRecord(ctx context.Context, userID int64, v
 		Status: StatusUsed,
 		UsedBy: &userID,
 		UsedAt: &now,
-		Notes:  fmt.Sprintf("%s [%s] %s", item.Name, item.Rarity, item.RewardType),
+		Notes:  fmt.Sprintf("%s · %s · %s", item.Name, readableRarity(item.Rarity), readableRewardType(item.RewardType)),
 	}
 	if item.SubscriptionID != nil {
 		record.GroupID = item.SubscriptionID
@@ -386,6 +386,36 @@ func (s *BlindBoxService) createAuditRecord(ctx context.Context, userID int64, v
 	}
 	if createErr := s.redeemCodeRepo.Create(ctx, record); createErr != nil {
 		logger.LegacyPrintf("service.blindbox", "failed to create blindbox audit record for user %d: %v", userID, createErr)
+	}
+}
+
+func readableRarity(rarity string) string {
+	switch rarity {
+	case RarityCommon:
+		return "Common"
+	case RarityRare:
+		return "Rare"
+	case RarityEpic:
+		return "Epic"
+	case RarityLegendary:
+		return "Legendary"
+	default:
+		return rarity
+	}
+}
+
+func readableRewardType(rewardType string) string {
+	switch rewardType {
+	case BlindboxRewardBalance:
+		return "Balance"
+	case BlindboxRewardConcurrency:
+		return "Concurrency"
+	case BlindboxRewardSubscription:
+		return "Subscription"
+	case BlindboxRewardInvitationCode:
+		return "Invitation Code"
+	default:
+		return rewardType
 	}
 }
 
