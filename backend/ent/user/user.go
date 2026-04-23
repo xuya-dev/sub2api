@@ -43,6 +43,12 @@ const (
 	FieldTotpEnabled = "totp_enabled"
 	// FieldTotpEnabledAt holds the string denoting the totp_enabled_at field in the database.
 	FieldTotpEnabledAt = "totp_enabled_at"
+	// FieldSignupSource holds the string denoting the signup_source field in the database.
+	FieldSignupSource = "signup_source"
+	// FieldLastLoginAt holds the string denoting the last_login_at field in the database.
+	FieldLastLoginAt = "last_login_at"
+	// FieldLastActiveAt holds the string denoting the last_active_at field in the database.
+	FieldLastActiveAt = "last_active_at"
 	// FieldBalanceNotifyEnabled holds the string denoting the balance_notify_enabled field in the database.
 	FieldBalanceNotifyEnabled = "balance_notify_enabled"
 	// FieldBalanceNotifyThresholdType holds the string denoting the balance_notify_threshold_type field in the database.
@@ -75,6 +81,10 @@ const (
 	EdgePaymentOrders = "payment_orders"
 	// EdgeCheckins holds the string denoting the checkins edge name in mutations.
 	EdgeCheckins = "checkins"
+	// EdgeAuthIdentities holds the string denoting the auth_identities edge name in mutations.
+	EdgeAuthIdentities = "auth_identities"
+	// EdgePendingAuthSessions holds the string denoting the pending_auth_sessions edge name in mutations.
+	EdgePendingAuthSessions = "pending_auth_sessions"
 	// EdgeUserAllowedGroups holds the string denoting the user_allowed_groups edge name in mutations.
 	EdgeUserAllowedGroups = "user_allowed_groups"
 	// Table holds the table name of the user in the database.
@@ -154,6 +164,20 @@ const (
 	CheckinsInverseTable = "checkins"
 	// CheckinsColumn is the table column denoting the checkins relation/edge.
 	CheckinsColumn = "user_id"
+	// AuthIdentitiesTable is the table that holds the auth_identities relation/edge.
+	AuthIdentitiesTable = "auth_identities"
+	// AuthIdentitiesInverseTable is the table name for the AuthIdentity entity.
+	// It exists in this package in order to avoid circular dependency with the "authidentity" package.
+	AuthIdentitiesInverseTable = "auth_identities"
+	// AuthIdentitiesColumn is the table column denoting the auth_identities relation/edge.
+	AuthIdentitiesColumn = "user_id"
+	// PendingAuthSessionsTable is the table that holds the pending_auth_sessions relation/edge.
+	PendingAuthSessionsTable = "pending_auth_sessions"
+	// PendingAuthSessionsInverseTable is the table name for the PendingAuthSession entity.
+	// It exists in this package in order to avoid circular dependency with the "pendingauthsession" package.
+	PendingAuthSessionsInverseTable = "pending_auth_sessions"
+	// PendingAuthSessionsColumn is the table column denoting the pending_auth_sessions relation/edge.
+	PendingAuthSessionsColumn = "target_user_id"
 	// UserAllowedGroupsTable is the table that holds the user_allowed_groups relation/edge.
 	UserAllowedGroupsTable = "user_allowed_groups"
 	// UserAllowedGroupsInverseTable is the table name for the UserAllowedGroup entity.
@@ -180,6 +204,9 @@ var Columns = []string{
 	FieldTotpSecretEncrypted,
 	FieldTotpEnabled,
 	FieldTotpEnabledAt,
+	FieldSignupSource,
+	FieldLastLoginAt,
+	FieldLastActiveAt,
 	FieldBalanceNotifyEnabled,
 	FieldBalanceNotifyThresholdType,
 	FieldBalanceNotifyThreshold,
@@ -241,6 +268,10 @@ var (
 	DefaultNotes string
 	// DefaultTotpEnabled holds the default value on creation for the "totp_enabled" field.
 	DefaultTotpEnabled bool
+	// DefaultSignupSource holds the default value on creation for the "signup_source" field.
+	DefaultSignupSource string
+	// SignupSourceValidator is a validator for the "signup_source" field. It is called by the builders before save.
+	SignupSourceValidator func(string) error
 	// DefaultBalanceNotifyEnabled holds the default value on creation for the "balance_notify_enabled" field.
 	DefaultBalanceNotifyEnabled bool
 	// DefaultBalanceNotifyThresholdType holds the default value on creation for the "balance_notify_threshold_type" field.
@@ -327,6 +358,21 @@ func ByTotpEnabled(opts ...sql.OrderTermOption) OrderOption {
 // ByTotpEnabledAt orders the results by the totp_enabled_at field.
 func ByTotpEnabledAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotpEnabledAt, opts...).ToFunc()
+}
+
+// BySignupSource orders the results by the signup_source field.
+func BySignupSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSignupSource, opts...).ToFunc()
+}
+
+// ByLastLoginAt orders the results by the last_login_at field.
+func ByLastLoginAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLoginAt, opts...).ToFunc()
+}
+
+// ByLastActiveAt orders the results by the last_active_at field.
+func ByLastActiveAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastActiveAt, opts...).ToFunc()
 }
 
 // ByBalanceNotifyEnabled orders the results by the balance_notify_enabled field.
@@ -508,6 +554,34 @@ func ByCheckins(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByAuthIdentitiesCount orders the results by auth_identities count.
+func ByAuthIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAuthIdentitiesStep(), opts...)
+	}
+}
+
+// ByAuthIdentities orders the results by auth_identities terms.
+func ByAuthIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAuthIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPendingAuthSessionsCount orders the results by pending_auth_sessions count.
+func ByPendingAuthSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPendingAuthSessionsStep(), opts...)
+	}
+}
+
+// ByPendingAuthSessions orders the results by pending_auth_sessions terms.
+func ByPendingAuthSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPendingAuthSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByUserAllowedGroupsCount orders the results by user_allowed_groups count.
 func ByUserAllowedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -596,6 +670,20 @@ func newCheckinsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CheckinsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, CheckinsTable, CheckinsColumn),
+	)
+}
+func newAuthIdentitiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AuthIdentitiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AuthIdentitiesTable, AuthIdentitiesColumn),
+	)
+}
+func newPendingAuthSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PendingAuthSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PendingAuthSessionsTable, PendingAuthSessionsColumn),
 	)
 }
 func newUserAllowedGroupsStep() *sqlgraph.Step {

@@ -29,7 +29,7 @@ func newGatewayRecordUsageServiceForTest(usageRepo UsageLogRepository, userRepo 
 		cfg,
 		nil,
 		nil,
-		NewBillingService(cfg, nil),
+		NewBillingService(cfg, nil, nil),
 		nil,
 		&BillingCacheService{},
 		nil,
