@@ -411,6 +411,58 @@ func (s *CheckinService) createAuditRecord(txCtx context.Context, userID int64, 
 	}
 }
 
+type CheckinCalendarDay struct {
+	Date        string  `json:"date"`
+	CheckedIn   bool    `json:"checked_in"`
+	RewardType  string  `json:"reward_type,omitempty"`
+	RewardValue float64 `json:"reward_value,omitempty"`
+	StreakDays  int     `json:"streak_days,omitempty"`
+}
+
+type CheckinCalendar struct {
+	Days []CheckinCalendarDay `json:"days"`
+}
+
+func (s *CheckinService) GetCalendar(ctx context.Context, userID int64) (*CheckinCalendar, error) {
+	today := timezone.Today()
+	startDate := today.AddDate(0, 0, -29)
+
+	records, err := s.entClient.Checkin.
+		Query().
+		Where(
+			checkin.UserID(userID),
+			checkin.CheckinDateGTE(startDate),
+			checkin.CheckinDateLTE(today),
+		).
+		Order(dbent.Asc(checkin.FieldCheckinDate)).
+		All(ctx)
+	if err != nil && !dbent.IsNotFound(err) {
+		return nil, fmt.Errorf("query calendar: %w", err)
+	}
+
+	recordMap := make(map[string]*dbent.Checkin, len(records))
+	for i := range records {
+		key := records[i].CheckinDate.Format("2006-01-02")
+		recordMap[key] = records[i]
+	}
+
+	days := make([]CheckinCalendarDay, 30)
+	for i := 0; i < 30; i++ {
+		d := startDate.AddDate(0, 0, i)
+		key := d.Format("2006-01-02")
+		days[i] = CheckinCalendarDay{Date: key}
+
+		if rec, ok := recordMap[key]; ok {
+			days[i].CheckedIn = true
+			days[i].RewardType = rec.CheckinType
+			days[i].RewardValue = rec.RewardAmount
+			days[i].StreakDays = rec.StreakDays
+		}
+	}
+
+	return &CheckinCalendar{Days: days}, nil
+}
+
 func (s *CheckinService) invalidateCaches(ctx context.Context, userID int64) {
 	if s.authCacheInvalidator != nil {
 		s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)

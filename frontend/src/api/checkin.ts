@@ -52,10 +52,28 @@ export async function getCheckinStatus(): Promise<CheckinStatus> {
   return data
 }
 
+export interface CheckinCalendarDay {
+  date: string
+  checked_in: boolean
+  reward_type?: string
+  reward_value?: number
+  streak_days?: number
+}
+
+export interface CheckinCalendar {
+  days: CheckinCalendarDay[]
+}
+
+export async function getCheckinCalendar(): Promise<CheckinCalendar> {
+  const { data } = await apiClient.get<CheckinCalendar>('/checkin/calendar')
+  return data
+}
+
 export const checkinAPI = {
   checkin,
   luckCheckin,
   getCheckinStatus,
+  getCalendar: getCheckinCalendar,
   getBlindboxRecords,
 }
 

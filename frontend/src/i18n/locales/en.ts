@@ -946,6 +946,9 @@ export default {
       triggerInterval: 'Every',
       blindboxNextIn: 'Next blind box in {days} days',
       blindboxNextCycle: 'Blind box triggers every {interval} streak days',
+      calendarTitle: 'Check-in Calendar',
+      calendarCheckedNormal: '+${value}',
+      calendarCheckedLuck: 'Luck ${value}',
     }
   },
 

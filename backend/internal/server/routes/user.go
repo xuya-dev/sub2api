@@ -97,6 +97,7 @@ func RegisterUserRoutes(
 			checkin.POST("", h.Checkin.Checkin)
 			checkin.POST("/luck", h.Checkin.LuckCheckin)
 			checkin.GET("/status", h.Checkin.GetStatus)
+			checkin.GET("/calendar", h.Checkin.GetCalendar)
 			checkin.GET("/blindbox/records", h.Checkin.GetBlindboxRecords)
 		}
 

@@ -950,6 +950,9 @@ export default {
       triggerInterval: '触发间隔',
       blindboxNextIn: '距离下次盲盒还需 {days} 天',
       blindboxNextCycle: '每 {interval} 天连续签到触发一次盲盒',
+      calendarTitle: '签到日历',
+      calendarCheckedNormal: '+${value}',
+      calendarCheckedLuck: '幸运 ${value}',
     }
   },
 

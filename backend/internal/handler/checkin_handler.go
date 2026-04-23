@@ -80,6 +80,22 @@ func (h *CheckinHandler) GetStatus(c *gin.Context) {
 	response.Success(c, status)
 }
 
+func (h *CheckinHandler) GetCalendar(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	result, err := h.checkinService.GetCalendar(c.Request.Context(), subject.UserID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, result)
+}
+
 func (h *CheckinHandler) GetBlindboxRecords(c *gin.Context) {
 	subject, ok := middleware2.GetAuthSubjectFromContext(c)
 	if !ok {

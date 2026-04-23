@@ -145,6 +145,42 @@
         </template>
       </BaseDialog>
 
+      <!-- Check-in Calendar -->
+      <div v-if="calendarDays.length > 0" class="card p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="rounded-xl bg-emerald-100 p-2.5 dark:bg-emerald-900/30">
+            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ t('checkin.page.calendarTitle') }}</h3>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1.5 sm:gap-2">
+          <div v-for="d in weekHeaders" :key="d" class="pb-1.5 text-center text-[11px] font-medium text-gray-400 dark:text-dark-500">{{ d }}</div>
+          <div
+            v-for="(day, i) in calendarGrid"
+            :key="i"
+            class="calendar-cell relative flex flex-col items-center justify-center rounded-lg py-2 text-center transition-colors"
+            :class="getCalendarCellClass(day)"
+          >
+            <span class="text-xs font-medium" :class="day.isCurrentMonth ? 'text-gray-700 dark:text-gray-300' : 'text-gray-300 dark:text-dark-600'">{{ day.dayNum }}</span>
+            <div v-if="day.checkedIn" class="mt-0.5 flex items-center justify-center">
+              <div v-if="day.rewardType === 'luck'" class="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
+              <div v-else class="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-center gap-5 text-xs text-gray-400 dark:text-dark-500">
+          <div class="flex items-center gap-1.5"><div class="h-2 w-2 rounded-full bg-emerald-500"></div>{{ t('checkin.normalCheckin') }}</div>
+          <div class="flex items-center gap-1.5"><div class="h-2 w-2 rounded-full bg-purple-500"></div>{{ t('checkin.luckCheckin') }}</div>
+          <div class="flex items-center gap-1.5"><div class="h-2 w-2 rounded-full bg-gray-200 dark:bg-dark-700"></div>{{ t('checkin.page.todayNoResult') }}</div>
+        </div>
+      </div>
+
       <!-- Two Column: Blindbox History + Reward Stats -->
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <!-- Blindbox History (2/3 width) -->
@@ -276,7 +312,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useCheckinStore } from '@/stores/checkin'
-import { getBlindboxRecords, type BlindboxRecordItem, type BlindboxResult } from '@/api/checkin'
+import { getBlindboxRecords, getCheckinCalendar, type BlindboxRecordItem, type BlindboxResult, type CheckinCalendarDay } from '@/api/checkin'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 
@@ -291,6 +327,83 @@ const luckBet = ref<number>(0)
 const blindboxRecords = ref<BlindboxRecordItem[]>([])
 const blindboxTotal = ref(0)
 const blindboxPage = ref(1)
+
+const calendarDays = ref<CheckinCalendarDay[]>([])
+
+const weekHeaders = computed(() => {
+  const locale = (t as any).locale?.() || 'en'
+  if (locale === 'zh') return ['一', '二', '三', '四', '五', '六', '日']
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+})
+
+interface CalendarCell {
+  date: string
+  dayNum: number
+  isCurrentMonth: boolean
+  checkedIn: boolean
+  rewardType: string
+  rewardValue: number
+  isToday: boolean
+}
+
+const calendarGrid = computed<CalendarCell[]>(() => {
+  const days = calendarDays.value
+  if (days.length === 0) return []
+
+  const firstDate = new Date(days[0].date + 'T00:00:00')
+  const lastDate = new Date(days[days.length - 1].date + 'T00:00:00')
+
+  const checkedMap = new Map<string, CheckinCalendarDay>()
+  for (const d of days) {
+    checkedMap.set(d.date, d)
+  }
+
+  const startOfWeek = new Date(firstDate)
+  const dow = startOfWeek.getDay()
+  const mondayOffset = dow === 0 ? -6 : 1 - dow
+  startOfWeek.setDate(startOfWeek.getDate() + mondayOffset)
+
+  const endOfWeek = new Date(lastDate)
+  const endDow = endOfWeek.getDay()
+  const sundayOffset = endDow === 0 ? 0 : 7 - endDow
+  endOfWeek.setDate(endOfWeek.getDate() + sundayOffset)
+
+  const todayStr = new Date().toISOString().slice(0, 10)
+
+  const cells: CalendarCell[] = []
+  const current = new Date(startOfWeek)
+  while (current <= endOfWeek) {
+    const dateStr = current.toISOString().slice(0, 10)
+    const calDay = checkedMap.get(dateStr)
+    const firstMonth = firstDate.getFullYear() * 100 + firstDate.getMonth()
+    const curMonth = current.getFullYear() * 100 + current.getMonth()
+
+    cells.push({
+      date: dateStr,
+      dayNum: current.getDate(),
+      isCurrentMonth: curMonth === firstMonth || curMonth === lastDate.getFullYear() * 100 + lastDate.getMonth(),
+      checkedIn: calDay?.checked_in ?? false,
+      rewardType: calDay?.reward_type ?? '',
+      rewardValue: calDay?.reward_value ?? 0,
+      isToday: dateStr === todayStr,
+    })
+    current.setDate(current.getDate() + 1)
+  }
+
+  return cells
+})
+
+function getCalendarCellClass(day: CalendarCell): string {
+  const classes: string[] = []
+  if (day.isToday) classes.push('calendar-cell-today')
+  if (day.checkedIn) {
+    if (day.rewardType === 'luck') classes.push('calendar-cell-luck')
+    else classes.push('calendar-cell-checked')
+  } else if (day.isCurrentMonth) {
+    classes.push('calendar-cell-missed')
+  }
+  return classes.join(' ')
+}
 
 const streakColor = computed(() => {
   const d = checkinStore.streakDays
@@ -400,6 +513,13 @@ const rarityBreakdown = computed(() => {
   }))
 })
 
+async function fetchCalendar() {
+  try {
+    const result = await getCheckinCalendar()
+    calendarDays.value = result.days || []
+  } catch { /* noop */ }
+}
+
 async function fetchBlindboxRecords() {
   try {
     const result = await getBlindboxRecords(blindboxPage.value, 20)
@@ -419,6 +539,7 @@ async function loadMoreBlindboxRecords() {
 
 onMounted(() => {
   checkinStore.fetchStatus()
+  fetchCalendar()
   fetchBlindboxRecords()
 })
 </script>
@@ -458,4 +579,14 @@ html.dark .badge-legendary { background-color: #451a03; color: #fbbf24; }
 .checkin-btn-normal:hover:not(:disabled) { background: linear-gradient(135deg, #d97706, #b45309); }
 .checkin-btn-luck { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 .checkin-btn-luck:hover:not(:disabled) { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+
+.calendar-cell { min-height: 40px; }
+.calendar-cell-checked { background-color: #ecfdf5; border: 1px solid #a7f3d0; }
+.calendar-cell-luck { background-color: #f5f3ff; border: 1px solid #c4b5fd; }
+.calendar-cell-missed { background-color: transparent; border: 1px solid #f3f4f6; }
+.calendar-cell-today { box-shadow: 0 0 0 2px #3b82f6; z-index: 1; }
+html.dark .calendar-cell-checked { background-color: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+html.dark .calendar-cell-luck { background-color: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); }
+html.dark .calendar-cell-missed { border-color: #374151; }
+html.dark .calendar-cell-today { box-shadow: 0 0 0 2px #60a5fa; }
 </style>
