@@ -7805,6 +7805,7 @@ type CheckinBlindboxRecordMutation struct {
 	addreward_value  *float64
 	streak_days      *int
 	addstreak_days   *int
+	reward_detail    *string
 	created_at       *time.Time
 	clearedFields    map[string]struct{}
 	done             bool
@@ -8242,6 +8243,55 @@ func (m *CheckinBlindboxRecordMutation) ResetStreakDays() {
 	m.addstreak_days = nil
 }
 
+// SetRewardDetail sets the "reward_detail" field.
+func (m *CheckinBlindboxRecordMutation) SetRewardDetail(s string) {
+	m.reward_detail = &s
+}
+
+// RewardDetail returns the value of the "reward_detail" field in the mutation.
+func (m *CheckinBlindboxRecordMutation) RewardDetail() (r string, exists bool) {
+	v := m.reward_detail
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRewardDetail returns the old "reward_detail" field's value of the CheckinBlindboxRecord entity.
+// If the CheckinBlindboxRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CheckinBlindboxRecordMutation) OldRewardDetail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRewardDetail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRewardDetail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRewardDetail: %w", err)
+	}
+	return oldValue.RewardDetail, nil
+}
+
+// ClearRewardDetail clears the value of the "reward_detail" field.
+func (m *CheckinBlindboxRecordMutation) ClearRewardDetail() {
+	m.reward_detail = nil
+	m.clearedFields[checkinblindboxrecord.FieldRewardDetail] = struct{}{}
+}
+
+// RewardDetailCleared returns if the "reward_detail" field was cleared in this mutation.
+func (m *CheckinBlindboxRecordMutation) RewardDetailCleared() bool {
+	_, ok := m.clearedFields[checkinblindboxrecord.FieldRewardDetail]
+	return ok
+}
+
+// ResetRewardDetail resets all changes to the "reward_detail" field.
+func (m *CheckinBlindboxRecordMutation) ResetRewardDetail() {
+	m.reward_detail = nil
+	delete(m.clearedFields, checkinblindboxrecord.FieldRewardDetail)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *CheckinBlindboxRecordMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -8312,7 +8362,7 @@ func (m *CheckinBlindboxRecordMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CheckinBlindboxRecordMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.user_id != nil {
 		fields = append(fields, checkinblindboxrecord.FieldUserID)
 	}
@@ -8333,6 +8383,9 @@ func (m *CheckinBlindboxRecordMutation) Fields() []string {
 	}
 	if m.streak_days != nil {
 		fields = append(fields, checkinblindboxrecord.FieldStreakDays)
+	}
+	if m.reward_detail != nil {
+		fields = append(fields, checkinblindboxrecord.FieldRewardDetail)
 	}
 	if m.created_at != nil {
 		fields = append(fields, checkinblindboxrecord.FieldCreatedAt)
@@ -8359,6 +8412,8 @@ func (m *CheckinBlindboxRecordMutation) Field(name string) (ent.Value, bool) {
 		return m.RewardValue()
 	case checkinblindboxrecord.FieldStreakDays:
 		return m.StreakDays()
+	case checkinblindboxrecord.FieldRewardDetail:
+		return m.RewardDetail()
 	case checkinblindboxrecord.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -8384,6 +8439,8 @@ func (m *CheckinBlindboxRecordMutation) OldField(ctx context.Context, name strin
 		return m.OldRewardValue(ctx)
 	case checkinblindboxrecord.FieldStreakDays:
 		return m.OldStreakDays(ctx)
+	case checkinblindboxrecord.FieldRewardDetail:
+		return m.OldRewardDetail(ctx)
 	case checkinblindboxrecord.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -8443,6 +8500,13 @@ func (m *CheckinBlindboxRecordMutation) SetField(name string, value ent.Value) e
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStreakDays(v)
+		return nil
+	case checkinblindboxrecord.FieldRewardDetail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRewardDetail(v)
 		return nil
 	case checkinblindboxrecord.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -8531,7 +8595,11 @@ func (m *CheckinBlindboxRecordMutation) AddField(name string, value ent.Value) e
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CheckinBlindboxRecordMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(checkinblindboxrecord.FieldRewardDetail) {
+		fields = append(fields, checkinblindboxrecord.FieldRewardDetail)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -8544,6 +8612,11 @@ func (m *CheckinBlindboxRecordMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CheckinBlindboxRecordMutation) ClearField(name string) error {
+	switch name {
+	case checkinblindboxrecord.FieldRewardDetail:
+		m.ClearRewardDetail()
+		return nil
+	}
 	return fmt.Errorf("unknown CheckinBlindboxRecord nullable field %s", name)
 }
 
@@ -8571,6 +8644,9 @@ func (m *CheckinBlindboxRecordMutation) ResetField(name string) error {
 		return nil
 	case checkinblindboxrecord.FieldStreakDays:
 		m.ResetStreakDays()
+		return nil
+	case checkinblindboxrecord.FieldRewardDetail:
+		m.ResetRewardDetail()
 		return nil
 	case checkinblindboxrecord.FieldCreatedAt:
 		m.ResetCreatedAt()

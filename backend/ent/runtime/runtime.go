@@ -357,8 +357,12 @@ func init() {
 	checkinblindboxrecordDescStreakDays := checkinblindboxrecordFields[6].Descriptor()
 	// checkinblindboxrecord.DefaultStreakDays holds the default value on creation for the streak_days field.
 	checkinblindboxrecord.DefaultStreakDays = checkinblindboxrecordDescStreakDays.Default.(int)
+	// checkinblindboxrecordDescRewardDetail is the schema descriptor for reward_detail field.
+	checkinblindboxrecordDescRewardDetail := checkinblindboxrecordFields[7].Descriptor()
+	// checkinblindboxrecord.DefaultRewardDetail holds the default value on creation for the reward_detail field.
+	checkinblindboxrecord.DefaultRewardDetail = checkinblindboxrecordDescRewardDetail.Default.(string)
 	// checkinblindboxrecordDescCreatedAt is the schema descriptor for created_at field.
-	checkinblindboxrecordDescCreatedAt := checkinblindboxrecordFields[7].Descriptor()
+	checkinblindboxrecordDescCreatedAt := checkinblindboxrecordFields[8].Descriptor()
 	// checkinblindboxrecord.DefaultCreatedAt holds the default value on creation for the created_at field.
 	checkinblindboxrecord.DefaultCreatedAt = checkinblindboxrecordDescCreatedAt.Default.(func() time.Time)
 	checkinprizeitemFields := schema.CheckinPrizeItem{}.Fields()

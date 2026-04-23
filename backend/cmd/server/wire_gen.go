@@ -72,7 +72,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	userService := service.NewUserService(userRepository, settingRepository, apiKeyAuthCacheInvalidator, billingCache)
 	redeemCache := repository.NewRedeemCache(redisClient)
 	redeemService := service.NewRedeemService(redeemCodeRepository, userRepository, subscriptionService, redeemCache, billingCacheService, client, apiKeyAuthCacheInvalidator)
-	blindboxService := service.NewBlindBoxService(client, db, settingService, userRepository, billingCacheService, subscriptionService)
+	blindboxService := service.NewBlindBoxService(client, db, settingService, userRepository, billingCacheService, subscriptionService, redeemCodeRepository)
 	checkinService := service.NewCheckinService(client, userRepository, redeemCodeRepository, settingService, billingCacheService, apiKeyAuthCacheInvalidator, blindboxService)
 	secretEncryptor, err := repository.NewAESEncryptor(configConfig)
 	if err != nil {
@@ -241,7 +241,7 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	totpHandler := handler.NewTotpHandler(totpService)
 	handlerPaymentHandler := handler.NewPaymentHandler(paymentService, paymentConfigService, channelService)
 	paymentWebhookHandler := handler.NewPaymentWebhookHandler(paymentService, registry)
-	checkinHandler := handler.NewCheckinHandler(checkinService)
+	checkinHandler := handler.NewCheckinHandler(checkinService, blindboxService)
 	leaderboardService := service.NewLeaderboardService(client, db)
 	leaderboardHandler := handler.NewLeaderboardHandler(leaderboardService, checkinService)
 	idempotencyCoordinator := service.ProvideIdempotencyCoordinator(idempotencyRepository, configConfig)

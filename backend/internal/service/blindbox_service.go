@@ -11,6 +11,7 @@ import (
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/checkinblindboxrecord"
 	"github.com/Wei-Shaw/sub2api/ent/checkinprizeitem"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 )
 
 const (
@@ -41,21 +42,23 @@ type PrizeItem struct {
 }
 
 type BlindboxResult struct {
-	PrizeName       string  `json:"prize_name"`
-	Rarity          string  `json:"rarity"`
-	RewardType      string  `json:"reward_type"`
-	RewardValue     float64 `json:"reward_value"`
-	SubscriptionDays int    `json:"subscription_days,omitempty"`
+	PrizeName        string  `json:"prize_name"`
+	Rarity           string  `json:"rarity"`
+	RewardType       string  `json:"reward_type"`
+	RewardValue      float64 `json:"reward_value"`
+	SubscriptionDays int     `json:"subscription_days,omitempty"`
+	RewardDetail     string  `json:"reward_detail,omitempty"`
 }
 
 type BlindboxRecord struct {
-	ID          int64   `json:"id"`
-	PrizeName   string  `json:"prize_name"`
-	Rarity      string  `json:"rarity"`
-	RewardType  string  `json:"reward_type"`
-	RewardValue float64 `json:"reward_value"`
-	StreakDays  int     `json:"streak_days"`
-	CreatedAt   string  `json:"created_at"`
+	ID           int64   `json:"id"`
+	PrizeName    string  `json:"prize_name"`
+	Rarity       string  `json:"rarity"`
+	RewardType   string  `json:"reward_type"`
+	RewardValue  float64 `json:"reward_value"`
+	RewardDetail string  `json:"reward_detail,omitempty"`
+	StreakDays   int     `json:"streak_days"`
+	CreatedAt    string  `json:"created_at"`
 }
 
 type BlindboxRecordList struct {
@@ -70,6 +73,7 @@ type BlindBoxService struct {
 	userRepo          UserRepository
 	billingCache      *BillingCacheService
 	subscriptionSvc   *SubscriptionService
+	redeemCodeRepo    RedeemCodeRepository
 }
 
 func NewBlindBoxService(
@@ -79,6 +83,7 @@ func NewBlindBoxService(
 	userRepo UserRepository,
 	billingCache *BillingCacheService,
 	subscriptionSvc *SubscriptionService,
+	redeemCodeRepo RedeemCodeRepository,
 ) *BlindBoxService {
 	return &BlindBoxService{
 		entClient:       entClient,
@@ -87,6 +92,7 @@ func NewBlindBoxService(
 		userRepo:        userRepo,
 		billingCache:    billingCache,
 		subscriptionSvc: subscriptionSvc,
+		redeemCodeRepo:  redeemCodeRepo,
 	}
 }
 
@@ -217,7 +223,10 @@ func (s *BlindBoxService) ShouldTriggerBlindbox(ctx context.Context, userID int6
 
 	if triggerType == "total" {
 		var totalCheckins int
-		s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM checkins WHERE user_id = $1`, userID).Scan(&totalCheckins)
+		if err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM checkins WHERE user_id = $1`, userID).Scan(&totalCheckins); err != nil {
+			logger.LegacyPrintf("service.blindbox", "failed to count total checkins for user %d: %v", userID, err)
+			return false
+		}
 		return totalCheckins > 0 && totalCheckins%interval == 0
 	}
 
@@ -263,7 +272,8 @@ func (s *BlindBoxService) Draw(ctx context.Context, userID int64, streakDays int
 		rewardValue = math.Round(rewardValue*100) / 100
 	}
 
-	if err := s.applyReward(ctx, userID, selected, rewardValue); err != nil {
+	rewardDetail, err := s.applyReward(ctx, userID, selected, rewardValue)
+	if err != nil {
 		return nil, fmt.Errorf("apply reward: %w", err)
 	}
 
@@ -274,6 +284,7 @@ func (s *BlindBoxService) Draw(ctx context.Context, userID int64, streakDays int
 		SetRarity(selected.Rarity).
 		SetRewardType(selected.RewardType).
 		SetRewardValue(rewardValue).
+		SetRewardDetail(rewardDetail).
 		SetStreakDays(streakDays).
 		Save(ctx)
 	if err != nil {
@@ -286,24 +297,27 @@ func (s *BlindBoxService) Draw(ctx context.Context, userID int64, streakDays int
 		RewardType:       selected.RewardType,
 		RewardValue:      rewardValue,
 		SubscriptionDays: selected.SubscriptionDays,
+		RewardDetail:     rewardDetail,
 	}, nil
 }
 
-func (s *BlindBoxService) applyReward(ctx context.Context, userID int64, item *dbent.CheckinPrizeItem, value float64) error {
+func (s *BlindBoxService) applyReward(ctx context.Context, userID int64, item *dbent.CheckinPrizeItem, value float64) (string, error) {
 	switch item.RewardType {
 	case BlindboxRewardBalance:
 		if value > 0 {
 			if err := s.userRepo.UpdateBalance(ctx, userID, value); err != nil {
-				return fmt.Errorf("update balance: %w", err)
+				return "", fmt.Errorf("update balance: %w", err)
 			}
+			s.createAuditRecord(ctx, userID, value, item)
 		}
 	case BlindboxRewardConcurrency:
 		_, err := s.entClient.User.UpdateOneID(userID).
 			AddConcurrency(int(value)).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("update concurrency: %w", err)
+			return "", fmt.Errorf("update concurrency: %w", err)
 		}
+		s.createAuditRecord(ctx, userID, value, item)
 	case BlindboxRewardSubscription:
 		if item.SubscriptionID != nil && item.SubscriptionDays > 0 {
 			_, _, err := s.subscriptionSvc.AssignOrExtendSubscription(ctx, &AssignSubscriptionInput{
@@ -313,11 +327,33 @@ func (s *BlindBoxService) applyReward(ctx context.Context, userID int64, item *d
 				Notes:        "check-in blind box reward",
 			})
 			if err != nil {
-				return fmt.Errorf("assign subscription: %w", err)
+				return "", fmt.Errorf("assign subscription: %w", err)
 			}
+			s.createAuditRecord(ctx, userID, float64(item.SubscriptionDays), item)
 		}
 	case BlindboxRewardInvitationCode:
-		// invitation code generation is informational only - record is stored
+		code, err := GenerateRedeemCode()
+		if err != nil {
+			return "", fmt.Errorf("generate invitation code: %w", err)
+		}
+		redeemCode := &RedeemCode{
+			Code:   code,
+			Type:   RedeemTypeInvitation,
+			Value:  0,
+			Status: StatusUnused,
+		}
+		if createErr := s.redeemCodeRepo.Create(ctx, redeemCode); createErr != nil {
+			return "", fmt.Errorf("create invitation redeem code: %w", createErr)
+		}
+		s.createAuditRecord(ctx, userID, 0, item)
+		if s.billingCache != nil {
+			go func() {
+				cacheCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				_ = s.billingCache.InvalidateUserBalance(cacheCtx, userID)
+			}()
+		}
+		return code, nil
 	}
 	if s.billingCache != nil {
 		go func() {
@@ -326,7 +362,31 @@ func (s *BlindBoxService) applyReward(ctx context.Context, userID int64, item *d
 			_ = s.billingCache.InvalidateUserBalance(cacheCtx, userID)
 		}()
 	}
-	return nil
+	return "", nil
+}
+
+func (s *BlindBoxService) createAuditRecord(ctx context.Context, userID int64, value float64, item *dbent.CheckinPrizeItem) {
+	code, err := GenerateRedeemCode()
+	if err != nil {
+		return
+	}
+	now := time.Now()
+	record := &RedeemCode{
+		Code:   code,
+		Type:   AdjustmentTypeCheckinBlindbox,
+		Value:  value,
+		Status: StatusUsed,
+		UsedBy: &userID,
+		UsedAt: &now,
+		Notes:  fmt.Sprintf("%s [%s] %s", item.Name, item.Rarity, item.RewardType),
+	}
+	if item.SubscriptionID != nil {
+		record.GroupID = item.SubscriptionID
+		record.ValidityDays = item.SubscriptionDays
+	}
+	if createErr := s.redeemCodeRepo.Create(ctx, record); createErr != nil {
+		logger.LegacyPrintf("service.blindbox", "failed to create blindbox audit record for user %d: %v", userID, createErr)
+	}
 }
 
 func (s *BlindBoxService) GetUserRecords(ctx context.Context, userID int64, page, pageSize int) (*BlindboxRecordList, error) {
@@ -352,13 +412,14 @@ func (s *BlindBoxService) GetUserRecords(ctx context.Context, userID int64, page
 	items := make([]BlindboxRecord, 0, len(records))
 	for _, r := range records {
 		items = append(items, BlindboxRecord{
-			ID:          r.ID,
-			PrizeName:   r.PrizeName,
-			Rarity:      r.Rarity,
-			RewardType:  r.RewardType,
-			RewardValue: r.RewardValue,
-			StreakDays:  r.StreakDays,
-			CreatedAt:   r.CreatedAt.Format("2006-01-02 15:04:05"),
+			ID:           r.ID,
+			PrizeName:    r.PrizeName,
+			Rarity:       r.Rarity,
+			RewardType:   r.RewardType,
+			RewardValue:  r.RewardValue,
+			RewardDetail: r.RewardDetail,
+			StreakDays:   r.StreakDays,
+			CreatedAt:    r.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

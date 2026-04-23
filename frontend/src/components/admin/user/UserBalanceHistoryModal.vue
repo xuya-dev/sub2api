@@ -203,6 +203,7 @@ const typeOptions = computed(() => [
   { value: 'registration', label: t('admin.users.typeRegistration') },
   { value: 'checkin', label: t('admin.users.typeCheckin') },
   { value: 'checkin_luck', label: t('checkin.luckTitle') },
+  { value: 'checkin_blindbox', label: t('admin.users.typeCheckinBlindbox') },
   { value: 'invitation', label: t('admin.users.typeInvitation') },
   { value: 'concurrency', label: t('admin.users.typeConcurrency') },
   { value: 'admin_concurrency', label: t('admin.users.typeAdminConcurrency') },
@@ -241,14 +242,14 @@ const loadHistory = async (page: number) => {
 // Helper: check if admin type
 const isAdminType = (type: string) => type === 'admin_balance' || type === 'admin_concurrency'
 
-const isBalanceType = (type: string) => type === 'balance' || type === 'admin_balance' || type === 'checkin' || type === 'checkin_luck' || type === 'registration' || type === 'invitation'
+const isBalanceType = (type: string) => type === 'balance' || type === 'admin_balance' || type === 'checkin' || type === 'checkin_luck' || type === 'checkin_blindbox' || type === 'registration' || type === 'invitation'
 
 // Helper: check if subscription type
 const isSubscriptionType = (type: string) => type === 'subscription'
 
 // Icon name based on type
 const getIconName = (item: BalanceHistoryItem) => {
-  if (item.type === 'checkin' || item.type === 'checkin_luck') return 'calendar'
+  if (item.type === 'checkin' || item.type === 'checkin_luck' || item.type === 'checkin_blindbox') return 'calendar'
   if (item.type === 'registration') return 'gift'
   if (item.type === 'invitation') return 'link'
   if (isBalanceType(item.type)) return 'dollar'
@@ -258,7 +259,7 @@ const getIconName = (item: BalanceHistoryItem) => {
 
 // Icon background color
 const getIconBg = (item: BalanceHistoryItem) => {
-  if (item.type === 'checkin' || item.type === 'checkin_luck') return 'bg-amber-100 dark:bg-amber-900/30'
+  if (item.type === 'checkin' || item.type === 'checkin_luck' || item.type === 'checkin_blindbox') return 'bg-amber-100 dark:bg-amber-900/30'
   if (item.type === 'registration') return 'bg-sky-100 dark:bg-sky-900/30'
   if (item.type === 'invitation') return 'bg-rose-100 dark:bg-rose-900/30'
   if (isBalanceType(item.type)) {
@@ -274,7 +275,7 @@ const getIconBg = (item: BalanceHistoryItem) => {
 
 // Icon text color
 const getIconColor = (item: BalanceHistoryItem) => {
-  if (item.type === 'checkin' || item.type === 'checkin_luck') return 'text-amber-600 dark:text-amber-400'
+  if (item.type === 'checkin' || item.type === 'checkin_luck' || item.type === 'checkin_blindbox') return 'text-amber-600 dark:text-amber-400'
   if (item.type === 'registration') return 'text-sky-600 dark:text-sky-400'
   if (item.type === 'invitation') return 'text-rose-600 dark:text-rose-400'
   if (isBalanceType(item.type)) {
@@ -290,7 +291,7 @@ const getIconColor = (item: BalanceHistoryItem) => {
 
 // Value text color
 const getValueColor = (item: BalanceHistoryItem) => {
-  if (item.type === 'checkin' || item.type === 'checkin_luck') return 'text-amber-600 dark:text-amber-400'
+  if (item.type === 'checkin' || item.type === 'checkin_luck' || item.type === 'checkin_blindbox') return 'text-amber-600 dark:text-amber-400'
   if (item.type === 'registration') return 'text-sky-600 dark:text-sky-400'
   if (item.type === 'invitation') return 'text-rose-600 dark:text-rose-400'
   if (isBalanceType(item.type)) {
@@ -315,6 +316,8 @@ const getItemTitle = (item: BalanceHistoryItem) => {
       return t('admin.users.typeCheckin')
     case 'checkin_luck':
       return t('checkin.luckCheckinReward')
+    case 'checkin_blindbox':
+      return t('admin.users.typeCheckinBlindbox')
     case 'registration':
       return t('admin.users.typeRegistration')
     case 'invitation':

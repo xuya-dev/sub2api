@@ -317,6 +317,7 @@ export default {
     available: '可用',
     copiedToClipboard: '已复制到剪贴板',
     copied: '已复制',
+    copy: '复制',
     copyFailed: '复制失败',
     verifying: '验证中...',
     processing: '处理中...',
@@ -332,6 +333,7 @@ export default {
     saving: '保存中...',
     selectedCount: '（已选 {count} 个）',
     refresh: '刷新',
+    loadMore: '加载更多',
     view: '查看',
     settings: '设置',
     chooseFile: '选择文件',
@@ -910,7 +912,10 @@ export default {
     blindboxBalanceReward: '余额 +${value}',
     blindboxConcurrencyReward: '并发 +${value}',
     blindboxSubscriptionReward: '${days}天订阅体验',
-    blindboxInvitationReward: '邀请码 ×1'
+    blindboxInvitationReward: '邀请码 ×1',
+    blindboxInviteCode: '您的邀请码',
+    blindboxHistory: '盲盒奖品',
+    blindboxHistoryDesc: '签到盲盒获得的历史奖品'
   },
 
   leaderboard: {
@@ -1640,6 +1645,7 @@ export default {
       typeBalance: '余额（兑换码）',
       typeAdminBalance: '余额（管理员调整）',
       typeCheckin: '每日签到奖励',
+      typeCheckinBlindbox: '盲盒奖励',
       typeRegistration: '注册赠送',
       typeInvitation: '邀请码',
       typeConcurrency: '并发（兑换码）',
@@ -3429,8 +3435,9 @@ export default {
         subscription: '订阅',
         invitation: '邀请码',
         checkin: '签到奖励',
+        checkin_luck: '运气签到',
+        checkin_blindbox: '盲盒奖励',
         registration: '注册赠送',
-        // 管理员在用户管理页面调整余额/并发时产生的记录
         admin_balance: '余额（管理员）',
         admin_concurrency: '并发数（管理员）'
       },

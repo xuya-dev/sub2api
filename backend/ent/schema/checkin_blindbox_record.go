@@ -39,6 +39,10 @@ func (CheckinBlindboxRecord) Fields() []ent.Field {
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
 		field.Int("streak_days").
 			Default(0),
+		field.String("reward_detail").
+			Optional().
+			Default("").
+			SchemaType(map[string]string{dialect.Postgres: "text"}),
 		field.Time("created_at").
 			Immutable().
 			Default(time.Now).

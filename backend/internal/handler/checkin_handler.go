@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
 	middleware2 "github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
@@ -13,12 +15,14 @@ type luckCheckinRequest struct {
 }
 
 type CheckinHandler struct {
-	checkinService *service.CheckinService
+	checkinService  *service.CheckinService
+	blindboxService *service.BlindBoxService
 }
 
-func NewCheckinHandler(checkinService *service.CheckinService) *CheckinHandler {
+func NewCheckinHandler(checkinService *service.CheckinService, blindboxService *service.BlindBoxService) *CheckinHandler {
 	return &CheckinHandler{
-		checkinService: checkinService,
+		checkinService:  checkinService,
+		blindboxService: blindboxService,
 	}
 }
 
@@ -74,4 +78,29 @@ func (h *CheckinHandler) GetStatus(c *gin.Context) {
 	}
 
 	response.Success(c, status)
+}
+
+func (h *CheckinHandler) GetBlindboxRecords(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	page := 1
+	pageSize := 20
+	if p, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && p > 0 {
+		page = p
+	}
+	if ps, err := strconv.Atoi(c.DefaultQuery("page_size", "20")); err == nil && ps > 0 && ps <= 100 {
+		pageSize = ps
+	}
+
+	result, err := h.blindboxService.GetUserRecords(c.Request.Context(), subject.UserID, page, pageSize)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, result)
 }

@@ -317,6 +317,7 @@ export default {
     available: 'Available',
     copiedToClipboard: 'Copied to clipboard',
     copied: 'Copied',
+    copy: 'Copy',
     copyFailed: 'Failed to copy',
     verifying: 'Verifying...',
     processing: 'Processing...',
@@ -332,6 +333,7 @@ export default {
     saving: 'Saving...',
     selectedCount: '({count} selected)',
     refresh: 'Refresh',
+    loadMore: 'Load More',
     view: 'View',
     settings: 'Settings',
     chooseFile: 'Choose File',
@@ -906,7 +908,10 @@ export default {
     blindboxBalanceReward: 'Balance +${value}',
     blindboxConcurrencyReward: 'Concurrency +${value}',
     blindboxSubscriptionReward: '${days}-day subscription trial',
-    blindboxInvitationReward: 'Invitation code ×1'
+    blindboxInvitationReward: 'Invitation code ×1',
+    blindboxInviteCode: 'Your Invitation Code',
+    blindboxHistory: 'Blind Box Prizes',
+    blindboxHistoryDesc: 'Prizes you have won from check-in blind boxes'
   },
 
   leaderboard: {
@@ -1581,6 +1586,7 @@ export default {
       typeBalance: 'Balance (Redeem)',
       typeAdminBalance: 'Balance (Admin)',
       typeCheckin: 'Daily Check-in Reward',
+      typeCheckinBlindbox: 'Blind Box Reward',
       typeRegistration: 'Registration Bonus',
       typeInvitation: 'Invitation Code',
       typeConcurrency: 'Concurrency (Redeem)',
@@ -3343,6 +3349,8 @@ export default {
         subscription: 'Subscription',
         invitation: 'Invitation',
         checkin: 'Check-in Reward',
+        checkin_luck: 'Lucky Check-in',
+        checkin_blindbox: 'Blind Box Reward',
         registration: 'Registration Bonus',
         admin_balance: 'Balance (Admin)',
         admin_concurrency: 'Concurrency (Admin)'

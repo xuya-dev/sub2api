@@ -55,6 +55,7 @@ const (
 	AdjustmentTypeAdminConcurrency = domain.AdjustmentTypeAdminConcurrency // 管理员调整并发数
 	AdjustmentTypeCheckin          = domain.AdjustmentTypeCheckin          // 签到奖励
 	AdjustmentTypeCheckinLuck      = domain.AdjustmentTypeCheckinLuck      // 运气签到
+	AdjustmentTypeCheckinBlindbox  = domain.AdjustmentTypeCheckinBlindbox  // 签到盲盒奖励
 	AdjustmentTypeRegistration     = domain.AdjustmentTypeRegistration     // 注册赠送
 )
 

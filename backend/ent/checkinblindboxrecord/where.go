@@ -89,6 +89,11 @@ func StreakDays(v int) predicate.CheckinBlindboxRecord {
 	return predicate.CheckinBlindboxRecord(sql.FieldEQ(FieldStreakDays, v))
 }
 
+// RewardDetail applies equality check predicate on the "reward_detail" field. It's identical to RewardDetailEQ.
+func RewardDetail(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldEQ(FieldRewardDetail, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.CheckinBlindboxRecord {
 	return predicate.CheckinBlindboxRecord(sql.FieldEQ(FieldCreatedAt, v))
@@ -447,6 +452,81 @@ func StreakDaysLT(v int) predicate.CheckinBlindboxRecord {
 // StreakDaysLTE applies the LTE predicate on the "streak_days" field.
 func StreakDaysLTE(v int) predicate.CheckinBlindboxRecord {
 	return predicate.CheckinBlindboxRecord(sql.FieldLTE(FieldStreakDays, v))
+}
+
+// RewardDetailEQ applies the EQ predicate on the "reward_detail" field.
+func RewardDetailEQ(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldEQ(FieldRewardDetail, v))
+}
+
+// RewardDetailNEQ applies the NEQ predicate on the "reward_detail" field.
+func RewardDetailNEQ(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldNEQ(FieldRewardDetail, v))
+}
+
+// RewardDetailIn applies the In predicate on the "reward_detail" field.
+func RewardDetailIn(vs ...string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldIn(FieldRewardDetail, vs...))
+}
+
+// RewardDetailNotIn applies the NotIn predicate on the "reward_detail" field.
+func RewardDetailNotIn(vs ...string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldNotIn(FieldRewardDetail, vs...))
+}
+
+// RewardDetailGT applies the GT predicate on the "reward_detail" field.
+func RewardDetailGT(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldGT(FieldRewardDetail, v))
+}
+
+// RewardDetailGTE applies the GTE predicate on the "reward_detail" field.
+func RewardDetailGTE(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldGTE(FieldRewardDetail, v))
+}
+
+// RewardDetailLT applies the LT predicate on the "reward_detail" field.
+func RewardDetailLT(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldLT(FieldRewardDetail, v))
+}
+
+// RewardDetailLTE applies the LTE predicate on the "reward_detail" field.
+func RewardDetailLTE(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldLTE(FieldRewardDetail, v))
+}
+
+// RewardDetailContains applies the Contains predicate on the "reward_detail" field.
+func RewardDetailContains(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldContains(FieldRewardDetail, v))
+}
+
+// RewardDetailHasPrefix applies the HasPrefix predicate on the "reward_detail" field.
+func RewardDetailHasPrefix(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldHasPrefix(FieldRewardDetail, v))
+}
+
+// RewardDetailHasSuffix applies the HasSuffix predicate on the "reward_detail" field.
+func RewardDetailHasSuffix(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldHasSuffix(FieldRewardDetail, v))
+}
+
+// RewardDetailIsNil applies the IsNil predicate on the "reward_detail" field.
+func RewardDetailIsNil() predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldIsNull(FieldRewardDetail))
+}
+
+// RewardDetailNotNil applies the NotNil predicate on the "reward_detail" field.
+func RewardDetailNotNil() predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldNotNull(FieldRewardDetail))
+}
+
+// RewardDetailEqualFold applies the EqualFold predicate on the "reward_detail" field.
+func RewardDetailEqualFold(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldEqualFold(FieldRewardDetail, v))
+}
+
+// RewardDetailContainsFold applies the ContainsFold predicate on the "reward_detail" field.
+func RewardDetailContainsFold(v string) predicate.CheckinBlindboxRecord {
+	return predicate.CheckinBlindboxRecord(sql.FieldContainsFold(FieldRewardDetail, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

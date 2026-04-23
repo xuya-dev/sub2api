@@ -90,7 +90,7 @@
                   ? 'badge-success'
                   : value === 'subscription'
                     ? 'badge-warning'
-                    : value === 'checkin'
+                    : value === 'checkin' || value === 'checkin_luck' || value === 'checkin_blindbox'
                       ? 'badge-warning'
                       : 'badge-primary'
               ]"
@@ -525,6 +525,8 @@ const filterTypeOptions = computed(() => [
   { value: 'subscription', label: t('admin.redeem.subscription') },
   { value: 'invitation', label: t('admin.redeem.invitation') },
   { value: 'checkin', label: t('admin.redeem.types.checkin') },
+  { value: 'checkin_luck', label: t('admin.redeem.types.checkin_luck') },
+  { value: 'checkin_blindbox', label: t('admin.redeem.types.checkin_blindbox') },
   { value: 'registration', label: t('admin.redeem.types.registration') }
 ])
 

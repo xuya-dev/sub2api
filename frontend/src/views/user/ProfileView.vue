@@ -123,6 +123,41 @@
       />
       <ProfilePasswordForm />
       <ProfileTotpCard />
+
+      <!-- Blindbox Prize History -->
+      <div v-if="checkinStore.enabled && blindboxRecords.length > 0" class="card p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="rounded-xl bg-purple-100 p-3 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 dark:text-dark-100">{{ t('checkin.blindboxHistory') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-dark-400">{{ t('checkin.blindboxHistoryDesc') }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <div v-for="record in blindboxRecords" :key="record.id" class="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3 dark:border-dark-700">
+            <div class="flex items-center gap-3">
+              <span class="blindbox-rarity-badge text-xs" :class="getRarityBadgeClass(record.rarity)">{{ getRarityLabel(record.rarity) }}</span>
+              <div>
+                <span class="text-sm font-medium text-gray-900 dark:text-dark-100">{{ record.prize_name }}</span>
+                <span v-if="record.reward_type === 'invitation_code' && record.reward_detail" class="ml-2 rounded bg-indigo-50 px-2 py-0.5 text-xs font-mono text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">{{ record.reward_detail }}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-medium text-gray-700 dark:text-dark-300">{{ formatRecordReward(record) }}</div>
+              <div class="text-xs text-gray-400 dark:text-dark-500">{{ record.created_at }}</div>
+            </div>
+          </div>
+        </div>
+        <div v-if="blindboxTotal > blindboxRecords.length" class="mt-3 text-center">
+          <button type="button" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400" @click="loadMoreBlindboxRecords">{{ t('common.loadMore') }}</button>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -130,7 +165,8 @@
 <script setup lang="ts">
 import { ref, computed, h, onMounted } from 'vue'; import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'; import { useCheckinStore } from '@/stores/checkin'; import { formatDate } from '@/utils/format'
-import { authAPI } from '@/api'; import AppLayout from '@/components/layout/AppLayout.vue'
+import { authAPI } from '@/api'; import { getBlindboxRecords, type BlindboxRecordItem } from '@/api/checkin'
+import AppLayout from '@/components/layout/AppLayout.vue'
 import StatCard from '@/components/common/StatCard.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import ProfileInfoCard from '@/components/user/profile/ProfileInfoCard.vue'
@@ -146,6 +182,9 @@ const balanceLowNotifyEnabled = ref(false)
 const systemDefaultThreshold = ref(0)
 const showProfileLuckModal = ref(false)
 const profileLuckBet = ref<number>(0)
+const blindboxRecords = ref<BlindboxRecordItem[]>([])
+const blindboxTotal = ref(0)
+const blindboxPage = ref(1)
 
 const streakColor = computed(() => {
   const d = checkinStore.streakDays
@@ -175,6 +214,56 @@ const WalletIcon = { render: () => h('svg', { fill: 'none', viewBox: '0 0 24 24'
 const BoltIcon = { render: () => h('svg', { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' }, [h('path', { d: 'm3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z' })]) }
 const CalendarIcon = { render: () => h('svg', { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' }, [h('path', { d: 'M6.75 3v2.25M17.25 3v2.25' })]) }
 
-onMounted(async () => { try { const s = await authAPI.getPublicSettings(); contactInfo.value = s.contact_info || ''; balanceLowNotifyEnabled.value = s.balance_low_notify_enabled ?? false; systemDefaultThreshold.value = s.balance_low_notify_threshold ?? 0 } catch (error) { console.error('Failed to load settings:', error) } })
+function getRarityBadgeClass(rarity: string) {
+  const map: Record<string, string> = { common: 'badge-common', rare: 'badge-rare', epic: 'badge-epic', legendary: 'badge-legendary' }
+  return map[rarity] || 'badge-common'
+}
+function getRarityLabel(rarity: string) {
+  const map: Record<string, string> = { common: t('checkin.blindboxCommon'), rare: t('checkin.blindboxRare'), epic: t('checkin.blindboxEpic'), legendary: t('checkin.blindboxLegendary') }
+  return map[rarity] || rarity
+}
+function formatRecordReward(record: BlindboxRecordItem) {
+  switch (record.reward_type) {
+    case 'balance': return `+$${record.reward_value.toFixed(2)}`
+    case 'concurrency': return `+${record.reward_value}`
+    case 'subscription': return `${record.reward_value}d`
+    case 'invitation_code': return '×1'
+    default: return `${record.reward_value}`
+  }
+}
+async function fetchBlindboxRecords() {
+  try {
+    const result = await getBlindboxRecords(blindboxPage.value, 20)
+    blindboxRecords.value = result.items || []
+    blindboxTotal.value = result.total || 0
+  } catch { /* noop */ }
+}
+async function loadMoreBlindboxRecords() {
+  blindboxPage.value++
+  try {
+    const result = await getBlindboxRecords(blindboxPage.value, 20)
+    blindboxRecords.value = [...blindboxRecords.value, ...(result.items || [])]
+    blindboxTotal.value = result.total || 0
+  } catch { /* noop */ }
+}
+
+onMounted(async () => { try { const s = await authAPI.getPublicSettings(); contactInfo.value = s.contact_info || ''; balanceLowNotifyEnabled.value = s.balance_low_notify_enabled ?? false; systemDefaultThreshold.value = s.balance_low_notify_threshold ?? 0 } catch (error) { console.error('Failed to load settings:', error) }; fetchBlindboxRecords() })
 const formatCurrency = (v: number) => `$${v.toFixed(2)}`
 </script>
+
+<style scoped>
+.blindbox-rarity-badge {
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.badge-common { background-color: #f3f4f6; color: #6b7280; }
+.badge-rare { background-color: #dbeafe; color: #2563eb; }
+.badge-epic { background-color: #ede9fe; color: #7c3aed; }
+.badge-legendary { background-color: #fef3c7; color: #d97706; }
+html.dark .badge-common { background-color: #374151; color: #9ca3af; }
+html.dark .badge-rare { background-color: #1e3a5f; color: #60a5fa; }
+html.dark .badge-epic { background-color: #2d1b69; color: #a78bfa; }
+html.dark .badge-legendary { background-color: #451a03; color: #fbbf24; }
+</style>

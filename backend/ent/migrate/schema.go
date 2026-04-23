@@ -386,6 +386,7 @@ var (
 		{Name: "reward_type", Type: field.TypeString, Default: "balance", SchemaType: map[string]string{"postgres": "varchar(30)"}},
 		{Name: "reward_value", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "streak_days", Type: field.TypeInt, Default: 0},
+		{Name: "reward_detail", Type: field.TypeString, Nullable: true, Default: "", SchemaType: map[string]string{"postgres": "text"}},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 	}
 	// CheckinBlindboxRecordsTable holds the schema information for the "checkin_blindbox_records" table.
@@ -402,7 +403,7 @@ var (
 			{
 				Name:    "checkinblindboxrecord_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{CheckinBlindboxRecordsColumns[8]},
+				Columns: []*schema.Column{CheckinBlindboxRecordsColumns[9]},
 			},
 		},
 	}

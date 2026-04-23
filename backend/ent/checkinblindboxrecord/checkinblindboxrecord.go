@@ -27,6 +27,8 @@ const (
 	FieldRewardValue = "reward_value"
 	// FieldStreakDays holds the string denoting the streak_days field in the database.
 	FieldStreakDays = "streak_days"
+	// FieldRewardDetail holds the string denoting the reward_detail field in the database.
+	FieldRewardDetail = "reward_detail"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// Table holds the table name of the checkinblindboxrecord in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldRewardType,
 	FieldRewardValue,
 	FieldStreakDays,
+	FieldRewardDetail,
 	FieldCreatedAt,
 }
 
@@ -67,6 +70,8 @@ var (
 	DefaultRewardValue float64
 	// DefaultStreakDays holds the default value on creation for the "streak_days" field.
 	DefaultStreakDays int
+	// DefaultRewardDetail holds the default value on creation for the "reward_detail" field.
+	DefaultRewardDetail string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )
@@ -112,6 +117,11 @@ func ByRewardValue(opts ...sql.OrderTermOption) OrderOption {
 // ByStreakDays orders the results by the streak_days field.
 func ByStreakDays(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStreakDays, opts...).ToFunc()
+}
+
+// ByRewardDetail orders the results by the reward_detail field.
+func ByRewardDetail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRewardDetail, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

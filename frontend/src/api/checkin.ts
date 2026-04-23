@@ -6,6 +6,7 @@ export interface BlindboxResult {
   reward_type: string
   reward_value: number
   subscription_days?: number
+  reward_detail?: string
 }
 
 export interface CheckinResult {
@@ -54,7 +55,29 @@ export async function getCheckinStatus(): Promise<CheckinStatus> {
 export const checkinAPI = {
   checkin,
   luckCheckin,
-  getCheckinStatus
+  getCheckinStatus,
+  getBlindboxRecords,
 }
 
 export default checkinAPI
+
+export interface BlindboxRecordItem {
+  id: number
+  prize_name: string
+  rarity: string
+  reward_type: string
+  reward_value: number
+  reward_detail?: string
+  streak_days: number
+  created_at: string
+}
+
+export interface BlindboxRecordList {
+  items: BlindboxRecordItem[]
+  total: number
+}
+
+export async function getBlindboxRecords(page = 1, pageSize = 20): Promise<BlindboxRecordList> {
+  const { data } = await apiClient.get<BlindboxRecordList>('/checkin/blindbox/records', { params: { page, page_size: pageSize } })
+  return data
+}

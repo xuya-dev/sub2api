@@ -104,6 +104,20 @@ func (_c *CheckinBlindboxRecordCreate) SetNillableStreakDays(v *int) *CheckinBli
 	return _c
 }
 
+// SetRewardDetail sets the "reward_detail" field.
+func (_c *CheckinBlindboxRecordCreate) SetRewardDetail(v string) *CheckinBlindboxRecordCreate {
+	_c.mutation.SetRewardDetail(v)
+	return _c
+}
+
+// SetNillableRewardDetail sets the "reward_detail" field if the given value is not nil.
+func (_c *CheckinBlindboxRecordCreate) SetNillableRewardDetail(v *string) *CheckinBlindboxRecordCreate {
+	if v != nil {
+		_c.SetRewardDetail(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *CheckinBlindboxRecordCreate) SetCreatedAt(v time.Time) *CheckinBlindboxRecordCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -172,6 +186,10 @@ func (_c *CheckinBlindboxRecordCreate) defaults() {
 	if _, ok := _c.mutation.StreakDays(); !ok {
 		v := checkinblindboxrecord.DefaultStreakDays
 		_c.mutation.SetStreakDays(v)
+	}
+	if _, ok := _c.mutation.RewardDetail(); !ok {
+		v := checkinblindboxrecord.DefaultRewardDetail
+		_c.mutation.SetRewardDetail(v)
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := checkinblindboxrecord.DefaultCreatedAt()
@@ -259,6 +277,10 @@ func (_c *CheckinBlindboxRecordCreate) createSpec() (*CheckinBlindboxRecord, *sq
 	if value, ok := _c.mutation.StreakDays(); ok {
 		_spec.SetField(checkinblindboxrecord.FieldStreakDays, field.TypeInt, value)
 		_node.StreakDays = value
+	}
+	if value, ok := _c.mutation.RewardDetail(); ok {
+		_spec.SetField(checkinblindboxrecord.FieldRewardDetail, field.TypeString, value)
+		_node.RewardDetail = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(checkinblindboxrecord.FieldCreatedAt, field.TypeTime, value)
@@ -421,6 +443,24 @@ func (u *CheckinBlindboxRecordUpsert) UpdateStreakDays() *CheckinBlindboxRecordU
 // AddStreakDays adds v to the "streak_days" field.
 func (u *CheckinBlindboxRecordUpsert) AddStreakDays(v int) *CheckinBlindboxRecordUpsert {
 	u.Add(checkinblindboxrecord.FieldStreakDays, v)
+	return u
+}
+
+// SetRewardDetail sets the "reward_detail" field.
+func (u *CheckinBlindboxRecordUpsert) SetRewardDetail(v string) *CheckinBlindboxRecordUpsert {
+	u.Set(checkinblindboxrecord.FieldRewardDetail, v)
+	return u
+}
+
+// UpdateRewardDetail sets the "reward_detail" field to the value that was provided on create.
+func (u *CheckinBlindboxRecordUpsert) UpdateRewardDetail() *CheckinBlindboxRecordUpsert {
+	u.SetExcluded(checkinblindboxrecord.FieldRewardDetail)
+	return u
+}
+
+// ClearRewardDetail clears the value of the "reward_detail" field.
+func (u *CheckinBlindboxRecordUpsert) ClearRewardDetail() *CheckinBlindboxRecordUpsert {
+	u.SetNull(checkinblindboxrecord.FieldRewardDetail)
 	return u
 }
 
@@ -592,6 +632,27 @@ func (u *CheckinBlindboxRecordUpsertOne) AddStreakDays(v int) *CheckinBlindboxRe
 func (u *CheckinBlindboxRecordUpsertOne) UpdateStreakDays() *CheckinBlindboxRecordUpsertOne {
 	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
 		s.UpdateStreakDays()
+	})
+}
+
+// SetRewardDetail sets the "reward_detail" field.
+func (u *CheckinBlindboxRecordUpsertOne) SetRewardDetail(v string) *CheckinBlindboxRecordUpsertOne {
+	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
+		s.SetRewardDetail(v)
+	})
+}
+
+// UpdateRewardDetail sets the "reward_detail" field to the value that was provided on create.
+func (u *CheckinBlindboxRecordUpsertOne) UpdateRewardDetail() *CheckinBlindboxRecordUpsertOne {
+	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
+		s.UpdateRewardDetail()
+	})
+}
+
+// ClearRewardDetail clears the value of the "reward_detail" field.
+func (u *CheckinBlindboxRecordUpsertOne) ClearRewardDetail() *CheckinBlindboxRecordUpsertOne {
+	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
+		s.ClearRewardDetail()
 	})
 }
 
@@ -929,6 +990,27 @@ func (u *CheckinBlindboxRecordUpsertBulk) AddStreakDays(v int) *CheckinBlindboxR
 func (u *CheckinBlindboxRecordUpsertBulk) UpdateStreakDays() *CheckinBlindboxRecordUpsertBulk {
 	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
 		s.UpdateStreakDays()
+	})
+}
+
+// SetRewardDetail sets the "reward_detail" field.
+func (u *CheckinBlindboxRecordUpsertBulk) SetRewardDetail(v string) *CheckinBlindboxRecordUpsertBulk {
+	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
+		s.SetRewardDetail(v)
+	})
+}
+
+// UpdateRewardDetail sets the "reward_detail" field to the value that was provided on create.
+func (u *CheckinBlindboxRecordUpsertBulk) UpdateRewardDetail() *CheckinBlindboxRecordUpsertBulk {
+	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
+		s.UpdateRewardDetail()
+	})
+}
+
+// ClearRewardDetail clears the value of the "reward_detail" field.
+func (u *CheckinBlindboxRecordUpsertBulk) ClearRewardDetail() *CheckinBlindboxRecordUpsertBulk {
+	return u.Update(func(s *CheckinBlindboxRecordUpsert) {
+		s.ClearRewardDetail()
 	})
 }
 

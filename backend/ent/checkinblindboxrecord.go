@@ -31,6 +31,8 @@ type CheckinBlindboxRecord struct {
 	RewardValue float64 `json:"reward_value,omitempty"`
 	// StreakDays holds the value of the "streak_days" field.
 	StreakDays int `json:"streak_days,omitempty"`
+	// RewardDetail holds the value of the "reward_detail" field.
+	RewardDetail string `json:"reward_detail,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt    time.Time `json:"created_at,omitempty"`
 	selectValues sql.SelectValues
@@ -45,7 +47,7 @@ func (*CheckinBlindboxRecord) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case checkinblindboxrecord.FieldID, checkinblindboxrecord.FieldUserID, checkinblindboxrecord.FieldPrizeItemID, checkinblindboxrecord.FieldStreakDays:
 			values[i] = new(sql.NullInt64)
-		case checkinblindboxrecord.FieldPrizeName, checkinblindboxrecord.FieldRarity, checkinblindboxrecord.FieldRewardType:
+		case checkinblindboxrecord.FieldPrizeName, checkinblindboxrecord.FieldRarity, checkinblindboxrecord.FieldRewardType, checkinblindboxrecord.FieldRewardDetail:
 			values[i] = new(sql.NullString)
 		case checkinblindboxrecord.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -112,6 +114,12 @@ func (_m *CheckinBlindboxRecord) assignValues(columns []string, values []any) er
 			} else if value.Valid {
 				_m.StreakDays = int(value.Int64)
 			}
+		case checkinblindboxrecord.FieldRewardDetail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field reward_detail", values[i])
+			} else if value.Valid {
+				_m.RewardDetail = value.String
+			}
 		case checkinblindboxrecord.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -174,6 +182,9 @@ func (_m *CheckinBlindboxRecord) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("streak_days=")
 	builder.WriteString(fmt.Sprintf("%v", _m.StreakDays))
+	builder.WriteString(", ")
+	builder.WriteString("reward_detail=")
+	builder.WriteString(_m.RewardDetail)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

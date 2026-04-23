@@ -153,6 +153,26 @@ func (_u *CheckinBlindboxRecordUpdate) AddStreakDays(v int) *CheckinBlindboxReco
 	return _u
 }
 
+// SetRewardDetail sets the "reward_detail" field.
+func (_u *CheckinBlindboxRecordUpdate) SetRewardDetail(v string) *CheckinBlindboxRecordUpdate {
+	_u.mutation.SetRewardDetail(v)
+	return _u
+}
+
+// SetNillableRewardDetail sets the "reward_detail" field if the given value is not nil.
+func (_u *CheckinBlindboxRecordUpdate) SetNillableRewardDetail(v *string) *CheckinBlindboxRecordUpdate {
+	if v != nil {
+		_u.SetRewardDetail(*v)
+	}
+	return _u
+}
+
+// ClearRewardDetail clears the value of the "reward_detail" field.
+func (_u *CheckinBlindboxRecordUpdate) ClearRewardDetail() *CheckinBlindboxRecordUpdate {
+	_u.mutation.ClearRewardDetail()
+	return _u
+}
+
 // Mutation returns the CheckinBlindboxRecordMutation object of the builder.
 func (_u *CheckinBlindboxRecordUpdate) Mutation() *CheckinBlindboxRecordMutation {
 	return _u.mutation
@@ -226,6 +246,12 @@ func (_u *CheckinBlindboxRecordUpdate) sqlSave(ctx context.Context) (_node int, 
 	}
 	if value, ok := _u.mutation.AddedStreakDays(); ok {
 		_spec.AddField(checkinblindboxrecord.FieldStreakDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RewardDetail(); ok {
+		_spec.SetField(checkinblindboxrecord.FieldRewardDetail, field.TypeString, value)
+	}
+	if _u.mutation.RewardDetailCleared() {
+		_spec.ClearField(checkinblindboxrecord.FieldRewardDetail, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -373,6 +399,26 @@ func (_u *CheckinBlindboxRecordUpdateOne) AddStreakDays(v int) *CheckinBlindboxR
 	return _u
 }
 
+// SetRewardDetail sets the "reward_detail" field.
+func (_u *CheckinBlindboxRecordUpdateOne) SetRewardDetail(v string) *CheckinBlindboxRecordUpdateOne {
+	_u.mutation.SetRewardDetail(v)
+	return _u
+}
+
+// SetNillableRewardDetail sets the "reward_detail" field if the given value is not nil.
+func (_u *CheckinBlindboxRecordUpdateOne) SetNillableRewardDetail(v *string) *CheckinBlindboxRecordUpdateOne {
+	if v != nil {
+		_u.SetRewardDetail(*v)
+	}
+	return _u
+}
+
+// ClearRewardDetail clears the value of the "reward_detail" field.
+func (_u *CheckinBlindboxRecordUpdateOne) ClearRewardDetail() *CheckinBlindboxRecordUpdateOne {
+	_u.mutation.ClearRewardDetail()
+	return _u
+}
+
 // Mutation returns the CheckinBlindboxRecordMutation object of the builder.
 func (_u *CheckinBlindboxRecordUpdateOne) Mutation() *CheckinBlindboxRecordMutation {
 	return _u.mutation
@@ -476,6 +522,12 @@ func (_u *CheckinBlindboxRecordUpdateOne) sqlSave(ctx context.Context) (_node *C
 	}
 	if value, ok := _u.mutation.AddedStreakDays(); ok {
 		_spec.AddField(checkinblindboxrecord.FieldStreakDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RewardDetail(); ok {
+		_spec.SetField(checkinblindboxrecord.FieldRewardDetail, field.TypeString, value)
+	}
+	if _u.mutation.RewardDetailCleared() {
+		_spec.ClearField(checkinblindboxrecord.FieldRewardDetail, field.TypeString)
 	}
 	_node = &CheckinBlindboxRecord{config: _u.config}
 	_spec.Assign = _node.assignValues

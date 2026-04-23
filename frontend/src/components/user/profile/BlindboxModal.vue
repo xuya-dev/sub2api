@@ -34,6 +34,14 @@
                 {{ rewardText }}
               </div>
 
+              <div v-if="result.reward_type === 'invitation_code' && result.reward_detail" class="blindbox-invite-code">
+                <div class="blindbox-invite-code-label">{{ t('checkin.blindboxInviteCode') }}</div>
+                <div class="blindbox-invite-code-value">{{ result.reward_detail }}</div>
+                <button type="button" class="blindbox-copy-btn" @click="copyCode(result.reward_detail!)">
+                  {{ copied ? t('common.copied') : t('common.copy') }}
+                </button>
+              </div>
+
               <button
                 type="button"
                 class="blindbox-close-btn"
@@ -51,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { BlindboxResult } from '@/api/checkin'
 
@@ -63,6 +71,8 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{ (e: 'close'): void }>()
 const { t } = useI18n()
+
+const copied = ref(false)
 
 const rarityLabel = computed(() => {
   if (!props.result) return ''
@@ -135,6 +145,14 @@ function sparkleStyle(i: number) {
 
 function handleClose() {
   emit('close')
+}
+
+async function copyCode(code: string) {
+  try {
+    await navigator.clipboard.writeText(code)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch { /* noop */ }
 }
 </script>
 
@@ -265,6 +283,59 @@ html.dark .blindbox-rarity-label {
   font-size: 13px;
   font-weight: 500;
   opacity: 0.7;
+}
+
+.blindbox-invite-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #f9fafb;
+  width: 100%;
+}
+
+html.dark .blindbox-invite-code {
+  background: #374151;
+}
+
+.blindbox-invite-code-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+html.dark .blindbox-invite-code-label {
+  color: #9ca3af;
+}
+
+.blindbox-invite-code-value {
+  font-size: 14px;
+  font-family: monospace;
+  word-break: break-all;
+  text-align: center;
+  color: #111827;
+  font-weight: 600;
+}
+
+html.dark .blindbox-invite-code-value {
+  color: #f3f4f6;
+}
+
+.blindbox-copy-btn {
+  padding: 4px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  background: #6366f1;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.blindbox-copy-btn:hover {
+  opacity: 0.85;
 }
 
 .blindbox-close-btn {
