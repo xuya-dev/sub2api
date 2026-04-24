@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
@@ -18,8 +19,16 @@ func NewBalanceTransferHandler(transferService *service.BalanceTransferService) 
 	return &BalanceTransferHandler{transferService: transferService}
 }
 
+func getUserID(c *gin.Context) int64 {
+	subject, ok := middleware.GetAuthSubjectFromContext(c)
+	if !ok {
+		return 0
+	}
+	return subject.UserID
+}
+
 func (h *BalanceTransferHandler) Transfer(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -42,7 +51,7 @@ func (h *BalanceTransferHandler) Transfer(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) ValidateTransfer(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -64,7 +73,7 @@ func (h *BalanceTransferHandler) ValidateTransfer(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) GetHistory(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -87,7 +96,7 @@ func (h *BalanceTransferHandler) GetHistory(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) GetStats(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -101,7 +110,7 @@ func (h *BalanceTransferHandler) GetStats(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) CreateRedPacket(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -128,7 +137,7 @@ func (h *BalanceTransferHandler) CreateRedPacket(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) ClaimRedPacket(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -163,7 +172,7 @@ func (h *BalanceTransferHandler) GetRedPacketDetail(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) GetMyRedPackets(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -199,7 +208,7 @@ func (h *BalanceTransferHandler) GetLeaderboard(c *gin.Context) {
 }
 
 func (h *BalanceTransferHandler) SearchUsers(c *gin.Context) {
-	userID := GetUserIDAware(c)
+	userID := getUserID(c)
 	if userID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -217,18 +226,11 @@ func (h *BalanceTransferHandler) SearchUsers(c *gin.Context) {
 }
 
 func GetUserIDAware(c *gin.Context) int64 {
-	id, exists := c.Get("user_id")
-	if !exists {
+	subject, ok := middleware.GetAuthSubjectFromContext(c)
+	if !ok {
 		return 0
 	}
-	switch v := id.(type) {
-	case int64:
-		return v
-	case float64:
-		return int64(v)
-	default:
-		return 0
-	}
+	return subject.UserID
 }
 
 func WriteAppError(c *gin.Context, err error) {

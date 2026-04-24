@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
@@ -149,18 +150,11 @@ func (h *TransferAdminHandler) ListRedPackets(c *gin.Context) {
 }
 
 func getUserIDFromContext(c *gin.Context) int64 {
-	id, exists := c.Get("user_id")
-	if !exists {
+	subject, ok := middleware.GetAuthSubjectFromContext(c)
+	if !ok {
 		return 0
 	}
-	switch v := id.(type) {
-	case int64:
-		return v
-	case float64:
-		return int64(v)
-	default:
-		return 0
-	}
+	return subject.UserID
 }
 
 func writeAppError(c *gin.Context, err error) {

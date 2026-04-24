@@ -112,18 +112,43 @@
     <Teleport to="body">
       <div v-if="showBatchDialog" class="fixed inset-0 z-50 flex items-center justify-center">
         <div class="fixed inset-0 bg-black/50" @click="showBatchDialog = false"></div>
-        <div class="relative z-10 w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-dark-800">
+        <div class="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl dark:bg-dark-800">
           <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{{ t('admin.transfer.batchDistribute', '批量发放') }}</h2>
           <div class="max-h-96 space-y-3 overflow-y-auto">
-            <div v-for="(target, i) in batchTargets" :key="i" class="flex items-center gap-2">
-              <input v-model.number="target.user_id" type="number" :placeholder="t('admin.transfer.userId', '用户 ID')" class="input flex-1" />
-              <input v-model.number="target.amount" type="number" step="0.01" min="0.01" :placeholder="t('admin.transfer.amount', '金额')" class="input flex-1" />
-              <button @click="batchTargets.splice(i, 1)" class="text-gray-400 hover:text-red-500">
-                <Icon name="trash" size="sm" />
-              </button>
+            <div v-for="(target, i) in batchTargets" :key="i" class="rounded-lg border border-gray-200 p-3 dark:border-dark-700">
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                  <input v-model="target.query" type="text"
+                    :placeholder="t('admin.transfer.searchUser', '搜索邮箱/用户名')"
+                    class="input w-full"
+                    @input="onBatchSearch(i)"
+                    @focus="onBatchSearch(i)" />
+                  <div v-if="target.results && target.results.length > 0 && !target.selected" class="absolute left-0 right-0 top-full z-10 mt-1 max-h-36 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-dark-600 dark:bg-dark-800">
+                    <button v-for="u in target.results" :key="u.id" type="button" @click="selectBatchUser(i, u)"
+                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-dark-700">
+                      <div class="flex h-6 w-6 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+                        <Icon name="user" size="xs" class="text-primary-600 dark:text-primary-400" />
+                      </div>
+                      <span class="flex-1 truncate text-gray-900 dark:text-white">{{ u.email }}</span>
+                      <span class="text-xs text-gray-400">#{{ u.id }}</span>
+                    </button>
+                  </div>
+                </div>
+                <div v-if="target.selected" class="flex items-center gap-1">
+                  <span class="rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 dark:bg-primary-900/20 dark:text-primary-300">{{ target.selected.email }}</span>
+                  <button @click="clearBatchUser(i)" class="text-gray-400 hover:text-red-500">
+                    <Icon name="x" size="xs" />
+                  </button>
+                </div>
+                <input v-model.number="target.amount" type="number" step="0.01" min="0.01"
+                  :placeholder="t('admin.transfer.amount', '金额')" class="input w-28" />
+                <button @click="removeBatchTarget(i)" class="text-gray-400 hover:text-red-500">
+                  <Icon name="trash" size="sm" />
+                </button>
+              </div>
             </div>
           </div>
-          <button @click="batchTargets.push({ user_id: 0, amount: 0 })" class="mt-3 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+          <button @click="addBatchTarget" class="mt-3 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
             + {{ t('admin.transfer.addTarget', '添加目标') }}
           </button>
           <input v-model="batchMemo" type="text" :placeholder="t('admin.transfer.memoPlaceholder', '备注（可选）')" class="input mt-3 w-full" />
@@ -148,6 +173,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
+import { searchUsers as adminSearchUsers } from '@/api/admin/usage'
 import type { TransferRecord } from '@/api/admin/transfer'
 import type { Column } from '@/components/common/types'
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -176,9 +202,16 @@ const freezeTarget = ref<TransferRecord | null>(null)
 const revokeTarget = ref<TransferRecord | null>(null)
 
 const showBatchDialog = ref(false)
-const batchTargets = reactive([{ user_id: 0, amount: 0 }])
+const batchTargets = reactive<BatchTarget[]>([])
 const batchMemo = ref('')
 const batchLoading = ref(false)
+
+interface BatchTarget {
+  query: string
+  results: { id: number; email: string }[]
+  selected: { id: number; email: string } | null
+  amount: number
+}
 
 const columns = computed<Column[]>(() => [
   { key: 'id', label: 'ID', sortable: true },
@@ -324,8 +357,50 @@ async function handleRevoke() {
   }
 }
 
+function addBatchTarget() {
+  batchTargets.push({ query: '', results: [], selected: null, amount: 0 })
+}
+
+function removeBatchTarget(i: number) {
+  batchTargets.splice(i, 1)
+}
+
+function selectBatchUser(i: number, u: { id: number; email: string }) {
+  const target = batchTargets[i]
+  target.selected = u
+  target.query = u.email
+  target.results = []
+}
+
+function clearBatchUser(i: number) {
+  const target = batchTargets[i]
+  target.selected = null
+  target.query = ''
+  target.results = []
+}
+
+let batchSearchTimers: Map<number, ReturnType<typeof setTimeout>> = new Map()
+async function onBatchSearch(i: number) {
+  const target = batchTargets[i]
+  target.selected = null
+  const old = batchSearchTimers.get(i)
+  if (old) clearTimeout(old)
+  if (!target.query || target.query.length < 1) {
+    target.results = []
+    return
+  }
+  const timer = setTimeout(async () => {
+    try {
+      target.results = await adminSearchUsers(target.query)
+    } catch {
+      target.results = []
+    }
+  }, 300)
+  batchSearchTimers.set(i, timer)
+}
+
 async function handleBatch() {
-  const valid = batchTargets.filter(t => t.user_id > 0 && t.amount > 0)
+  const valid = batchTargets.filter(t => t.selected && t.amount > 0).map(t => ({ user_id: t.selected!.id, amount: t.amount }))
   if (valid.length === 0) {
     appStore.showError(t('admin.transfer.noValidTargets', '请添加有效的发放目标'))
     return
@@ -335,7 +410,7 @@ async function handleBatch() {
     await adminAPI.transfer.batchDistribute(valid, batchMemo.value || undefined)
     appStore.showSuccess(t('admin.transfer.batchSuccess', '批量发放成功'))
     showBatchDialog.value = false
-    batchTargets.splice(0, batchTargets.length, { user_id: 0, amount: 0 })
+    batchTargets.splice(0, batchTargets.length)
     batchMemo.value = ''
     loadTransfers()
   } catch (e: any) {
