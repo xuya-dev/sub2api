@@ -134,6 +134,8 @@ func RegisterUserRoutes(
 			transfer.POST("/validate", h.Transfer.ValidateTransfer)
 			transfer.GET("/history", h.Transfer.GetHistory)
 			transfer.GET("/stats", h.Transfer.GetStats)
+			transfer.GET("/search-users", h.Transfer.SearchUsers)
+			transfer.GET("/leaderboard", h.Transfer.GetLeaderboard)
 		}
 
 		// 红包
@@ -144,8 +146,5 @@ func RegisterUserRoutes(
 			redpacket.GET("/:id", h.Transfer.GetRedPacketDetail)
 			redpacket.GET("/my", h.Transfer.GetMyRedPackets)
 		}
-
-		// 转账排行榜
-		authenticated.GET("/transfer/leaderboard", h.Transfer.GetLeaderboard)
 	}
 }

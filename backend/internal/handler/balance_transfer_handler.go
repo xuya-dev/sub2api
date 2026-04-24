@@ -198,6 +198,24 @@ func (h *BalanceTransferHandler) GetLeaderboard(c *gin.Context) {
 	c.JSON(http.StatusOK, entries)
 }
 
+func (h *BalanceTransferHandler) SearchUsers(c *gin.Context) {
+	userID := GetUserIDAware(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	q := c.Query("q")
+	results, err := h.transferService.SearchUsers(c.Request.Context(), q)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if results == nil {
+		results = []*service.UserSearchResult{}
+	}
+	c.JSON(http.StatusOK, results)
+}
+
 func GetUserIDAware(c *gin.Context) int64 {
 	id, exists := c.Get("user_id")
 	if !exists {

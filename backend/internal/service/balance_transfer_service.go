@@ -9,6 +9,7 @@ import (
 	"time"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 )
 
 var (
@@ -475,4 +476,25 @@ func generateRedPacketCode() (string, error) {
 
 func (s *BalanceTransferService) GetTransferStats(ctx context.Context, userID int64) (sent float64, received float64, feePaid float64, err error) {
 	return s.transferRepo.GetUserTransferStats(ctx, userID)
+}
+
+type UserSearchResult struct {
+	ID       int64  `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+}
+
+func (s *BalanceTransferService) SearchUsers(ctx context.Context, query string) ([]*UserSearchResult, error) {
+	if query == "" {
+		return nil, nil
+	}
+	users, _, err := s.userRepo.ListWithFilters(ctx, pagination.PaginationParams{Page: 1, PageSize: 10}, UserListFilters{Search: query})
+	if err != nil {
+		return nil, err
+	}
+	var results []*UserSearchResult
+	for _, u := range users {
+		results = append(results, &UserSearchResult{ID: u.ID, Email: u.Email, Username: u.Username})
+	}
+	return results, nil
 }

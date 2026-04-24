@@ -21,6 +21,17 @@ export interface TransferStats {
   total_fee_paid: number
 }
 
+export interface UserSearchResult {
+  id: number
+  email: string
+  username: string
+}
+
+export async function searchUsers(query: string): Promise<UserSearchResult[]> {
+  const { data } = await apiClient.get<UserSearchResult[]>('/transfer/search-users', { params: { q: query } })
+  return data
+}
+
 export interface TransferLeaderboardEntry {
   rank: number
   user_id: number
@@ -30,7 +41,7 @@ export interface TransferLeaderboardEntry {
 }
 
 export async function transferBalance(receiverId: number, amount: number, memo?: string): Promise<TransferRecord> {
-  const { data } = await apiClient.post<TransferRecord>('/user/transfer', {
+  const { data } = await apiClient.post<TransferRecord>('/transfer', {
     receiver_id: receiverId,
     amount,
     memo,
@@ -39,7 +50,7 @@ export async function transferBalance(receiverId: number, amount: number, memo?:
 }
 
 export async function validateTransfer(receiverId: number, amount: number): Promise<{ fee: number; fee_rate: number }> {
-  const { data } = await apiClient.post<{ fee: number; fee_rate: number }>('/user/transfer/validate', {
+  const { data } = await apiClient.post<{ fee: number; fee_rate: number }>('/transfer/validate', {
     receiver_id: receiverId,
     amount,
   })
@@ -51,12 +62,12 @@ export async function getTransferHistory(params: {
   page?: number
   page_size?: number
 }): Promise<{ items: TransferRecord[]; total: number; page: number; page_size: number }> {
-  const { data } = await apiClient.get('/user/transfer/history', { params })
+  const { data } = await apiClient.get('/transfer/history', { params })
   return data
 }
 
 export async function getTransferStats(): Promise<TransferStats> {
-  const { data } = await apiClient.get<TransferStats>('/user/transfer/stats')
+  const { data } = await apiClient.get<TransferStats>('/transfer/stats')
   return data
 }
 
@@ -64,7 +75,7 @@ export async function getTransferLeaderboard(params: {
   period?: string
   limit?: number
 }): Promise<TransferLeaderboardEntry[]> {
-  const { data } = await apiClient.get<TransferLeaderboardEntry[]>('/user/transfer/leaderboard', { params })
+  const { data } = await apiClient.get<TransferLeaderboardEntry[]>('/transfer/leaderboard', { params })
   return data
 }
 
@@ -100,12 +111,12 @@ export async function createRedPacket(params: {
   redpacket_type?: 'equal' | 'random'
   memo?: string
 }): Promise<RedPacketRecord> {
-  const { data } = await apiClient.post<RedPacketRecord>('/user/redpacket', params)
+  const { data } = await apiClient.post<RedPacketRecord>('/redpacket', params)
   return data
 }
 
 export async function claimRedPacket(code: string): Promise<RedPacketClaimRecord> {
-  const { data } = await apiClient.post<RedPacketClaimRecord>('/user/redpacket/claim', { code })
+  const { data } = await apiClient.post<RedPacketClaimRecord>('/redpacket/claim', { code })
   return data
 }
 
@@ -113,7 +124,7 @@ export async function getRedPacketDetail(id: number): Promise<{
   redpacket: RedPacketRecord
   claims: RedPacketClaimRecord[]
 }> {
-  const { data } = await apiClient.get(`/user/redpacket/${id}`)
+  const { data } = await apiClient.get(`/redpacket/${id}`)
   return data
 }
 
@@ -121,6 +132,6 @@ export async function getMyRedPackets(params: {
   page?: number
   page_size?: number
 }): Promise<{ items: RedPacketRecord[]; total: number; page: number; page_size: number }> {
-  const { data } = await apiClient.get('/user/redpacket/my', { params })
+  const { data } = await apiClient.get('/redpacket/my', { params })
   return data
 }
