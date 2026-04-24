@@ -288,7 +288,9 @@ async function handleTransfer() {
     amount.value = 0
     memo.value = ''
     feePreview.value = null
-    await Promise.all([loadStats(), loadHistory(), authStore.refreshUser()])
+    loadStats().catch(() => {})
+    loadHistory().catch(() => {})
+    authStore.refreshUser().catch(() => {})
   } catch (e: any) {
     appStore.showError(e?.response?.data?.error || t('transfer.failed', '转账失败'))
   } finally {

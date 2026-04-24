@@ -340,7 +340,8 @@ async function handleCreate() {
       memo: createForm.memo || undefined,
     })
     appStore.showSuccess(t('redpacket.created', '红包创建成功'))
-    await Promise.all([loadMyPackets(), authStore.refreshUser()])
+    loadMyPackets().catch(() => {})
+    authStore.refreshUser().catch(() => {})
   } catch (e: any) {
     createError.value = e?.response?.data?.error || t('redpacket.createFailed', '创建失败')
   } finally {
@@ -355,7 +356,8 @@ async function handleClaim() {
   try {
     claimResult.value = await claimRedPacket(claimCode.value)
     appStore.showSuccess(t('redpacket.claimSuccess', '领取成功！'))
-    await Promise.all([loadMyPackets(), authStore.refreshUser()])
+    loadMyPackets().catch(() => {})
+    authStore.refreshUser().catch(() => {})
   } catch (e: any) {
     claimError.value = e?.response?.data?.error || t('redpacket.claimFailed', '领取失败')
   } finally {
