@@ -199,6 +199,13 @@ type SystemSettings struct {
 	CheckinBlindboxEnabled      bool   `json:"checkin_blindbox_enabled"`
 	CheckinBlindboxTriggerType  string `json:"checkin_blindbox_trigger_type"`
 	CheckinBlindboxInterval     int    `json:"checkin_blindbox_interval"`
+
+	// Channel Monitor feature switch
+	ChannelMonitorEnabled                bool `json:"channel_monitor_enabled"`
+	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
+
+	// Available Channels feature switch (user-facing aggregate view)
+	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 }
 
 type DefaultSubscriptionSetting struct {
@@ -246,6 +253,11 @@ type PublicSettings struct {
 	AccountQuotaNotifyEnabled        bool             `json:"account_quota_notify_enabled"`
 	BalanceLowNotifyThreshold        float64          `json:"balance_low_notify_threshold"`
 	BalanceLowNotifyRechargeURL      string           `json:"balance_low_notify_recharge_url"`
+
+	ChannelMonitorEnabled                bool `json:"channel_monitor_enabled"`
+	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
+
+	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 }
 
 // OverloadCooldownSettings 529过载冷却配置 DTO
