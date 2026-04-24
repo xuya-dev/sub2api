@@ -92,6 +92,27 @@ func (r *balanceTransferRepo) ListByUser(ctx context.Context, userID int64, role
 	return r.queryWithPagination(ctx, query, page, pageSize)
 }
 
+func (r *balanceTransferRepo) ListByUserExcludeType(ctx context.Context, userID int64, role, excludeType string, page, pageSize int) ([]*service.BalanceTransferRecord, int, error) {
+	client := clientFromContext(ctx, r.client)
+	var preds []predicate.BalanceTransfer
+	switch role {
+	case "sender":
+		preds = append(preds, balancetransfer.SenderID(userID))
+	case "receiver":
+		preds = append(preds, balancetransfer.ReceiverID(userID))
+	default:
+		preds = append(preds, balancetransfer.Or(
+			balancetransfer.SenderID(userID),
+			balancetransfer.ReceiverID(userID),
+		))
+	}
+	if excludeType != "" {
+		preds = append(preds, balancetransfer.TransferTypeNEQ(excludeType))
+	}
+	query := client.BalanceTransfer.Query().Where(preds...).Order(dbent.Desc(balancetransfer.FieldCreatedAt))
+	return r.queryWithPagination(ctx, query, page, pageSize)
+}
+
 func (r *balanceTransferRepo) ListAll(ctx context.Context, filter *service.TransferFilter, page, pageSize int) ([]*service.BalanceTransferRecord, int, error) {
 	client := clientFromContext(ctx, r.client)
 	var preds []predicate.BalanceTransfer

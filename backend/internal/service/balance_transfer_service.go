@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math"
+	"math/big"
+	"sync"
 	"time"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
@@ -33,10 +35,11 @@ var (
 )
 
 type BalanceTransferService struct {
-	transferRepo  BalanceTransferRepository
-	redPacketRepo BalanceRedPacketRepository
-	userRepo      UserRepository
+	transferRepo   BalanceTransferRepository
+	redPacketRepo  BalanceRedPacketRepository
+	userRepo       UserRepository
 	settingService *SettingService
+	claimLocks     sync.Map
 }
 
 func NewBalanceTransferService(
@@ -159,7 +162,7 @@ func (s *BalanceTransferService) ValidateTransfer(ctx context.Context, senderID,
 }
 
 func (s *BalanceTransferService) GetHistory(ctx context.Context, userID int64, role string, page, pageSize int) ([]*BalanceTransferRecord, int, error) {
-	return s.transferRepo.ListByUser(ctx, userID, role, page, pageSize)
+	return s.transferRepo.ListByUserExcludeType(ctx, userID, role, "redpacket", page, pageSize)
 }
 
 func (s *BalanceTransferService) GetAllTransfers(ctx context.Context, filter *TransferFilter, page, pageSize int) ([]*BalanceTransferRecord, int, error) {
@@ -347,27 +350,42 @@ func (s *BalanceTransferService) ClaimRedPacket(ctx context.Context, userID int6
 	if claimed {
 		return nil, ErrRedPacketAlreadyClaimed
 	}
-	amount := s.calculateClaimAmount(rp)
+
+	lockKey := fmt.Sprintf("rp:%d", rp.ID)
+	actual, _ := s.claimLocks.LoadOrStore(lockKey, &sync.Mutex{})
+	mu := actual.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
+
+	freshRp, err := s.redPacketRepo.GetByID(ctx, rp.ID)
+	if err != nil {
+		return nil, ErrRedPacketNotFound
+	}
+	if freshRp.Status != "active" || freshRp.RemainingCount <= 0 || freshRp.RemainingAmount <= 0 {
+		return nil, ErrRedPacketExhausted
+	}
+
+	amount := s.calculateClaimAmount(freshRp)
 	if amount <= 0 {
 		return nil, ErrRedPacketExhausted
 	}
-	remainingCount := rp.RemainingCount
+	remainingCount := freshRp.RemainingCount
 	var claimRecord *RedPacketClaimRecord
 	if err := s.transferRepo.RunInTx(ctx, func(txCtx context.Context) error {
-		if err := s.redPacketRepo.DecrementClaim(txCtx, rp.ID, amount); err != nil {
+		if err := s.redPacketRepo.DecrementClaim(txCtx, freshRp.ID, amount); err != nil {
 			return ErrRedPacketExhausted
 		}
 		if err := s.userRepo.UpdateBalance(txCtx, userID, amount); err != nil {
 			return fmt.Errorf("credit balance: %w", err)
 		}
 		claimRecord = &RedPacketClaimRecord{
-			RedPacketID: rp.ID,
+			RedPacketID: freshRp.ID,
 			UserID:      userID,
 			Amount:      amount,
 			CreatedAt:   time.Now(),
 		}
 		transferRecord := &BalanceTransferRecord{
-			SenderID:     rp.SenderID,
+			SenderID:     freshRp.SenderID,
 			ReceiverID:   userID,
 			Amount:       amount,
 			Fee:          0,
@@ -375,7 +393,7 @@ func (s *BalanceTransferService) ClaimRedPacket(ctx context.Context, userID int6
 			GrossAmount:  amount,
 			TransferType: "redpacket",
 			Status:       "completed",
-			RedpacketID:  &rp.ID,
+			RedpacketID:  &freshRp.ID,
 			CreatedAt:    time.Now(),
 		}
 		if err := s.transferRepo.Create(txCtx, transferRecord); err != nil {
@@ -386,7 +404,7 @@ func (s *BalanceTransferService) ClaimRedPacket(ctx context.Context, userID int6
 			return fmt.Errorf("create claim record: %w", err)
 		}
 		if remainingCount <= 1 {
-			return s.redPacketRepo.MarkExhausted(txCtx, rp.ID)
+			return s.redPacketRepo.MarkExhausted(txCtx, freshRp.ID)
 		}
 		return nil
 	}); err != nil {
@@ -450,23 +468,21 @@ func (s *BalanceTransferService) calculateClaimAmount(rp *RedPacketRecord) float
 	if rp.RemainingCount == 1 {
 		return math.Round(rp.RemainingAmount*1e8) / 1e8
 	}
-	max := (rp.RemainingAmount - float64(rp.RemainingCount-1)*0.01) * 2
-	if max <= 0 {
-		max = 0.01
+	maxAllowed := rp.RemainingAmount - float64(rp.RemainingCount-1)*0.01
+	upperBound := maxAllowed / float64(rp.RemainingCount) * 2
+	if upperBound <= 0.01 {
+		return 0.01
 	}
-	var buf [8]byte
-	rand.Read(buf[:])
-	seed := int64(buf[0])<<56 | int64(buf[1])<<48 | int64(buf[2])<<40 | int64(buf[3])<<32 |
-		int64(buf[4])<<24 | int64(buf[5])<<16 | int64(buf[6])<<8 | int64(buf[7])
-	if seed < 0 {
-		seed = -seed
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(upperBound*100)))
+	if err != nil {
+		return math.Round(maxAllowed/float64(rp.RemainingCount)*1e8) / 1e8
 	}
-	amount := float64(seed%int64(max*100)) / 100
+	amount := float64(n.Int64())/100 + 0.01
 	if amount < 0.01 {
 		amount = 0.01
 	}
-	if amount > rp.RemainingAmount-float64(rp.RemainingCount-1)*0.01 {
-		amount = rp.RemainingAmount - float64(rp.RemainingCount-1)*0.01
+	if amount > maxAllowed {
+		amount = maxAllowed
 	}
 	return math.Round(amount*1e8) / 1e8
 }

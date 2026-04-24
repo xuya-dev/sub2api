@@ -90,6 +90,7 @@ type BalanceTransferRepository interface {
 	GetByID(ctx context.Context, id int64) (*BalanceTransferRecord, error)
 	UpdateStatus(ctx context.Context, id int64, status string, frozenAt *time.Time, frozenBy *int64, revokeReason *string) error
 	ListByUser(ctx context.Context, userID int64, role string, page, pageSize int) ([]*BalanceTransferRecord, int, error)
+	ListByUserExcludeType(ctx context.Context, userID int64, role, excludeType string, page, pageSize int) ([]*BalanceTransferRecord, int, error)
 	ListAll(ctx context.Context, filter *TransferFilter, page, pageSize int) ([]*BalanceTransferRecord, int, error)
 	GetDailyTransferTotal(ctx context.Context, userID int64) (float64, int, error)
 	GetFeeStats(ctx context.Context, startTime, endTime time.Time) ([]*DailyFeeStat, error)
