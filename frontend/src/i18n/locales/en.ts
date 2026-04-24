@@ -1135,9 +1135,11 @@ export default {
     balanceSubtitle: '{count} check-ins',
     consumptionSubtitle: '{count} requests',
     checkinSubtitle: '{total} total · last {date} · earned ${reward}',
+    transferCount: 'transactions',
     tabs: {
       balance: 'Balance',
       consumption: 'Consumption',
+      transfer: 'Transfer',
       checkin: 'Check-in',
     },
     periods: {

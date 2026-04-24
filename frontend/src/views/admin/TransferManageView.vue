@@ -1,157 +1,349 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <h2 class="text-xl font-bold">{{ t('nav.transferManage', '转账管理') }}</h2>
-      <div class="flex gap-2">
-        <button class="btn-primary text-sm" @click="showBatch = true">批量发放</button>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-4" v-if="feeStats.length">
-      <div class="rounded-lg bg-green-50 dark:bg-green-900/20 p-4 text-center">
-        <div class="text-xs text-gray-500">30天手续费收入</div>
-        <div class="text-lg font-bold text-green-600">{{ totalFee.toFixed(4) }}</div>
-      </div>
-      <div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
-        <div class="text-xs text-gray-500">30天总笔数</div>
-        <div class="text-lg font-bold text-blue-600">{{ totalCount }}</div>
-      </div>
-      <div class="rounded-lg bg-purple-50 dark:bg-purple-900/20 p-4 text-center">
-        <div class="text-xs text-gray-500">记录总数</div>
-        <div class="text-lg font-bold text-purple-600">{{ pagination.total }}</div>
-      </div>
-    </div>
-
-    <div class="overflow-x-auto rounded-lg bg-white dark:bg-gray-800 shadow">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th class="px-4 py-3 text-left">ID</th>
-            <th class="px-4 py-3 text-left">发送方</th>
-            <th class="px-4 py-3 text-left">接收方</th>
-            <th class="px-4 py-3 text-right">金额</th>
-            <th class="px-4 py-3 text-right">手续费</th>
-            <th class="px-4 py-3 text-left">类型</th>
-            <th class="px-4 py-3 text-left">状态</th>
-            <th class="px-4 py-3 text-left">时间</th>
-            <th class="px-4 py-3 text-left">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="t in transfers" :key="t.id" class="border-t dark:border-gray-700">
-            <td class="px-4 py-3">{{ t.id }}</td>
-            <td class="px-4 py-3">{{ t.sender_id }}</td>
-            <td class="px-4 py-3">{{ t.receiver_id }}</td>
-            <td class="px-4 py-3 text-right">{{ t.amount.toFixed(4) }}</td>
-            <td class="px-4 py-3 text-right">{{ t.fee.toFixed(4) }}</td>
-            <td class="px-4 py-3">{{ t.transfer_type }}</td>
-            <td class="px-4 py-3">
-              <span :class="statusClass(t.status)">{{ t.status }}</span>
-            </td>
-            <td class="px-4 py-3 text-xs text-gray-500">{{ new Date(t.created_at).toLocaleString() }}</td>
-            <td class="px-4 py-3">
-              <template v-if="t.status === 'completed'">
-                <button class="text-yellow-600 text-xs mr-2" @click="handleFreeze(t.id)">冻结</button>
-                <button class="text-red-600 text-xs" @click="handleRevoke(t.id)">撤回</button>
-              </template>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div v-if="showBatch" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showBatch = false">
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-[500px] max-h-[80vh] overflow-auto">
-        <h3 class="text-lg font-semibold mb-4">批量发放余额</h3>
-        <div class="space-y-3">
-          <div v-for="(target, i) in batchTargets" :key="i" class="flex gap-2">
-            <input v-model.number="target.user_id" type="number" placeholder="用户ID" class="input-field flex-1" />
-            <input v-model.number="target.amount" type="number" step="0.01" placeholder="金额" class="input-field flex-1" />
-            <button class="text-red-500" @click="batchTargets.splice(i, 1)">✕</button>
+  <AppLayout>
+    <TablePageLayout>
+      <template #filters>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex-1 sm:max-w-64">
+            <input v-model="filterQuery" type="text" :placeholder="t('admin.transfer.searchPlaceholder', '搜索用户 ID')" class="input" @input="handleSearch" />
+          </div>
+          <Select v-model="filters.status" :options="statusOptions" class="w-36" @change="loadTransfers" />
+          <Select v-model="filters.transfer_type" :options="typeOptions" class="w-36" @change="loadTransfers" />
+          <div class="flex flex-1 flex-wrap items-center justify-end gap-2">
+            <button @click="loadTransfers" :disabled="loading" class="btn btn-secondary" :title="t('common.refresh')">
+              <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
+            </button>
+            <button @click="showBatchDialog = true" class="btn btn-primary">
+              {{ t('admin.transfer.batchDistribute', '批量发放') }}
+            </button>
           </div>
         </div>
-        <button class="text-blue-500 text-sm mt-2" @click="batchTargets.push({ user_id: 0, amount: 0 })">+ 添加</button>
-        <input v-model="batchMemo" type="text" placeholder="备注(可选)" class="input-field w-full mt-3" />
-        <div class="flex gap-2 mt-4">
-          <button class="btn-primary flex-1" @click="handleBatch" :disabled="batchLoading">{{ batchLoading ? '发放中...' : '确认发放' }}</button>
-          <button class="btn-secondary flex-1" @click="showBatch = false">取消</button>
+      </template>
+
+      <template #table>
+        <DataTable
+          :columns="columns"
+          :data="transfers"
+          :loading="loading"
+          :server-side-sort="true"
+          default-sort-key="created_at"
+          default-sort-order="desc"
+          @sort="handleSort"
+        >
+          <template #cell-sender_id="{ value }">
+            <span class="text-sm text-gray-700 dark:text-gray-300">#{{ value }}</span>
+          </template>
+
+          <template #cell-receiver_id="{ value }">
+            <span class="text-sm text-gray-700 dark:text-gray-300">#{{ value }}</span>
+          </template>
+
+          <template #cell-amount="{ value }">
+            <span class="text-sm font-medium text-gray-900 dark:text-white">${{ value.toFixed(2) }}</span>
+          </template>
+
+          <template #cell-fee="{ value }">
+            <span class="text-sm text-gray-500 dark:text-dark-400">${{ value.toFixed(2) }}</span>
+          </template>
+
+          <template #cell-transfer_type="{ value }">
+            <span :class="['badge', typeBadgeClass(value)]">{{ typeLabel(value) }}</span>
+          </template>
+
+          <template #cell-status="{ value }">
+            <span :class="['badge', statusBadgeClass(value)]">{{ statusLabel(value) }}</span>
+          </template>
+
+          <template #cell-created_at="{ value }">
+            <span class="text-sm text-gray-500 dark:text-dark-400">{{ formatDateTime(value) }}</span>
+          </template>
+
+          <template #cell-actions="{ row }">
+            <div class="flex items-center space-x-2">
+              <template v-if="row.status === 'completed'">
+                <button @click="confirmFreeze(row)" class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-yellow-50 hover:text-yellow-600 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400">
+                  <Icon name="ban" size="sm" />
+                  <span class="text-xs">{{ t('admin.transfer.freeze', '冻结') }}</span>
+                </button>
+                <button @click="confirmRevoke(row)" class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+                  <Icon name="trash" size="sm" />
+                  <span class="text-xs">{{ t('admin.transfer.revoke', '撤回') }}</span>
+                </button>
+              </template>
+              <span v-else class="text-gray-400 dark:text-dark-500">-</span>
+            </div>
+          </template>
+        </DataTable>
+      </template>
+
+      <template #pagination>
+        <Pagination
+          v-if="pagination.total > 0"
+          :page="pagination.page"
+          :total="pagination.total"
+          :page-size="pagination.page_size"
+          @update:page="handlePageChange"
+          @update:pageSize="handlePageSizeChange"
+        />
+      </template>
+    </TablePageLayout>
+
+    <ConfirmDialog
+      :show="showFreezeDialog"
+      :title="t('admin.transfer.freezeTitle', '冻结转账')"
+      :message="t('admin.transfer.freezeConfirm', '确认冻结此笔转账？冻结后接收方余额将被扣除并退回发送方。')"
+      :confirm-text="t('admin.transfer.freeze', '冻结')"
+      :cancel-text="t('common.cancel')"
+      danger
+      @confirm="handleFreeze"
+      @cancel="showFreezeDialog = false"
+    />
+
+    <ConfirmDialog
+      :show="showRevokeDialog"
+      :title="t('admin.transfer.revokeTitle', '撤回转账')"
+      :message="t('admin.transfer.revokeConfirm', '确认撤回此笔转账？')"
+      :confirm-text="t('admin.transfer.revoke', '撤回')"
+      :cancel-text="t('common.cancel')"
+      danger
+      @confirm="handleRevoke"
+      @cancel="showRevokeDialog = false"
+    />
+
+    <Teleport to="body">
+      <div v-if="showBatchDialog" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="fixed inset-0 bg-black/50" @click="showBatchDialog = false"></div>
+        <div class="relative z-10 w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-dark-800">
+          <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{{ t('admin.transfer.batchDistribute', '批量发放') }}</h2>
+          <div class="max-h-96 space-y-3 overflow-y-auto">
+            <div v-for="(target, i) in batchTargets" :key="i" class="flex items-center gap-2">
+              <input v-model.number="target.user_id" type="number" :placeholder="t('admin.transfer.userId', '用户 ID')" class="input flex-1" />
+              <input v-model.number="target.amount" type="number" step="0.01" min="0.01" :placeholder="t('admin.transfer.amount', '金额')" class="input flex-1" />
+              <button @click="batchTargets.splice(i, 1)" class="text-gray-400 hover:text-red-500">
+                <Icon name="trash" size="sm" />
+              </button>
+            </div>
+          </div>
+          <button @click="batchTargets.push({ user_id: 0, amount: 0 })" class="mt-3 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+            + {{ t('admin.transfer.addTarget', '添加目标') }}
+          </button>
+          <input v-model="batchMemo" type="text" :placeholder="t('admin.transfer.memoPlaceholder', '备注（可选）')" class="input mt-3 w-full" />
+          <div class="mt-4 flex gap-3">
+            <button @click="handleBatch" :disabled="batchLoading" class="btn btn-primary flex-1">
+              <svg v-if="batchLoading" class="-ml-1 mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ t('admin.transfer.confirm', '确认发放') }}
+            </button>
+            <button @click="showBatchDialog = false" class="btn btn-secondary flex-1">{{ t('common.cancel') }}</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    </Teleport>
+  </AppLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
-import type { TransferRecord, DailyFeeStat } from '@/api/admin/transfer'
+import type { TransferRecord } from '@/api/admin/transfer'
+import type { Column } from '@/components/common/types'
+import AppLayout from '@/components/layout/AppLayout.vue'
+import TablePageLayout from '@/components/layout/TablePageLayout.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import Pagination from '@/components/common/Pagination.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import Icon from '@/components/icons/Icon.vue'
+import Select from '@/components/common/Select.vue'
+import { formatDateTime } from '@/utils/format'
 
 const { t } = useI18n()
+const appStore = useAppStore()
+
 const transfers = ref<TransferRecord[]>([])
-const feeStats = ref<DailyFeeStat[]>([])
-const showBatch = ref(false)
+const loading = ref(false)
+const filterQuery = ref('')
+const filters = reactive({ status: '', transfer_type: '' })
+const pagination = reactive({ total: 0, page: 1, page_size: 20 })
+const sortKey = ref('created_at')
+const sortOrder = ref<'asc' | 'desc'>('desc')
+
+const showFreezeDialog = ref(false)
+const showRevokeDialog = ref(false)
+const freezeTarget = ref<TransferRecord | null>(null)
+const revokeTarget = ref<TransferRecord | null>(null)
+
+const showBatchDialog = ref(false)
 const batchTargets = reactive([{ user_id: 0, amount: 0 }])
 const batchMemo = ref('')
 const batchLoading = ref(false)
-const pagination = reactive({ total: 0, page: 1, page_size: 20 })
 
-const totalFee = computed(() => feeStats.value.reduce((s, d) => s + d.total_fee, 0))
-const totalCount = computed(() => feeStats.value.reduce((s, d) => s + d.count, 0))
+const columns = computed<Column[]>(() => [
+  { key: 'id', label: 'ID', sortable: true },
+  { key: 'sender_id', label: t('admin.transfer.sender', '发送方') },
+  { key: 'receiver_id', label: t('admin.transfer.receiver', '接收方') },
+  { key: 'amount', label: t('admin.transfer.amount', '金额'), sortable: true },
+  { key: 'fee', label: t('admin.transfer.fee', '手续费') },
+  { key: 'transfer_type', label: t('admin.transfer.type', '类型') },
+  { key: 'status', label: t('admin.transfer.status', '状态') },
+  { key: 'created_at', label: t('admin.transfer.time', '时间'), sortable: true },
+  { key: 'actions', label: t('admin.transfer.actions', '操作') },
+])
 
-onMounted(async () => {
-  await Promise.all([loadTransfers(), loadFeeStats()])
-})
+const statusOptions = computed(() => [
+  { value: '', label: t('admin.transfer.allStatus', '全部状态') },
+  { value: 'completed', label: t('admin.transfer.completed', '已完成') },
+  { value: 'frozen', label: t('admin.transfer.frozen', '已冻结') },
+  { value: 'revoked', label: t('admin.transfer.revoked', '已撤回') },
+])
+
+const typeOptions = computed(() => [
+  { value: '', label: t('admin.transfer.allType', '全部类型') },
+  { value: 'direct', label: t('admin.transfer.direct', '直接转账') },
+  { value: 'redpacket', label: t('admin.transfer.redpacket', '红包') },
+  { value: 'batch', label: t('admin.transfer.batch', '批量发放') },
+])
+
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+function handleSearch() {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    pagination.page = 1
+    loadTransfers()
+  }, 300)
+}
+
+function handleSort(key: string, order: 'asc' | 'desc') {
+  sortKey.value = key
+  sortOrder.value = order
+  loadTransfers()
+}
+
+function handlePageChange(page: number) {
+  pagination.page = page
+  loadTransfers()
+}
+
+function handlePageSizeChange(pageSize: number) {
+  pagination.page_size = pageSize
+  pagination.page = 1
+  loadTransfers()
+}
 
 async function loadTransfers() {
+  loading.value = true
   try {
-    const res = await adminAPI.transfer.listTransfers({ page: pagination.page, page_size: pagination.page_size })
+    const params: Record<string, any> = { page: pagination.page, page_size: pagination.page_size, status: filters.status, transfer_type: filters.transfer_type }
+    if (filterQuery.value) {
+      const uid = parseInt(filterQuery.value)
+      if (uid > 0) params.user_id = uid
+    }
+    const res = await adminAPI.transfer.listTransfers(params)
     transfers.value = res.items || []
     pagination.total = res.total
-  } catch {}
-}
-
-async function loadFeeStats() {
-  try {
-    feeStats.value = await adminAPI.transfer.getFeeStats({})
-  } catch {}
-}
-
-function statusClass(status: string) {
-  switch (status) {
-    case 'completed': return 'text-green-600'
-    case 'frozen': return 'text-yellow-600'
-    case 'revoked': return 'text-red-600'
-    default: return 'text-gray-500'
+  } catch {
+    appStore.showError(t('admin.transfer.loadFailed', '加载失败'))
+  } finally {
+    loading.value = false
   }
 }
 
-async function handleFreeze(id: number) {
-  if (!confirm('确认冻结此转账？')) return
-  try {
-    await adminAPI.transfer.freezeTransfer(id)
-    loadTransfers()
-  } catch {}
+function typeBadgeClass(type: string) {
+  switch (type) {
+    case 'direct': return 'badge-primary'
+    case 'redpacket': return 'badge-danger'
+    case 'batch': return 'badge-warning'
+    default: return 'badge-gray'
+  }
 }
 
-async function handleRevoke(id: number) {
-  const reason = prompt('请输入撤回原因:')
-  if (!reason) return
+function typeLabel(type: string) {
+  switch (type) {
+    case 'direct': return t('admin.transfer.direct', '直接转账')
+    case 'redpacket': return t('admin.transfer.redpacket', '红包')
+    case 'batch': return t('admin.transfer.batch', '批量发放')
+    default: return type
+  }
+}
+
+function statusBadgeClass(status: string) {
+  switch (status) {
+    case 'completed': return 'badge-success'
+    case 'frozen': return 'badge-warning'
+    case 'revoked': return 'badge-danger'
+    default: return 'badge-gray'
+  }
+}
+
+function statusLabel(status: string) {
+  switch (status) {
+    case 'completed': return t('admin.transfer.completed', '已完成')
+    case 'frozen': return t('admin.transfer.frozen', '已冻结')
+    case 'revoked': return t('admin.transfer.revoked', '已撤回')
+    default: return status
+  }
+}
+
+function confirmFreeze(row: TransferRecord) {
+  freezeTarget.value = row
+  showFreezeDialog.value = true
+}
+
+function confirmRevoke(row: TransferRecord) {
+  revokeTarget.value = row
+  showRevokeDialog.value = true
+}
+
+async function handleFreeze() {
+  if (!freezeTarget.value) return
   try {
-    await adminAPI.transfer.revokeTransfer(id, reason)
+    await adminAPI.transfer.freezeTransfer(freezeTarget.value.id)
+    appStore.showSuccess(t('admin.transfer.freezeSuccess', '冻结成功'))
     loadTransfers()
-  } catch {}
+  } catch (e: any) {
+    appStore.showError(e?.response?.data?.error || t('admin.transfer.freezeFailed', '冻结失败'))
+  } finally {
+    showFreezeDialog.value = false
+    freezeTarget.value = null
+  }
+}
+
+async function handleRevoke() {
+  if (!revokeTarget.value) return
+  try {
+    await adminAPI.transfer.revokeTransfer(revokeTarget.value.id, t('admin.transfer.adminRevoke', '管理员撤回'))
+    appStore.showSuccess(t('admin.transfer.revokeSuccess', '撤回成功'))
+    loadTransfers()
+  } catch (e: any) {
+    appStore.showError(e?.response?.data?.error || t('admin.transfer.revokeFailed', '撤回失败'))
+  } finally {
+    showRevokeDialog.value = false
+    revokeTarget.value = null
+  }
 }
 
 async function handleBatch() {
+  const valid = batchTargets.filter(t => t.user_id > 0 && t.amount > 0)
+  if (valid.length === 0) {
+    appStore.showError(t('admin.transfer.noValidTargets', '请添加有效的发放目标'))
+    return
+  }
   batchLoading.value = true
   try {
-    const valid = batchTargets.filter(t => t.user_id > 0 && t.amount > 0)
     await adminAPI.transfer.batchDistribute(valid, batchMemo.value || undefined)
-    showBatch.value = false
+    appStore.showSuccess(t('admin.transfer.batchSuccess', '批量发放成功'))
+    showBatchDialog.value = false
+    batchTargets.splice(0, batchTargets.length, { user_id: 0, amount: 0 })
+    batchMemo.value = ''
     loadTransfers()
-  } catch {} finally {
+  } catch (e: any) {
+    appStore.showError(e?.response?.data?.error || t('admin.transfer.batchFailed', '批量发放失败'))
+  } finally {
     batchLoading.value = false
   }
 }
+
+onMounted(loadTransfers)
 </script>

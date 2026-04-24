@@ -1139,9 +1139,11 @@ export default {
     balanceSubtitle: '累计签到 {count} 次',
     consumptionSubtitle: '{count} 次请求',
     checkinSubtitle: '累计 {total} 次 · 最近 {date} · 获得 ${reward}',
+    transferCount: '笔',
     tabs: {
       balance: '余额排行',
       consumption: '消耗排行',
+      transfer: '转账排行',
       checkin: '签到排行',
     },
     periods: {
