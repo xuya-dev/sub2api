@@ -3,7 +3,9 @@ import { apiClient } from './client'
 export interface TransferRecord {
   id: number
   sender_id: number
+  sender_email: string
   receiver_id: number
+  receiver_email: string
   amount: number
   fee: number
   fee_rate: number

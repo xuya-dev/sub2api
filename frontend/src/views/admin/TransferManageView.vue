@@ -29,12 +29,18 @@
           default-sort-order="desc"
           @sort="handleSort"
         >
-          <template #cell-sender_id="{ value }">
-            <span class="text-sm text-gray-700 dark:text-gray-300">#{{ value }}</span>
+          <template #cell-sender_id="{ value, row }">
+            <div class="flex flex-col">
+              <span class="text-sm text-gray-900 dark:text-white">{{ row.sender_email || '-' }}</span>
+              <span class="text-xs text-gray-400 dark:text-dark-500">#{{ value }}</span>
+            </div>
           </template>
 
-          <template #cell-receiver_id="{ value }">
-            <span class="text-sm text-gray-700 dark:text-gray-300">#{{ value }}</span>
+          <template #cell-receiver_id="{ value, row }">
+            <div class="flex flex-col">
+              <span class="text-sm text-gray-900 dark:text-white">{{ row.receiver_email || '-' }}</span>
+              <span class="text-xs text-gray-400 dark:text-dark-500">#{{ value }}</span>
+            </div>
           </template>
 
           <template #cell-amount="{ value }">

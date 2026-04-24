@@ -166,7 +166,26 @@ func (s *BalanceTransferService) GetHistory(ctx context.Context, userID int64, r
 }
 
 func (s *BalanceTransferService) GetAllTransfers(ctx context.Context, filter *TransferFilter, page, pageSize int) ([]*BalanceTransferRecord, int, error) {
-	return s.transferRepo.ListAll(ctx, filter, page, pageSize)
+	records, total, err := s.transferRepo.ListAll(ctx, filter, page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+	userIDs := make(map[int64]struct{})
+	for _, r := range records {
+		userIDs[r.SenderID] = struct{}{}
+		userIDs[r.ReceiverID] = struct{}{}
+	}
+	emails := make(map[int64]string)
+	for uid := range userIDs {
+		if u, err := s.userRepo.GetByID(ctx, uid); err == nil {
+			emails[uid] = u.Email
+		}
+	}
+	for _, r := range records {
+		r.SenderEmail = emails[r.SenderID]
+		r.ReceiverEmail = emails[r.ReceiverID]
+	}
+	return records, total, nil
 }
 
 func (s *BalanceTransferService) FreezeTransfer(ctx context.Context, adminID, transferID int64) error {

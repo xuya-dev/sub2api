@@ -6,21 +6,23 @@ import (
 )
 
 type BalanceTransferRecord struct {
-	ID           int64      `json:"id"`
-	SenderID     int64      `json:"sender_id"`
-	ReceiverID   int64      `json:"receiver_id"`
-	Amount       float64    `json:"amount"`
-	Fee          float64    `json:"fee"`
-	FeeRate      float64    `json:"fee_rate"`
-	GrossAmount  float64    `json:"gross_amount"`
-	TransferType string     `json:"transfer_type"`
-	Status       string     `json:"status"`
-	Memo         *string    `json:"memo"`
-	RedpacketID  *int64     `json:"redpacket_id"`
-	FrozenAt     *time.Time `json:"frozen_at"`
-	FrozenBy     *int64     `json:"frozen_by"`
-	RevokeReason *string    `json:"revoke_reason"`
-	CreatedAt    time.Time  `json:"created_at"`
+	ID             int64      `json:"id"`
+	SenderID       int64      `json:"sender_id"`
+	SenderEmail    string     `json:"sender_email"`
+	ReceiverID     int64      `json:"receiver_id"`
+	ReceiverEmail  string     `json:"receiver_email"`
+	Amount         float64    `json:"amount"`
+	Fee            float64    `json:"fee"`
+	FeeRate        float64    `json:"fee_rate"`
+	GrossAmount    float64    `json:"gross_amount"`
+	TransferType   string     `json:"transfer_type"`
+	Status         string     `json:"status"`
+	Memo           *string    `json:"memo"`
+	RedpacketID    *int64     `json:"redpacket_id"`
+	FrozenAt       *time.Time `json:"frozen_at"`
+	FrozenBy       *int64     `json:"frozen_by"`
+	RevokeReason   *string    `json:"revoke_reason"`
+	CreatedAt      time.Time  `json:"created_at"`
 }
 
 type RedPacketRecord struct {
