@@ -232,9 +232,9 @@ func (r *balanceTransferRepo) RunInTx(ctx context.Context, fn func(ctx context.C
 func (r *balanceTransferRepo) GetUserTransferStats(ctx context.Context, userID int64) (sent, received, feePaid float64, err error) {
 	err = r.db.QueryRowContext(ctx,
 		`SELECT
-			COALESCE((SELECT SUM(amount) FROM balance_transfers WHERE sender_id = $1 AND status != 'revoked'), 0),
-			COALESCE((SELECT SUM(amount) FROM balance_transfers WHERE receiver_id = $1 AND status != 'revoked'), 0),
-			COALESCE((SELECT SUM(fee) FROM balance_transfers WHERE sender_id = $1 AND status != 'revoked'), 0)`,
+			COALESCE((SELECT SUM(amount) FROM balance_transfers WHERE sender_id = $1 AND status != 'revoked' AND transfer_type != 'redpacket'), 0),
+			COALESCE((SELECT SUM(amount) FROM balance_transfers WHERE receiver_id = $1 AND status != 'revoked' AND transfer_type != 'redpacket'), 0),
+			COALESCE((SELECT SUM(fee) FROM balance_transfers WHERE sender_id = $1 AND status != 'revoked' AND transfer_type != 'redpacket'), 0)`,
 		userID,
 	).Scan(&sent, &received, &feePaid)
 	return
