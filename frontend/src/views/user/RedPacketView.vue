@@ -271,7 +271,7 @@
                     </div>
                     <div v-if="rp.status === 'active' && rp.remaining_count > 0" class="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-center dark:bg-dark-700/50">
                       <span class="text-xs text-gray-400 dark:text-dark-500">
-                        {{ t('redpacket.waitingClaims', '还有 {n} 份等待领取').replace('{n}', String(rp.remaining_count)) }}
+                        还有 {{ rp.remaining_count }} 份等待领取
                       </span>
                     </div>
                   </div>
