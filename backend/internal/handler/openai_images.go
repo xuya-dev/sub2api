@@ -117,23 +117,11 @@ func (h *OpenAIGatewayHandler) Images(c *gin.Context) {
 		return
 	}
 
-	if parsed.RequiredCapability == service.OpenAIImagesCapabilityNative {
-		if !h.gatewayService.HasStrictOpenAINativeImageAccounts(c.Request.Context(), apiKey.GroupID, parsed.Model) {
-			parsed.ExplicitModel = false
-			parsed.ExplicitSize = false
-			parsed.Model = "gpt-image-2"
-			parsed.Size = ""
-			parsed.RequiredCapability = service.OpenAIImagesCapabilityBasic
-			channelMapping, _ = h.gatewayService.ResolveChannelMappingAndRestrict(c.Request.Context(), apiKey.GroupID, parsed.Model)
-			reqLog.Info("openai.images.no_native_accounts_downgrading_to_basic")
-		}
-	}
-
 	sessionHash := ""
 	if parsed.Multipart {
 		sessionHash = h.gatewayService.GenerateSessionHashWithFallback(c, nil, parsed.StickySessionSeed())
 	} else {
-		sessionHash = h.gatewayService.GenerateSessionHashWithFallback(c, nil, parsed.StickySessionSeed())
+		sessionHash = h.gatewayService.GenerateSessionHash(c, body)
 	}
 
 	maxAccountSwitches := h.maxAccountSwitches
