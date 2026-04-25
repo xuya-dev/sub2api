@@ -504,6 +504,9 @@ export interface SystemSettings {
   redpacket_enabled: boolean;
   redpacket_max_count: number;
   redpacket_expire_hours: number;
+
+  // Affiliate (邀请返利) feature switch
+  affiliate_enabled: boolean;
 }
 
 export interface UpdateSettingsRequest {
@@ -674,6 +677,9 @@ export interface UpdateSettingsRequest {
 
   // Available Channels feature switch
   available_channels_enabled?: boolean;
+
+  // Affiliate (邀请返利) feature switch
+  affiliate_enabled?: boolean;
 
   // Balance Transfer 余额流转设置
   transfer_enabled?: boolean;

@@ -41,7 +41,7 @@ func ProvideAdminHandlers(
 	modelPricingHandler *admin.ModelPricingHandler,
 	blindboxHandler *admin.BlindboxHandler,
 	transferAdminHandler *admin.TransferAdminHandler,
-) *AdminHandlers {
+	affiliateHandler *admin.AffiliateHandler,
 	return &AdminHandlers{
 		Dashboard:              dashboardHandler,
 		User:                   userHandler,
@@ -75,6 +75,7 @@ func ProvideAdminHandlers(
 		ModelPricing:           modelPricingHandler,
 		Blindbox:               blindboxHandler,
 		TransferAdmin:          transferAdminHandler,
+		Affiliate:              affiliateHandler,
 	}
 }
 
@@ -190,6 +191,7 @@ var ProviderSet = wire.NewSet(
 	admin.NewModelPricingHandler,
 	admin.NewBlindboxHandler,
 	admin.NewTransferAdminHandler,
+	admin.NewAffiliateHandler,
 
 	// AdminHandlers and Handlers constructors
 	ProvideAdminHandlers,

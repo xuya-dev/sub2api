@@ -100,6 +100,9 @@ func RegisterAdminRoutes(
 
 		// 转账管理
 		registerTransferAdminRoutes(admin, h)
+
+		// 邀请返利（专属用户管理）
+		registerAffiliateRoutes(admin, h)
 	}
 }
 
@@ -641,5 +644,21 @@ func registerTransferAdminRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	redpackets := admin.Group("/redpackets")
 	{
 		redpackets.GET("", h.Admin.TransferAdmin.ListRedPackets)
+	}
+}
+
+// registerAffiliateRoutes 注册邀请返利的管理端路由（专属用户配置）
+func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	affiliates := admin.Group("/affiliates")
+	{
+		users := affiliates.Group("/users")
+		{
+			users.GET("", h.Admin.Affiliate.ListUsers)
+			users.GET("/lookup", h.Admin.Affiliate.LookupUsers)
+			users.POST("/batch-rate", h.Admin.Affiliate.BatchSetRate)
+			users.PUT("/:user_id", h.Admin.Affiliate.UpdateUserSettings)
+			users.DELETE("/:user_id", h.Admin.Affiliate.ClearUserSettings)
+			users.POST("/:user_id/reset-code", h.Admin.Affiliate.ResetUserCode)
+		}
 	}
 }

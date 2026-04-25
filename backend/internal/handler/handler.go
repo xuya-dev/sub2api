@@ -38,6 +38,7 @@ type AdminHandlers struct {
 	ModelPricing           *admin.ModelPricingHandler
 	Blindbox               *admin.BlindboxHandler
 	TransferAdmin          *admin.TransferAdminHandler
+	Affiliate              *admin.AffiliateHandler
 }
 
 // Handlers contains all HTTP handlers

@@ -219,6 +219,9 @@ type SystemSettings struct {
 	RedPacketEnabled           bool    `json:"redpacket_enabled"`
 	RedPacketMaxCount          int     `json:"redpacket_max_count"`
 	RedPacketExpireHours       int     `json:"redpacket_expire_hours"`
+
+	// Affiliate (邀请返利) feature switch
+	AffiliateEnabled bool `json:"affiliate_enabled"`
 }
 
 type DefaultSubscriptionSetting struct {
@@ -271,6 +274,8 @@ type PublicSettings struct {
 	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
 
 	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
+
+	AffiliateEnabled bool `json:"affiliate_enabled"`
 }
 
 // OverloadCooldownSettings 529过载冷却配置 DTO
