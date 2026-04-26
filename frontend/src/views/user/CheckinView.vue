@@ -101,7 +101,7 @@
               </div>
               <div class="flex gap-2">
                 <template v-if="checkinStore.canCheckin">
-                  <button v-if="checkinStore.normalEnabled" type="button" :disabled="checkinStore.loading" class="checkin-btn checkin-btn-normal" @click="checkinStore.doCheckin()">
+                  <button v-if="checkinStore.normalEnabled" type="button" :disabled="checkinStore.loading" class="checkin-btn checkin-btn-normal" @click="handleNormalCheckin">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     {{ checkinStore.loading ? '...' : t('checkin.normalCheckin') }}
                   </button>
@@ -439,12 +439,21 @@ const nextBlindboxHint = computed(() => {
   return t('checkin.page.blindboxNextIn', { days: next })
 })
 
+async function handleNormalCheckin() {
+  const result = await checkinStore.doCheckin()
+  if (result) {
+    fetchCalendar()
+    fetchBlindboxRecords()
+  }
+}
+
 async function submitLuck() {
   if (!luckBet.value || luckBet.value <= 0) return
   const result = await checkinStore.doLuckCheckin(luckBet.value)
   if (result) {
     showLuckModal.value = false
     luckBet.value = 0
+    fetchCalendar()
     fetchBlindboxRecords()
   }
 }
