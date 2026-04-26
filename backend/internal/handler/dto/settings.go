@@ -106,11 +106,14 @@ type SystemSettings struct {
 	CustomMenuItems             []CustomMenuItem `json:"custom_menu_items"`
 	CustomEndpoints             []CustomEndpoint `json:"custom_endpoints"`
 
-	DefaultConcurrency   int                          `json:"default_concurrency"`
-	DefaultBalance       float64                      `json:"default_balance"`
-	AffiliateRebateRate  float64                      `json:"affiliate_rebate_rate"`
-	DefaultUserRPMLimit  int                          `json:"default_user_rpm_limit"`
-	DefaultSubscriptions []DefaultSubscriptionSetting `json:"default_subscriptions"`
+	DefaultConcurrency           int                          `json:"default_concurrency"`
+	DefaultBalance               float64                      `json:"default_balance"`
+	AffiliateRebateRate          float64                      `json:"affiliate_rebate_rate"`
+	AffiliateRebateFreezeHours   int                          `json:"affiliate_rebate_freeze_hours"`
+	AffiliateRebateDurationDays  int                          `json:"affiliate_rebate_duration_days"`
+	AffiliateRebatePerInviteeCap float64                      `json:"affiliate_rebate_per_invitee_cap"`
+	DefaultUserRPMLimit          int                          `json:"default_user_rpm_limit"`
+	DefaultSubscriptions         []DefaultSubscriptionSetting `json:"default_subscriptions"`
 
 	// Model fallback configuration
 	EnableModelFallback      bool   `json:"enable_model_fallback"`
@@ -209,16 +212,16 @@ type SystemSettings struct {
 	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 
 	// Balance Transfer 余额流转设置
-	TransferEnabled            bool    `json:"transfer_enabled"`
-	TransferFeeRate            float64 `json:"transfer_fee_rate"`
-	TransferMinAmount          float64 `json:"transfer_min_amount"`
-	TransferMaxAmount          float64 `json:"transfer_max_amount"`
-	TransferDailyLimit         float64 `json:"transfer_daily_limit"`
-	TransferDailyCountLimit    int     `json:"transfer_daily_count_limit"`
-	TransferVIPFeeExempt       bool    `json:"transfer_vip_fee_exempt"`
-	RedPacketEnabled           bool    `json:"redpacket_enabled"`
-	RedPacketMaxCount          int     `json:"redpacket_max_count"`
-	RedPacketExpireHours       int     `json:"redpacket_expire_hours"`
+	TransferEnabled         bool    `json:"transfer_enabled"`
+	TransferFeeRate         float64 `json:"transfer_fee_rate"`
+	TransferMinAmount       float64 `json:"transfer_min_amount"`
+	TransferMaxAmount       float64 `json:"transfer_max_amount"`
+	TransferDailyLimit      float64 `json:"transfer_daily_limit"`
+	TransferDailyCountLimit int     `json:"transfer_daily_count_limit"`
+	TransferVIPFeeExempt    bool    `json:"transfer_vip_fee_exempt"`
+	RedPacketEnabled        bool    `json:"redpacket_enabled"`
+	RedPacketMaxCount       int     `json:"redpacket_max_count"`
+	RedPacketExpireHours    int     `json:"redpacket_expire_hours"`
 
 	// Affiliate (邀请返利) feature switch
 	AffiliateEnabled bool `json:"affiliate_enabled"`

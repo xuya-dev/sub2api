@@ -1019,8 +1019,12 @@ export default {
     loadFailed: 'Failed to load affiliate data',
     transferFailed: 'Failed to transfer affiliate quota',
     stats: {
+      rebateRate: 'My Rebate Rate',
+      rebateRateHint: 'What you earn each time an invitee recharges',
       invitedUsers: 'Invited Users',
       availableQuota: 'Available Rebate Quota',
+      frozenQuota: 'Frozen',
+      frozenQuotaHint: 'Recently earned rebates pending release',
       totalQuota: 'Historical Rebate Quota'
     },
     transfer: {
@@ -1037,14 +1041,16 @@ export default {
       columns: {
         email: 'Email',
         username: 'Username',
+        rebate: 'Rebate',
         joinedAt: 'Joined At'
       }
     },
     tips: {
       title: 'How It Works',
       line1: 'Share your affiliate code or invite link with new users.',
-      line2: 'When invitees recharge, you receive rebate quota based on the configured rate.',
-      line3: 'Transfer rebate quota to balance at any time.'
+      line2: 'When invitees recharge, you receive {rate} of the recharge as rebate quota.',
+      line3: 'Transfer rebate quota to balance at any time.',
+      line4: 'Newly earned rebates may have a waiting period before they can be transferred.'
     }
   },
 
@@ -5049,6 +5055,12 @@ export default {
           enabledHint: 'When off, the affiliate menu is hidden, the aff parameter is ignored at signup, and new recharges generate no rebate. Existing rebate balances can still be transferred.',
           rebateRate: 'Global Rebate Rate',
           rebateRateHint: 'Default percentage given back to the inviter on recharges (0-100, e.g. 10 = 10%).',
+          freezeHours: 'Rebate Freeze Period (hours)',
+          freezeHoursDesc: 'New rebates will be frozen for this period before becoming available for withdrawal. 0 = no freeze.',
+          durationDays: 'Rebate Duration (days)',
+          durationDaysDesc: 'Rebate relationship expires after this many days since invitee registration. 0 = permanent.',
+          perInviteeCap: 'Per-Invitee Rebate Cap',
+          perInviteeCapDesc: 'Maximum total rebate from a single invitee. 0 = no limit.',
           customUsers: {
             title: 'Per-User Overrides',
             description: 'Set a custom invite code or exclusive rebate rate for specific users. Lists only users that have an override applied.',
@@ -5059,8 +5071,10 @@ export default {
             customBadge: 'custom',
             useGlobal: 'use global',
             resetCode: 'Reset code',
-            resetConfirm: 'Reset this user’s invite code to a new system-generated code? Previously shared invite links will stop working.',
-            clearConfirm: 'Clear this user’s exclusive rebate rate? They will fall back to the global rate.',
+            resetConfirm: 'Reset this user\'s invite code to a new system-generated code? Previously shared invite links will stop working.',
+            clearConfirm: 'Clear this user\'s exclusive rebate rate? They will fall back to the global rate.',
+            resetTitle: 'Reset Custom Settings',
+            resetMessage: 'Reset all custom settings for {email}?\n• The exclusive rebate rate will be cleared (fall back to the global rate)\n• The invite code will be regenerated as a new system code (previously shared links will stop working)',
             totalLabel: '{total} total',
             col: {
               email: 'Email',
@@ -5076,6 +5090,7 @@ export default {
             userLabel: 'User',
             userPlaceholder: 'Search by email or username',
             selectedUser: 'Selected: {email}',
+            changeUser: 'Change user',
             codeLabel: 'Custom Invite Code (optional)',
             codePlaceholder: 'e.g. VIP2026',
             codeHint: '4-32 characters; A-Z, 0-9, underscore, dash. Leave empty to keep current. Input is upper-cased.',
@@ -5084,7 +5099,7 @@ export default {
             rateHint: '0-100. Leave empty (in edit mode) to clear and fall back to the global rate.',
             errorNoUser: 'Please select a user first',
             errorBadRate: 'Please enter a number between 0 and 100',
-            errorEmpty: 'Please provide at least one custom field',
+            errorEmpty: 'Fill at least one: custom invite code or exclusive rebate rate',
           },
           batchModal: {
             title: 'Batch Set Rate ({count} users selected)',

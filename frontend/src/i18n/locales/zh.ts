@@ -1023,8 +1023,12 @@ export default {
     loadFailed: '加载邀请返利数据失败',
     transferFailed: '转入余额失败',
     stats: {
+      rebateRate: '我的返利比例',
+      rebateRateHint: '被邀请用户每次充值后你可获得的返利比例',
       invitedUsers: '邀请人数',
       availableQuota: '可转返利额度',
+      frozenQuota: '冻结中',
+      frozenQuotaHint: '新产生的返利正在冻结期中',
       totalQuota: '历史返利额度'
     },
     transfer: {
@@ -1041,14 +1045,16 @@ export default {
       columns: {
         email: '邮箱',
         username: '用户名',
+        rebate: '返利明细',
         joinedAt: '注册时间'
       }
     },
     tips: {
       title: '使用说明',
       line1: '将邀请码或邀请链接分享给新用户。',
-      line2: '被邀请用户充值后，你可获得对应比例的返利额度。',
-      line3: '返利额度可随时转入账户余额。'
+      line2: '被邀请用户充值后，你可获得 {rate} 的返利额度。',
+      line3: '返利额度可随时转入账户余额。',
+      line4: '新产生的返利需要经过冻结期后才能提现。'
     }
   },
 
@@ -5212,6 +5218,12 @@ export default {
           enabledHint: '关闭后用户菜单中的邀请页面入口隐藏、注册时忽略邀请码、新充值不再产生返利。已有返利额度仍可转入余额。',
           rebateRate: '全局返利比例',
           rebateRateHint: '充值后返给邀请人的默认比例（0-100%，例如填写 10 表示返利 10%）。',
+          freezeHours: '返利冻结期（小时）',
+          freezeHoursDesc: '新产生的返利将在冻结期内无法提现。0 = 不冻结。',
+          durationDays: '返利有效期（天）',
+          durationDaysDesc: '被邀请用户注册后多少天内的充值产生返利。0 = 永久有效。',
+          perInviteeCap: '单人返利上限',
+          perInviteeCapDesc: '每个被邀请用户最多产生的返利总额。0 = 无上限。',
           customUsers: {
             title: '专属用户配置',
             description: '为指定用户设置专属邀请码或专属返利比例。仅展示已设置过专属配置的用户。',
@@ -5224,6 +5236,8 @@ export default {
             resetCode: '重置邀请码',
             resetConfirm: '确认将此用户的邀请码重置为系统随机码？已分发的邀请链接将失效。',
             clearConfirm: '确认清除此用户的专属返利比例？该用户后续将沿用全局比例。',
+            resetTitle: '重置该用户的专属配置',
+            resetMessage: '确认将 {email} 的专属配置全部重置为默认？\n• 专属返利比例将清除（沿用全局）\n• 邀请码将重新生成为系统随机码（已分发的旧邀请链接将失效）',
             totalLabel: '共 {total} 条',
             col: {
               email: '邮箱',
@@ -5239,6 +5253,7 @@ export default {
             userLabel: '用户',
             userPlaceholder: '搜索邮箱或用户名',
             selectedUser: '已选择：{email}',
+            changeUser: '更换用户',
             codeLabel: '专属邀请码（可选）',
             codePlaceholder: '例如 VIP2026',
             codeHint: '4-32 位，仅支持大写字母、数字、下划线、连字符；留空表示不修改；输入将自动转大写。',
@@ -5247,7 +5262,7 @@ export default {
             rateHint: '0-100%；留空（编辑模式下）表示清除专属比例并沿用全局。',
             errorNoUser: '请先选择用户',
             errorBadRate: '请输入 0-100 之间的比例',
-            errorEmpty: '请至少填写一项专属配置',
+            errorEmpty: '至少填写一项：专属邀请码或专属返利比例',
           },
           batchModal: {
             title: '批量设置专属比例（已选 {count} 个用户）',

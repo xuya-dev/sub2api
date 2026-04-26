@@ -658,7 +658,6 @@ func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 			users.POST("/batch-rate", h.Admin.Affiliate.BatchSetRate)
 			users.PUT("/:user_id", h.Admin.Affiliate.UpdateUserSettings)
 			users.DELETE("/:user_id", h.Admin.Affiliate.ClearUserSettings)
-			users.POST("/:user_id/reset-code", h.Admin.Affiliate.ResetUserCode)
 		}
 	}
 }

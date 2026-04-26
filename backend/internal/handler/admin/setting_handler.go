@@ -186,6 +186,9 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		DefaultConcurrency:                     settings.DefaultConcurrency,
 		DefaultBalance:                         settings.DefaultBalance,
 		AffiliateRebateRate:                    settings.AffiliateRebateRate,
+		AffiliateRebateFreezeHours:             settings.AffiliateRebateFreezeHours,
+		AffiliateRebateDurationDays:            settings.AffiliateRebateDurationDays,
+		AffiliateRebatePerInviteeCap:           settings.AffiliateRebatePerInviteeCap,
 		DefaultUserRPMLimit:                    settings.DefaultUserRPMLimit,
 		DefaultSubscriptions:                   defaultSubscriptions,
 		EnableModelFallback:                    settings.EnableModelFallback,
@@ -252,16 +255,16 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 
 		AvailableChannelsEnabled: settings.AvailableChannelsEnabled,
 
-		TransferEnabled:            settings.TransferEnabled,
-		TransferFeeRate:            settings.TransferFeeRate,
-		TransferMinAmount:          settings.TransferMinAmount,
-		TransferMaxAmount:          settings.TransferMaxAmount,
-		TransferDailyLimit:         settings.TransferDailyLimit,
-		TransferDailyCountLimit:    settings.TransferDailyCountLimit,
-		TransferVIPFeeExempt:       settings.TransferVIPFeeExempt,
-		RedPacketEnabled:           settings.RedPacketEnabled,
-		RedPacketMaxCount:          settings.RedPacketMaxCount,
-		RedPacketExpireHours:       settings.RedPacketExpireHours,
+		TransferEnabled:         settings.TransferEnabled,
+		TransferFeeRate:         settings.TransferFeeRate,
+		TransferMinAmount:       settings.TransferMinAmount,
+		TransferMaxAmount:       settings.TransferMaxAmount,
+		TransferDailyLimit:      settings.TransferDailyLimit,
+		TransferDailyCountLimit: settings.TransferDailyCountLimit,
+		TransferVIPFeeExempt:    settings.TransferVIPFeeExempt,
+		RedPacketEnabled:        settings.RedPacketEnabled,
+		RedPacketMaxCount:       settings.RedPacketMaxCount,
+		RedPacketExpireHours:    settings.RedPacketExpireHours,
 
 		AffiliateEnabled: settings.AffiliateEnabled,
 	}
@@ -362,6 +365,9 @@ type UpdateSettingsRequest struct {
 	DefaultConcurrency                       int                               `json:"default_concurrency"`
 	DefaultBalance                           float64                           `json:"default_balance"`
 	AffiliateRebateRate                      *float64                          `json:"affiliate_rebate_rate"`
+	AffiliateRebateFreezeHours               *int                              `json:"affiliate_rebate_freeze_hours"`
+	AffiliateRebateDurationDays              *int                              `json:"affiliate_rebate_duration_days"`
+	AffiliateRebatePerInviteeCap             *float64                          `json:"affiliate_rebate_per_invitee_cap"`
 	DefaultUserRPMLimit                      int                               `json:"default_user_rpm_limit"`
 	DefaultSubscriptions                     []dto.DefaultSubscriptionSetting  `json:"default_subscriptions"`
 	AuthSourceDefaultEmailBalance            *float64                          `json:"auth_source_default_email_balance"`
@@ -480,16 +486,16 @@ type UpdateSettingsRequest struct {
 	AvailableChannelsEnabled *bool `json:"available_channels_enabled"`
 
 	// Balance Transfer 余额流转设置
-	TransferEnabled            *bool    `json:"transfer_enabled"`
-	TransferFeeRate            *float64 `json:"transfer_fee_rate"`
-	TransferMinAmount          *float64 `json:"transfer_min_amount"`
-	TransferMaxAmount          *float64 `json:"transfer_max_amount"`
-	TransferDailyLimit         *float64 `json:"transfer_daily_limit"`
-	TransferDailyCountLimit    *int     `json:"transfer_daily_count_limit"`
-	TransferVIPFeeExempt       *bool    `json:"transfer_vip_fee_exempt"`
-	RedPacketEnabled           *bool    `json:"redpacket_enabled"`
-	RedPacketMaxCount          *int     `json:"redpacket_max_count"`
-	RedPacketExpireHours       *int     `json:"redpacket_expire_hours"`
+	TransferEnabled         *bool    `json:"transfer_enabled"`
+	TransferFeeRate         *float64 `json:"transfer_fee_rate"`
+	TransferMinAmount       *float64 `json:"transfer_min_amount"`
+	TransferMaxAmount       *float64 `json:"transfer_max_amount"`
+	TransferDailyLimit      *float64 `json:"transfer_daily_limit"`
+	TransferDailyCountLimit *int     `json:"transfer_daily_count_limit"`
+	TransferVIPFeeExempt    *bool    `json:"transfer_vip_fee_exempt"`
+	RedPacketEnabled        *bool    `json:"redpacket_enabled"`
+	RedPacketMaxCount       *int     `json:"redpacket_max_count"`
+	RedPacketExpireHours    *int     `json:"redpacket_expire_hours"`
 
 	// Affiliate (邀请返利) feature switch
 	AffiliateEnabled *bool `json:"affiliate_enabled"`
@@ -531,6 +537,33 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 	}
 	if affiliateRebateRate > service.AffiliateRebateRateMax {
 		affiliateRebateRate = service.AffiliateRebateRateMax
+	}
+	affiliateRebateFreezeHours := previousSettings.AffiliateRebateFreezeHours
+	if req.AffiliateRebateFreezeHours != nil {
+		affiliateRebateFreezeHours = *req.AffiliateRebateFreezeHours
+	}
+	if affiliateRebateFreezeHours < 0 {
+		affiliateRebateFreezeHours = service.AffiliateRebateFreezeHoursDefault
+	}
+	if affiliateRebateFreezeHours > service.AffiliateRebateFreezeHoursMax {
+		affiliateRebateFreezeHours = service.AffiliateRebateFreezeHoursMax
+	}
+	affiliateRebateDurationDays := previousSettings.AffiliateRebateDurationDays
+	if req.AffiliateRebateDurationDays != nil {
+		affiliateRebateDurationDays = *req.AffiliateRebateDurationDays
+	}
+	if affiliateRebateDurationDays < 0 {
+		affiliateRebateDurationDays = service.AffiliateRebateDurationDaysDefault
+	}
+	if affiliateRebateDurationDays > service.AffiliateRebateDurationDaysMax {
+		affiliateRebateDurationDays = service.AffiliateRebateDurationDaysMax
+	}
+	affiliateRebatePerInviteeCap := previousSettings.AffiliateRebatePerInviteeCap
+	if req.AffiliateRebatePerInviteeCap != nil {
+		affiliateRebatePerInviteeCap = *req.AffiliateRebatePerInviteeCap
+	}
+	if affiliateRebatePerInviteeCap < 0 {
+		affiliateRebatePerInviteeCap = service.AffiliateRebatePerInviteeCapDefault
 	}
 	// 通用表格配置：兼容旧客户端未传字段时保留当前值。
 	if req.TableDefaultPageSize <= 0 {
@@ -1184,6 +1217,9 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		DefaultConcurrency:               req.DefaultConcurrency,
 		DefaultBalance:                   req.DefaultBalance,
 		AffiliateRebateRate:              affiliateRebateRate,
+		AffiliateRebateFreezeHours:       affiliateRebateFreezeHours,
+		AffiliateRebateDurationDays:      affiliateRebateDurationDays,
+		AffiliateRebatePerInviteeCap:     affiliateRebatePerInviteeCap,
 		DefaultUserRPMLimit:              req.DefaultUserRPMLimit,
 		DefaultSubscriptions:             defaultSubscriptions,
 		EnableModelFallback:              req.EnableModelFallback,
@@ -1620,6 +1656,9 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		DefaultConcurrency:                     updatedSettings.DefaultConcurrency,
 		DefaultBalance:                         updatedSettings.DefaultBalance,
 		AffiliateRebateRate:                    updatedSettings.AffiliateRebateRate,
+		AffiliateRebateFreezeHours:             updatedSettings.AffiliateRebateFreezeHours,
+		AffiliateRebateDurationDays:            updatedSettings.AffiliateRebateDurationDays,
+		AffiliateRebatePerInviteeCap:           updatedSettings.AffiliateRebatePerInviteeCap,
 		DefaultUserRPMLimit:                    updatedSettings.DefaultUserRPMLimit,
 		DefaultSubscriptions:                   updatedDefaultSubscriptions,
 		EnableModelFallback:                    updatedSettings.EnableModelFallback,
@@ -1938,6 +1977,15 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	}
 	if before.AffiliateRebateRate != after.AffiliateRebateRate {
 		changed = append(changed, "affiliate_rebate_rate")
+	}
+	if before.AffiliateRebateFreezeHours != after.AffiliateRebateFreezeHours {
+		changed = append(changed, "affiliate_rebate_freeze_hours")
+	}
+	if before.AffiliateRebateDurationDays != after.AffiliateRebateDurationDays {
+		changed = append(changed, "affiliate_rebate_duration_days")
+	}
+	if before.AffiliateRebatePerInviteeCap != after.AffiliateRebatePerInviteeCap {
+		changed = append(changed, "affiliate_rebate_per_invitee_cap")
 	}
 	if !equalDefaultSubscriptions(before.DefaultSubscriptions, after.DefaultSubscriptions) {
 		changed = append(changed, "default_subscriptions")

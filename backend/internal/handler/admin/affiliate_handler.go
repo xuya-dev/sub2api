@@ -107,10 +107,12 @@ func (h *AffiliateHandler) ResetUserCode(c *gin.Context) {
 	response.Success(c, gin.H{"user_id": userID, "aff_code": newCode})
 }
 
-// ClearUserSettings clears the user's exclusive rebate rate. The aff_code is
-// intentionally NOT touched here — admins can use ResetUserCode if they want
-// to revert the invite code itself (which would invalidate any links already
-// shared by the user).
+// ClearUserSettings removes ALL of a user's custom affiliate settings — clears
+// the exclusive rebate rate AND regenerates the invite code as a new system
+// random one. Conceptually this "removes the user from the custom list".
+//
+// Both writes happen in this handler; failure of one leaves the other applied,
+// but the operation is idempotent so the admin can re-run it safely.
 // DELETE /api/v1/admin/affiliates/users/:user_id
 func (h *AffiliateHandler) ClearUserSettings(c *gin.Context) {
 	userID, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
@@ -119,6 +121,10 @@ func (h *AffiliateHandler) ClearUserSettings(c *gin.Context) {
 		return
 	}
 	if err := h.affiliateService.AdminSetUserRebateRate(c.Request.Context(), userID, nil); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	if _, err := h.affiliateService.AdminResetUserAffCode(c.Request.Context(), userID); err != nil {
 		response.ErrorFrom(c, err)
 		return
 	}
