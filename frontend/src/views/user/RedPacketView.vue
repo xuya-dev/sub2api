@@ -243,7 +243,7 @@
                       <span class="text-sm font-semibold text-slate-900 dark:text-white">
                         {{ packetTypeLabel(rp.redpacket_type) }}
                       </span>
-                      <span :class="statusBadgeClass(rp.status)">{{ rpStatusLabel(rp.status) }}</span>
+                      <span :class="statusBadgeClass(getDisplayStatus(rp))">{{ rpStatusLabel(getDisplayStatus(rp)) }}</span>
                       <span :class="packetTypeBadgeClass(rp.redpacket_type)">{{ packetTypeBadgeLabel(rp.redpacket_type) }}</span>
                     </div>
                     <p class="mt-1 text-xs text-slate-500 dark:text-dark-400">
@@ -317,7 +317,7 @@
                           </span>
                         </div>
                       </div>
-                      <div v-if="rp.status === 'active' && rp.remaining_count > 0" class="rounded-lg border border-dashed border-slate-200 px-3 py-2 text-center text-xs text-slate-500 dark:border-dark-700 dark:text-dark-400">
+                      <div v-if="getDisplayStatus(rp) === 'active' && rp.remaining_count > 0" class="rounded-lg border border-dashed border-slate-200 px-3 py-2 text-center text-xs text-slate-500 dark:border-dark-700 dark:text-dark-400">
                         {{ t('redpacket.waitingClaim', { n: rp.remaining_count }) }}
                       </div>
                     </div>
@@ -452,6 +452,12 @@ function typeToggleClass(active: boolean) {
       ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800/60 dark:bg-rose-900/20 dark:text-rose-300'
       : 'border-gray-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-dark-600 dark:bg-dark-800 dark:text-dark-300 dark:hover:bg-dark-700',
   ]
+}
+
+function getDisplayStatus(rp: RedPacketRecord): string {
+  if (rp.status === 'exhausted') return 'exhausted'
+  if (new Date(rp.expire_at) < new Date()) return 'expired'
+  return 'active'
 }
 
 function rpStatusLabel(status: string) {
